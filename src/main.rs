@@ -1,0 +1,3 @@
+use syntax;
+
+fn main() {}
