@@ -1,4 +1,4 @@
-use crate::{Token, BinaryOperator};
+use crate::{BinaryOperator, Token, UnaryOperator};
 
 use std::str::Chars;
 use std::iter::Peekable;
@@ -76,7 +76,11 @@ impl<'l> Lex<'l> {
     fn single(&mut self) -> Token {
         match self.source.next().unwrap() {
             '+' => Token::BinaryOperator(BinaryOperator::Add),
-            '-' => Token::BinaryOperator(BinaryOperator::Subtract),
+            '-' => if self.source.peek().is_some_and(|c| matches!(c, invisible!())) {
+                Token::BinaryOperator(BinaryOperator::Subtract)
+            } else {
+                Token::UnaryOperator(UnaryOperator::Negate)
+            }
             '*' => Token::BinaryOperator(BinaryOperator::Multiply),
             '/' => Token::BinaryOperator(BinaryOperator::Divide),
             _ => unreachable!(),

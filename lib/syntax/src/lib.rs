@@ -1,4 +1,4 @@
 mod lex;
 mod token;
 pub use lex::Lex;
-pub use token::{Token, BinaryOperator};
+pub use token::{Token, BinaryOperator, UnaryOperator};
