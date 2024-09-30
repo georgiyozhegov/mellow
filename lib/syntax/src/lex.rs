@@ -1,4 +1,4 @@
-use crate::Token;
+use crate::{Token, BinaryOperator};
 
 use std::str::Chars;
 use std::iter::Peekable;
@@ -18,6 +18,12 @@ macro_rules! alphabetic {
 macro_rules! invisible {
     () => {
         ' ' | '\t' | '\n'
+    };
+}
+
+macro_rules! single {
+    () => {
+        '+' | '-' | '*' | '/'
     };
 }
 
@@ -47,6 +53,7 @@ impl<'l> Lex<'l> {
             numeric!() => Some(self.numeric()),
             alphabetic!() => Some(self.alphabetic()),
             invisible!() => self.invisible(),
+            single!() => Some(self.single()),
             _ => todo!(),
         }
     }
@@ -64,6 +71,16 @@ impl<'l> Lex<'l> {
     fn invisible(&mut self) -> Option<Token> {
         take_until(&mut self.source, |c| matches!(c, invisible!()));
         self.token()
+    }
+
+    fn single(&mut self) -> Token {
+        match self.source.next().unwrap() {
+            '+' => Token::BinaryOperator(BinaryOperator::Add),
+            '-' => Token::BinaryOperator(BinaryOperator::Subtract),
+            '*' => Token::BinaryOperator(BinaryOperator::Multiply),
+            '/' => Token::BinaryOperator(BinaryOperator::Divide),
+            _ => unreachable!(),
+        }
     }
 }
 
