@@ -23,7 +23,7 @@ macro_rules! invisible {
 
 macro_rules! single {
     () => {
-        '+' | '-' | '*' | '/'
+        '+' | '-' | '*' | '/' | '(' | ')'
     };
 }
 
@@ -83,6 +83,8 @@ impl<'l> Lex<'l> {
             }
             '*' => Token::BinaryOperator(BinaryOperator::Multiply),
             '/' => Token::BinaryOperator(BinaryOperator::Divide),
+            '(' => Token::LeftParenthesis,
+            ')' => Token::RightParenthesis,
             _ => unreachable!(),
         }
     }

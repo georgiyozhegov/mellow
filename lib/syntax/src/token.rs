@@ -4,6 +4,8 @@ pub enum Token {
     Identifier(String),
     BinaryOperator(BinaryOperator),
     UnaryOperator(UnaryOperator),
+    LeftParenthesis,
+    RightParenthesis,
 }
 
 #[derive(Debug)]
