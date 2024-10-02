@@ -65,7 +65,31 @@ impl<'l> Lex<'l> {
 
     fn alphabetic(&mut self) -> Token {
         let buffer = take_until(&mut self.source, |c| matches!(c, alphabetic!() | numeric!()));
-        Token::Identifier(buffer)
+        if let Some(token) = Lex::keyword(&buffer) {
+            token
+        } else {
+            Token::Identifier(buffer)
+        }
+    }
+
+    fn keyword(buffer: &str) -> Option<Token> {
+        match buffer {
+            "let" => Some(Token::Let),
+            "if" => Some(Token::If),
+            "match" => Some(Token::Match),
+            "for" => Some(Token::For),
+            "while" => Some(Token::While),
+            "loop" => Some(Token::Loop),
+            "do" => Some(Token::Do),
+            "then" => Some(Token::Then),
+            "else" => Some(Token::Else),
+            "case" => Some(Token::Case),
+            "from" => Some(Token::From),
+            "to" => Some(Token::To),
+            "in" => Some(Token::In),
+            "end" => Some(Token::End),
+            _ => None,
+        }
     }
 
     fn invisible(&mut self) -> Option<Token> {
