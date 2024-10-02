@@ -6,6 +6,20 @@ pub enum Token {
     UnaryOperator(UnaryOperator),
     LeftParenthesis,
     RightParenthesis,
+    Let,
+    If,
+    Match,
+    For,
+    While,
+    Loop,
+    Do,
+    Then,
+    Else,
+    Case,
+    From,
+    To,
+    In,
+    End,
 }
 
 #[derive(Debug)]
