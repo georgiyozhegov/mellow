@@ -6,6 +6,7 @@ pub enum Token {
     UnaryOperator(UnaryOperator),
     LeftParenthesis,
     RightParenthesis,
+    Equal,
     Let,
     If,
     Match,
