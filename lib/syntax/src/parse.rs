@@ -1,4 +1,4 @@
-use crate::{Expression, Lex, Statement, Token};
+use crate::{Expression, Lex, Statement, SyntaxError, Token};
 
 use std::iter::Peekable;
 
@@ -15,7 +15,7 @@ impl<'p> Parse<'p> {
 }
 
 impl<'p> Iterator for Parse<'p> {
-    type Item = Statement;
+    type Item = Result<Statement, SyntaxError>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.statement()
@@ -23,42 +23,43 @@ impl<'p> Iterator for Parse<'p> {
 }
 
 impl<'p> Parse<'p> {
-    pub fn statement(&mut self) -> Option<Statement> {
+    pub fn statement(&mut self) -> Option<Result<Statement, SyntaxError>> {
         let token = self.source.peek()?;
         match token {
             Token::Let => Some(self.let_()),
-            _ => todo!(),
+            _ => Some(Err(SyntaxError::Grammar("let".to_string()))),
         }
     }
 
-    fn let_(&mut self) -> Statement {
+    fn let_(&mut self) -> Result<Statement, SyntaxError> {
         self.source.next();
-        let identifier = self.identifier();
-        self.equal();
-        let value = self.expression();
-        Statement::Let { identifier, value }
+        let identifier = self.identifier()?;
+        self.equal()?;
+        let value = self.expression()?;
+        Ok(Statement::Let { identifier, value })
     }
 
-    fn identifier(&mut self) -> String {
-        match self.source.next() {
-            Some(Token::Identifier(identifier)) => identifier,
-            _ => todo!("Error handling"),
+    fn identifier(&mut self) -> Result<String, SyntaxError> {
+        let token = self.source.next();
+        match token {
+            Some(Token::Identifier(identifier)) => Ok(identifier),
+            _ => Err(SyntaxError::Grammar("identifier".to_string())),
         }
     }
 
-    fn equal(&mut self) {
+    fn equal(&mut self) -> Result<(), SyntaxError> {
         match self.source.next() {
-            Some(Token::Equal) => {},
-            _ => todo!("Error handling"),
+            Some(Token::Equal) => Ok(()),
+            _ => Err(SyntaxError::Grammar("'='".to_string())),
         }
     }
 }
 
 impl<'p> Parse<'p> {
-    pub fn expression(&mut self) -> Expression {
+    pub fn expression(&mut self) -> Result<Expression, SyntaxError> {
         match self.source.next() {
-            Some(Token::Integer(integer)) => Expression::Integer(integer),
-            _ => todo!("Error handling"),
+            Some(Token::Integer(integer)) => Ok(Expression::Integer(integer)),
+            _ => Err(SyntaxError::Grammar("expression".to_string())),
         }
     }
 }

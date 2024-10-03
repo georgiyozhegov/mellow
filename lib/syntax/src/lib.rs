@@ -1,8 +1,10 @@
+mod error;
 mod lex;
-mod token;
 mod parse;
 mod statement;
+mod token;
+pub use error::SyntaxError;
 pub use lex::Lex;
-pub use token::{BinaryOperator, Token, UnaryOperator};
 pub use parse::Parse;
-pub use statement::{Statement, Expression};
+pub use statement::{Expression, Statement};
+pub use token::{BinaryOperator, Token, UnaryOperator};

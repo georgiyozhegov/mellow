@@ -1,6 +1,9 @@
 #[derive(Debug)]
 pub enum Statement {
-    Let { identifier: String, value: Expression, },
+    Let {
+        identifier: String,
+        value: Expression,
+    },
 }
 
 #[derive(Debug)]
