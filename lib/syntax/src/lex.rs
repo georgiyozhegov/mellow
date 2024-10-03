@@ -1,7 +1,7 @@
 use crate::{BinaryOperator, Token, UnaryOperator};
 
-use std::str::Chars;
 use std::iter::Peekable;
+use std::str::Chars;
 
 macro_rules! numeric {
     () => {
@@ -64,7 +64,9 @@ impl<'l> Lex<'l> {
     }
 
     fn alphabetic(&mut self) -> Token {
-        let buffer = take_until(&mut self.source, |c| matches!(c, alphabetic!() | numeric!()));
+        let buffer = take_until(&mut self.source, |c| {
+            matches!(c, alphabetic!() | numeric!())
+        });
         if let Some(token) = Lex::keyword(&buffer) {
             token
         } else {
@@ -100,10 +102,16 @@ impl<'l> Lex<'l> {
     fn single(&mut self) -> Token {
         match self.source.next().unwrap() {
             '+' => Token::BinaryOperator(BinaryOperator::Add),
-            '-' => if self.source.peek().is_some_and(|c| matches!(c, invisible!())) {
-                Token::BinaryOperator(BinaryOperator::Subtract)
-            } else {
-                Token::UnaryOperator(UnaryOperator::Negate)
+            '-' => {
+                if self
+                    .source
+                    .peek()
+                    .is_some_and(|c| matches!(c, invisible!()))
+                {
+                    Token::BinaryOperator(BinaryOperator::Subtract)
+                } else {
+                    Token::UnaryOperator(UnaryOperator::Negate)
+                }
             }
             '*' => Token::BinaryOperator(BinaryOperator::Multiply),
             '/' => Token::BinaryOperator(BinaryOperator::Divide),
