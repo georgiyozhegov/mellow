@@ -54,7 +54,7 @@ impl<'l> Lex<'l> {
             alphabetic!() => Some(self.alphabetic()),
             invisible!() => self.invisible(),
             single!() => Some(self.single()),
-            _ => todo!(),
+            _ => todo!("Error handling"),
         }
     }
 

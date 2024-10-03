@@ -7,6 +7,7 @@ fn main() {
     let lex = Lex::new(source.chars().peekable());
     let parse = Parse::new(lex.peekable());
     for statement in parse {
+        let statement = statement.unwrap();
         println!("{statement:?}");
     }
 }
