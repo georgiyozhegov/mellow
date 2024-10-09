@@ -9,7 +9,10 @@ pub struct Rpn {
 
 impl Rpn {
     pub fn new(value_stack: Vec<Expression>, item_stack: Vec<RpnItem>) -> Self {
-        Self { value_stack, item_stack }
+        Self {
+            value_stack,
+            item_stack,
+        }
     }
 }
 
@@ -29,7 +32,11 @@ impl Rpn {
     }
 
     pub fn binary(&mut self, item: RpnItem) {
-        while self.item_stack.last().is_some_and(|previous_item| previous_item.precedence() >= item.precedence()) {
+        while self
+            .item_stack
+            .last()
+            .is_some_and(|previous_item| previous_item.precedence() >= item.precedence())
+        {
             let previous_item = self.item_stack.pop().unwrap();
             self.fold(previous_item);
         }
@@ -63,11 +70,16 @@ impl Rpn {
             RpnItem::Binary(operator) => {
                 let left = self.value_stack.pop().unwrap();
                 let right = self.value_stack.pop().unwrap();
-                self.value_stack.push(Expression::Binary(operator, Box::new(right), Box::new(left)));
+                self.value_stack.push(Expression::Binary(
+                    operator,
+                    Box::new(right),
+                    Box::new(left),
+                ));
             }
             RpnItem::Unary(operator) => {
                 let value = self.value_stack.pop().unwrap();
-                self.value_stack.push(Expression::Unary(operator, Box::new(value)));
+                self.value_stack
+                    .push(Expression::Unary(operator, Box::new(value)));
             }
             _ => panic!(),
         }

@@ -1,4 +1,7 @@
-use crate::{rpn::{Rpn, RpnItem}, Expression, Lex, Statement, SyntaxError, Token};
+use crate::{
+    rpn::{Rpn, RpnItem},
+    Expression, Lex, Statement, SyntaxError, Token,
+};
 
 use std::iter::Peekable;
 
