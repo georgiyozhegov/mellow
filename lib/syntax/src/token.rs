@@ -23,7 +23,7 @@ pub enum Token {
     End,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum BinaryOperator {
     Add,
     Subtract,
@@ -31,7 +31,7 @@ pub enum BinaryOperator {
     Divide,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum UnaryOperator {
     Negate,
 }

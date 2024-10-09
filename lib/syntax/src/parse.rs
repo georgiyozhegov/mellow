@@ -1,4 +1,4 @@
-use crate::{Expression, Lex, Statement, SyntaxError, Token};
+use crate::{rpn::{Rpn, RpnItem}, Expression, Lex, Statement, SyntaxError, Token};
 
 use std::iter::Peekable;
 
@@ -57,9 +57,35 @@ impl<'p> Parse<'p> {
 
 impl<'p> Parse<'p> {
     pub fn expression(&mut self) -> Result<Expression, SyntaxError> {
-        match self.source.next() {
-            Some(Token::Integer(integer)) => Ok(Expression::Integer(integer)),
-            _ => Err(SyntaxError::Grammar("expression".to_string())),
+        let mut rpn = Rpn::default();
+        while let Some(token) = self.source.peek() {
+            match token {
+                Token::Integer(_) => {
+                    rpn.value(Expression::from(token));
+                    self.source.next();
+                }
+                Token::BinaryOperator(_) => {
+                    rpn.binary(RpnItem::from(token));
+                    self.source.next();
+                }
+                Token::UnaryOperator(_) => {
+                    rpn.unary(RpnItem::from(token));
+                    self.source.next();
+                }
+                Token::LeftParenthesis => {
+                    rpn.item(RpnItem::from(token));
+                    self.source.next();
+                }
+                Token::RightParenthesis => {
+                    rpn.parenthesis();
+                    self.source.next();
+                }
+                Token::Let => {
+                    break;
+                }
+                _ => todo!(),
+            }
         }
+        Ok(rpn.collapse())
     }
 }
