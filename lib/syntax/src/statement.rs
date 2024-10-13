@@ -6,6 +6,11 @@ pub enum Statement {
         identifier: String,
         value: Expression,
     },
+    If {
+        condition: Expression,
+        true_: Box<Statement>,
+        false_: Option<Box<Statement>>,
+    }
 }
 
 #[derive(Debug)]
@@ -13,6 +18,11 @@ pub enum Expression {
     Integer(i128),
     Binary(BinaryOperator, Box<Expression>, Box<Expression>),
     Unary(UnaryOperator, Box<Expression>),
+    If {
+        condition: Box<Expression>,
+        true_: Box<Expression>,
+        false_: Option<Box<Expression>>,
+    },
 }
 
 impl From<&Token> for Expression {

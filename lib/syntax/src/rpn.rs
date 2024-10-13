@@ -1,6 +1,6 @@
 use core::panic;
 
-use crate::{BinaryOperator, Expression, Token, UnaryOperator};
+use crate::{BinaryOperator, Expression, SyntaxError, Token, UnaryOperator};
 
 pub struct Rpn {
     value_stack: Vec<Expression>,
@@ -129,6 +129,44 @@ impl UnaryOperator {
     pub fn precedence(&self) -> u8 {
         match self {
             Self::Negate => 3,
+        }
+    }
+}
+
+#[derive(PartialEq)]
+pub enum Grammar {
+    Value,
+    Item,
+}
+
+impl Default for Grammar {
+    fn default() -> Self {
+        Self::Value
+    }
+}
+
+impl Grammar {
+    pub fn check(&mut self, token: &Token) -> Result<(), SyntaxError> {
+        match (&self, token) {
+            (Self::Value, Token::Integer(_) | Token::If) => {
+                *self = Self::Item;
+                Ok(())
+            }
+            (Self::Value, Token::LeftParenthesis) => Ok(()),
+            (Self::Item, Token::BinaryOperator(_)) => {
+                *self = Self::Value;
+                Ok(())
+            }
+            (Self::Item, Token::RightParenthesis | Token::UnaryOperator(_)) => Ok(()),
+            (Self::Item, Token::Then | Token::Else | Token::End) => Ok(()),
+            _ => Err(SyntaxError::Grammar(
+                if *self == Self::Value {
+                    "literal or '('"
+                } else {
+                    "operator or ')'"
+                }
+                .to_string(),
+            )),
         }
     }
 }
