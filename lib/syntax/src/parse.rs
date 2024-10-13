@@ -31,6 +31,7 @@ impl<'p> Parse<'p> {
         match token {
             Token::Let => Some(self.let_()),
             Token::Do => Some(self.do_()),
+            Token::While => Some(self.while_()),
             _ => Some(Err(SyntaxError::Grammar("'let'".to_string()))),
         }
     }
@@ -83,6 +84,14 @@ impl<'p> Parse<'p> {
             Some(Token::End) => Ok(None),
             _ => Err(SyntaxError::Grammar("'else' or 'end'".to_string())),
         }
+    }
+
+    fn while_(&mut self) -> Result<Statement, SyntaxError> {
+        let condition = self.expression()?;
+        self.then()?;
+        let body = self.statement().unwrap()?;
+        self.end()?;
+        Ok(Statement::While { condition, body: Box::new(body) })
     }
 }
 
