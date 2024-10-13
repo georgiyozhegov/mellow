@@ -17,6 +17,7 @@ pub enum Statement {
 pub enum Expression {
     Integer(i128),
     Identifier(String),
+    Boolean(bool),
     Binary(BinaryOperator, Box<Expression>, Box<Expression>),
     Unary(UnaryOperator, Box<Expression>),
     If {
@@ -31,6 +32,8 @@ impl From<&Token> for Expression {
         match value {
             Token::Integer(value) => Self::Integer(*value),
             Token::Identifier(value) => Self::Identifier(value.to_owned()),
+            Token::True => Self::Boolean(true),
+            Token::False => Self::Boolean(false),
             _ => panic!(),
         }
     }

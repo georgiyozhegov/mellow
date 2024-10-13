@@ -148,7 +148,7 @@ impl Default for Grammar {
 impl Grammar {
     pub fn check(&mut self, token: &Token) -> Result<(), SyntaxError> {
         match (&self, token) {
-            (Self::Value, Token::Integer(_) | Token::Identifier(_) | Token::If) => {
+            (Self::Value, Token::Integer(_) | Token::Identifier(_) | Token::True | Token::False | Token::If) => {
                 *self = Self::Item;
                 Ok(())
             }

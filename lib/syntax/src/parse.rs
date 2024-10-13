@@ -93,7 +93,7 @@ impl<'p> Parse<'p> {
         while let Some(token) = self.source.peek() {
             grammar.check(token)?;
             match token {
-                Token::Integer(_) | Token::Identifier(_) => {
+                Token::Integer(_) | Token::Identifier(_) | Token::True | Token::False => {
                     rpn.value(Expression::from(token));
                     self.source.next();
                 }
