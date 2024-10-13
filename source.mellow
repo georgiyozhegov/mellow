@@ -3,3 +3,7 @@ do if true then
 else
       let a = 2
 end
+
+while true then
+      let a = 2
+end

@@ -10,6 +10,10 @@ pub enum Statement {
         condition: Expression,
         true_: Box<Statement>,
         false_: Option<Box<Statement>>,
+    },
+    While {
+        condition: Expression,
+        body: Box<Statement>,
     }
 }
 
