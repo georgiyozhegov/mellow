@@ -90,6 +90,8 @@ impl<'l> Lex<'l> {
             "to" => Some(Token::To),
             "in" => Some(Token::In),
             "end" => Some(Token::End),
+            "true" => Some(Token::True),
+            "false" => Some(Token::False),
             _ => None,
         }
     }
