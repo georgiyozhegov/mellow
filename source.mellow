@@ -1,4 +1,6 @@
-do if 1 then
+let a = 1
+let b = 2
+do if a then
       let a = 1
 else
       let a = 2
