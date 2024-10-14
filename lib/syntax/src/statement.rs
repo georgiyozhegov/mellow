@@ -8,12 +8,12 @@ pub enum Statement {
     },
     If {
         condition: Expression,
-        true_: Box<Statement>,
-        false_: Option<Box<Statement>>,
+        true_: Vec<Statement>,
+        false_: Vec<Statement>,
     },
     While {
         condition: Expression,
-        body: Box<Statement>,
+        body: Vec<Statement>,
     },
 }
 
