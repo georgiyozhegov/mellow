@@ -1,6 +1,8 @@
-use crate::token::{BinaryOperator, Token, UnaryOperator};
-use crate::tree::Expression;
-use crate::SyntaxError;
+use crate::{
+    token::{BinaryOperator, Token, UnaryOperator},
+    tree::Expression,
+    SyntaxError,
+};
 
 #[macro_export]
 macro_rules! end_of_expression {

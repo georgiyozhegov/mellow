@@ -1,4 +1,5 @@
 use std::fmt::{self, Display, Formatter};
+
 use crate::token::{BinaryOperator, Token, UnaryOperator};
 
 #[derive(Debug, Clone)]
