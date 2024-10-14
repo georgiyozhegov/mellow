@@ -1,4 +1,4 @@
-use crate::{BinaryOperator, Token, UnaryOperator};
+use crate::{BinaryOperator, SyntaxError, Token, UnaryOperator};
 
 use std::iter::Peekable;
 use std::str::Chars;
@@ -40,7 +40,7 @@ impl<'l> Lex<'l> {
 }
 
 impl<'l> Iterator for Lex<'l> {
-    type Item = Token;
+    type Item = Result<Token, SyntaxError>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.token()
@@ -48,13 +48,13 @@ impl<'l> Iterator for Lex<'l> {
 }
 
 impl<'l> Lex<'l> {
-    pub fn token(&mut self) -> Option<Token> {
+    pub fn token(&mut self) -> Option<Result<Token, SyntaxError>> {
         match self.source.peek()? {
-            numeric!() => Some(self.numeric()),
-            alphabetic!() => Some(self.alphabetic()),
+            numeric!() => Some(Ok(self.numeric())),
+            alphabetic!() => Some(Ok(self.alphabetic())),
             invisible!() => self.invisible(),
-            single!() => Some(self.single()),
-            _ => todo!("Error handling"),
+            single!() => Some(Ok(self.single())),
+            c => Some(Err(SyntaxError::InvalidCharacter(*c))),
         }
     }
 
@@ -96,7 +96,7 @@ impl<'l> Lex<'l> {
         }
     }
 
-    fn invisible(&mut self) -> Option<Token> {
+    fn invisible(&mut self) -> Option<Result<Token, SyntaxError>> {
         take_until(&mut self.source, |c| matches!(c, invisible!()));
         self.token()
     }

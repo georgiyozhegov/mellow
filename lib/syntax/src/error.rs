@@ -2,7 +2,7 @@ use std::fmt::{self, Display, Formatter};
 
 use crate::{BinaryOperator, Token, UnaryOperator};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum SyntaxError {
     InvalidCharacter(char),
     Grammar {
