@@ -3,7 +3,7 @@ use crate::{BinaryOperator, Expression, SyntaxError, Token, UnaryOperator};
 #[macro_export]
 macro_rules! end_of_expression {
     () => {
-        Token::Let | Token::Do | Token::Then | Token::Else | Token::End
+        Token::Let | Token::While | Token::Do | Token::Then | Token::Else | Token::End
     };
 }
 
