@@ -1,5 +1,5 @@
 do if true then
-      let a = 1 + 
+      let a = 1 +
 else
       let a = 2 + 3
 end

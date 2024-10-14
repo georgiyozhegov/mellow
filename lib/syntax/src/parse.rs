@@ -8,6 +8,36 @@ use std::iter::Peekable;
 
 type Source<'s> = Peekable<Lex<'s>>;
 
+macro_rules! next {
+    ($source: expr) => {
+        match $source.next() {
+            Some(Ok(token)) => Some(token),
+            None => None,
+            Some(Err(error)) => return Err(error),
+        }
+    };
+}
+
+macro_rules! next_some {
+    ($source: expr) => {
+        match $source.next() {
+            Some(Ok(token)) => token,
+            None => return None,
+            Some(Err(error)) => return Some(Err(error)),
+        }
+    };
+}
+
+macro_rules! peek {
+    ($source: expr) => {
+        match $source.peek() {
+            Some(Ok(token)) => Some(token),
+            None => None,
+            Some(Err(error)) => return Err(error.clone()),
+        }
+    };
+}
+
 pub struct Parse<'p> {
     source: Source<'p>,
 }
@@ -28,12 +58,11 @@ impl<'p> Iterator for Parse<'p> {
 
 impl<'p> Parse<'p> {
     pub fn statement(&mut self) -> Option<Result<Statement, SyntaxError>> {
-        let token = self.source.next()?;
-        match token {
+        match next_some!(self.source) {
             Token::Let => Some(self.let_()),
             Token::Do => Some(self.do_()),
             Token::While => Some(self.while_()),
-            _ => Some(Err(SyntaxError::Grammar {
+            token => Some(Err(SyntaxError::Grammar {
                 expected: "'let', 'do' or 'while'",
                 found: Some(token),
             })),
@@ -48,7 +77,7 @@ impl<'p> Parse<'p> {
     }
 
     fn identifier(&mut self) -> Result<String, SyntaxError> {
-        match self.source.next() {
+        match next!(self.source) {
             Some(Token::Identifier(identifier)) => Ok(identifier),
             token => Err(SyntaxError::Grammar {
                 expected: "identifier",
@@ -58,7 +87,7 @@ impl<'p> Parse<'p> {
     }
 
     fn equal(&mut self) -> Result<(), SyntaxError> {
-        match self.source.next() {
+        match next!(self.source) {
             Some(Token::Equal) => Ok(()),
             token => Err(SyntaxError::Grammar {
                 expected: "'='",
@@ -68,7 +97,12 @@ impl<'p> Parse<'p> {
     }
 
     fn do_(&mut self) -> Result<Statement, SyntaxError> {
-        match self.source.next() {
+        let token = match self.source.next() {
+            Some(Ok(token)) => Some(token),
+            None => None,
+            Some(Err(error)) => return Err(error),
+        };
+        match token {
             Some(Token::If) => self.do_if(),
             token => Err(SyntaxError::Grammar {
                 expected: "'if'",
@@ -91,7 +125,7 @@ impl<'p> Parse<'p> {
     }
 
     fn do_else_(&mut self) -> Result<Option<Statement>, SyntaxError> {
-        match self.source.peek() {
+        match peek!(self.source) {
             Some(Token::Else) => {
                 self.source.next();
                 Ok(Some(self.statement().unwrap()?))
@@ -120,7 +154,7 @@ impl<'p> Parse<'p> {
     pub fn expression(&mut self) -> Result<Expression, SyntaxError> {
         let mut rpn = Rpn::default();
         let mut grammar = Grammar::default();
-        while let Some(token) = self.source.peek() {
+        while let Some(token) = peek!(self.source) {
             grammar.check(token)?;
             match token {
                 Token::Integer(_) | Token::Identifier(_) | Token::True | Token::False => {
@@ -170,7 +204,7 @@ impl<'p> Parse<'p> {
     }
 
     fn then(&mut self) -> Result<(), SyntaxError> {
-        match self.source.next() {
+        match next!(self.source) {
             Some(Token::Then) => Ok(()),
             token => Err(SyntaxError::Grammar {
                 expected: "'then'",
@@ -180,7 +214,7 @@ impl<'p> Parse<'p> {
     }
 
     fn else_(&mut self) -> Result<Option<Box<Expression>>, SyntaxError> {
-        match self.source.peek() {
+        match peek!(self.source) {
             Some(Token::Else) => {
                 self.source.next();
                 Ok(Some(Box::new(self.expression()?)))
@@ -194,7 +228,7 @@ impl<'p> Parse<'p> {
     }
 
     fn end(&mut self) -> Result<(), SyntaxError> {
-        match self.source.next() {
+        match next!(self.source) {
             Some(Token::End) => Ok(()),
             token => Err(SyntaxError::Grammar {
                 expected: "'end'",
