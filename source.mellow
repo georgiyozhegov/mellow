@@ -1,9 +1,6 @@
 do if true then
-      let a = 1 +
+      let a = 1
+      let b = 2
 else
       let a = 2 + 3
-end
-
-while true then
-      let a = 2
 end
