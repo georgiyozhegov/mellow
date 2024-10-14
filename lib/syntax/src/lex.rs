@@ -1,5 +1,5 @@
-use crate::{BinaryOperator, SyntaxError, Token, UnaryOperator};
-
+use crate::token::{BinaryOperator, Token, UnaryOperator};
+use crate::SyntaxError;
 use std::iter::Peekable;
 use std::str::Chars;
 

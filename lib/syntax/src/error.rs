@@ -1,6 +1,5 @@
 use std::fmt::{self, Display, Formatter};
-
-use crate::{BinaryOperator, Token, UnaryOperator};
+use crate::token::{BinaryOperator, Token, UnaryOperator};
 
 #[derive(Debug, Clone)]
 pub enum SyntaxError {
