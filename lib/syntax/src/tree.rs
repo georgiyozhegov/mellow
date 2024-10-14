@@ -1,4 +1,4 @@
-use crate::{BinaryOperator, Token, UnaryOperator};
+use crate::token::{BinaryOperator, Token, UnaryOperator};
 
 #[derive(Debug)]
 pub enum Statement {
