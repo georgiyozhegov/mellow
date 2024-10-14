@@ -1,6 +1,7 @@
 use crate::{
+    end_of_expression,
     rpn::{Grammar, Rpn, RpnItem},
-    Expression, Lex, Statement, SyntaxError, Token,
+    token, Expression, Lex, Statement, SyntaxError, Token,
 };
 
 use std::iter::Peekable;
@@ -32,7 +33,10 @@ impl<'p> Parse<'p> {
             Token::Let => Some(self.let_()),
             Token::Do => Some(self.do_()),
             Token::While => Some(self.while_()),
-            _ => Some(Err(SyntaxError::Grammar("'let'".to_string()))),
+            _ => Some(Err(SyntaxError::Grammar {
+                expected: "'let', 'do' or 'while'",
+                found: Some(token),
+            })),
         }
     }
 
@@ -44,24 +48,32 @@ impl<'p> Parse<'p> {
     }
 
     fn identifier(&mut self) -> Result<String, SyntaxError> {
-        let token = self.source.next();
-        match token {
+        match self.source.next() {
             Some(Token::Identifier(identifier)) => Ok(identifier),
-            _ => Err(SyntaxError::Grammar("identifier".to_string())),
+            token => Err(SyntaxError::Grammar {
+                expected: "identifier",
+                found: token,
+            }),
         }
     }
 
     fn equal(&mut self) -> Result<(), SyntaxError> {
         match self.source.next() {
             Some(Token::Equal) => Ok(()),
-            _ => Err(SyntaxError::Grammar("'='".to_string())),
+            token => Err(SyntaxError::Grammar {
+                expected: "'='",
+                found: token,
+            }),
         }
     }
 
     fn do_(&mut self) -> Result<Statement, SyntaxError> {
         match self.source.next() {
             Some(Token::If) => self.do_if(),
-            _ => Err(SyntaxError::Grammar("'if'".to_string())),
+            token => Err(SyntaxError::Grammar {
+                expected: "'if'",
+                found: token,
+            }),
         }
     }
 
@@ -71,18 +83,24 @@ impl<'p> Parse<'p> {
         let true_ = self.statement().unwrap()?;
         let false_ = self.do_else_()?;
         self.end()?;
-        Ok(Statement::If { condition, true_: Box::new(true_), false_ })
+        Ok(Statement::If {
+            condition,
+            true_: Box::new(true_),
+            false_: false_.map(|statement| Box::new(statement)),
+        })
     }
 
-    fn do_else_(&mut self) -> Result<Option<Box<Statement>>, SyntaxError> {
-        let token = self.source.peek();
-        match token {
+    fn do_else_(&mut self) -> Result<Option<Statement>, SyntaxError> {
+        match self.source.peek() {
             Some(Token::Else) => {
                 self.source.next();
-                Ok(Some(Box::new(self.statement().unwrap()?)))
+                Ok(Some(self.statement().unwrap()?))
             }
             Some(Token::End) => Ok(None),
-            _ => Err(SyntaxError::Grammar("'else' or 'end'".to_string())),
+            token => Err(SyntaxError::Grammar {
+                expected: "'else' or 'end'",
+                found: token.cloned(),
+            }),
         }
     }
 
@@ -91,7 +109,10 @@ impl<'p> Parse<'p> {
         self.then()?;
         let body = self.statement().unwrap()?;
         self.end()?;
-        Ok(Statement::While { condition, body: Box::new(body) })
+        Ok(Statement::While {
+            condition,
+            body: Box::new(body),
+        })
     }
 }
 
@@ -126,7 +147,7 @@ impl<'p> Parse<'p> {
                     self.source.next();
                     rpn.value(self.if_()?);
                 }
-                Token::Let | Token::Do | Token::Then | Token::Else | Token::End => {
+                end_of_expression!() => {
                     break;
                 }
                 _ => todo!(),
@@ -151,7 +172,10 @@ impl<'p> Parse<'p> {
     fn then(&mut self) -> Result<(), SyntaxError> {
         match self.source.next() {
             Some(Token::Then) => Ok(()),
-            _ => Err(SyntaxError::Grammar("'then'".to_string())),
+            token => Err(SyntaxError::Grammar {
+                expected: "'then'",
+                found: token,
+            }),
         }
     }
 
@@ -162,14 +186,20 @@ impl<'p> Parse<'p> {
                 Ok(Some(Box::new(self.expression()?)))
             }
             Some(Token::End) => Ok(None),
-            _ => Err(SyntaxError::Grammar("'else' or 'end'".to_string())),
+            token => Err(SyntaxError::Grammar {
+                expected: "'else' or 'end'",
+                found: token.cloned(),
+            }),
         }
     }
 
     fn end(&mut self) -> Result<(), SyntaxError> {
         match self.source.next() {
             Some(Token::End) => Ok(()),
-            _ => Err(SyntaxError::Grammar("'end'".to_string())),
+            token => Err(SyntaxError::Grammar {
+                expected: "'end'",
+                found: token,
+            }),
         }
     }
 }
