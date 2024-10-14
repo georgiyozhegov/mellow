@@ -42,7 +42,7 @@ impl Display for Token {
             "{}",
             match self {
                 Self::Integer(value) => value.to_string(),
-                Self::Identifier(value) => value.to_owned(),
+                Self::Identifier(value) => format!("identifier '{value}'"),
                 Self::BinaryOperator(operator) => operator.to_string(),
                 Self::UnaryOperator(operator) => operator.to_string(),
                 Self::LeftParenthesis => "(".to_string(),

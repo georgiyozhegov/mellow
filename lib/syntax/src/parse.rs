@@ -94,12 +94,7 @@ impl<'p> Parse<'p> {
     }
 
     fn do_(&mut self) -> Result<Statement, SyntaxError> {
-        let token = match self.source.next() {
-            Some(Ok(token)) => Some(token),
-            None => None,
-            Some(Err(error)) => return Err(error),
-        };
-        match token {
+        match next!(self.source) {
             Some(Token::If) => self.do_if(),
             token => Err(SyntaxError::Grammar {
                 expected: "'if'",
@@ -140,10 +135,7 @@ impl<'p> Parse<'p> {
         self.then()?;
         let body = self.body()?;
         self.end()?;
-        Ok(Statement::While {
-            condition,
-            body,
-        })
+        Ok(Statement::While { condition, body })
     }
 }
 
@@ -181,7 +173,12 @@ impl<'p> Parse<'p> {
                 end_of_expression!() => {
                     break;
                 }
-                _ => todo!(),
+                _ => {
+                    return Err(SyntaxError::Grammar {
+                        expected: "expression ",
+                        found: Some(token.clone()),
+                    })
+                }
             }
         }
         Ok(rpn.collapse())
