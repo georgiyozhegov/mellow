@@ -1,11 +1,12 @@
-use crate::token::Token;
-use crate::tree::{Expression, Statement};
+use std::iter::Peekable;
+
 use crate::{
     end_of_expression,
     rpn::{Grammar, Rpn, RpnItem},
+    token::Token,
+    tree::{Expression, Statement},
     Lex, SyntaxError,
 };
-use std::iter::Peekable;
 
 type Source<'s> = Peekable<Lex<'s>>;
 

@@ -1,7 +1,9 @@
-use crate::token::{BinaryOperator, Token, UnaryOperator};
-use crate::SyntaxError;
-use std::iter::Peekable;
-use std::str::Chars;
+use std::{iter::Peekable, str::Chars};
+
+use crate::{
+    token::{BinaryOperator, Token, UnaryOperator},
+    SyntaxError,
+};
 
 macro_rules! numeric {
     () => {
