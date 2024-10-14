@@ -1,6 +1,11 @@
-use core::panic;
-
 use crate::{BinaryOperator, Expression, SyntaxError, Token, UnaryOperator};
+
+#[macro_export]
+macro_rules! end_of_expression {
+    () => {
+        Token::Let | Token::Do | Token::Then | Token::Else | Token::End
+    };
+}
 
 pub struct Rpn {
     value_stack: Vec<Expression>,
@@ -148,7 +153,10 @@ impl Default for Grammar {
 impl Grammar {
     pub fn check(&mut self, token: &Token) -> Result<(), SyntaxError> {
         match (&self, token) {
-            (Self::Value, Token::Integer(_) | Token::Identifier(_) | Token::True | Token::False | Token::If) => {
+            (
+                Self::Value,
+                Token::Integer(_) | Token::Identifier(_) | Token::True | Token::False | Token::If,
+            ) => {
                 *self = Self::Item;
                 Ok(())
             }
@@ -158,15 +166,14 @@ impl Grammar {
                 Ok(())
             }
             (Self::Item, Token::RightParenthesis | Token::UnaryOperator(_)) => Ok(()),
-            (Self::Item, Token::Let | Token::Do | Token::Then | Token::Else | Token::End) => Ok(()),
-            _ => Err(SyntaxError::Grammar(
-                if *self == Self::Value {
-                    "literal or '('"
-                } else {
-                    "operator or ')'"
-                }
-                .to_string(),
-            )),
+            (Self::Value, _) => Err(SyntaxError::Grammar {
+                expected: "literal, identifier or '('",
+                found: Some(token.clone()),
+            }),
+            (Self::Item, _) => Err(SyntaxError::Grammar {
+                expected: "operator, statement or ')'",
+                found: Some(token.clone()),
+            }),
         }
     }
 }

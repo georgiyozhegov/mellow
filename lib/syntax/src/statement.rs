@@ -14,7 +14,7 @@ pub enum Statement {
     While {
         condition: Expression,
         body: Box<Statement>,
-    }
+    },
 }
 
 #[derive(Debug)]

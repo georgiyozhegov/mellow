@@ -1,5 +1,10 @@
+use crate::Token;
+
 #[derive(Debug)]
 pub enum SyntaxError {
     InvalidCharacter(char),
-    Grammar(String),
+    Grammar {
+        expected: &'static str,
+        found: Option<Token>,
+    },
 }
