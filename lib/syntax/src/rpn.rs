@@ -166,6 +166,7 @@ impl Grammar {
                 Ok(())
             }
             (Self::Item, Token::RightParenthesis | Token::UnaryOperator(_)) => Ok(()),
+            (Self::Item, end_of_expression!()) => Ok(()),
             (Self::Value, _) => Err(SyntaxError::Grammar {
                 expected: "literal, identifier or '('",
                 found: Some(token.clone()),
