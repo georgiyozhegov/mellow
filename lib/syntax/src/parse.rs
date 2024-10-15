@@ -64,7 +64,7 @@ impl<'p> Parse<'p> {
             Some(Token::While) => self.r#while(),
             Some(Token::For) => self.r#for(),
             token => Err(SyntaxError::Grammar {
-                expected: "'let', 'do' or 'while'",
+                expected: "statement",
                 found: token,
             }),
         }
@@ -75,7 +75,11 @@ impl<'p> Parse<'p> {
         let identifier = self.identifier()?;
         self.equal()?;
         let value = self.expression()?;
-        Ok(Statement::Let { identifier, mutable, value })
+        Ok(Statement::Let {
+            identifier,
+            mutable,
+            value,
+        })
     }
 
     fn mutable(&mut self) -> Result<bool, SyntaxError> {
@@ -113,7 +117,7 @@ impl<'p> Parse<'p> {
             Some(Token::If) => self.do_if(),
             Some(Token::Identifier(value)) => self.change(value),
             token => Err(SyntaxError::Grammar {
-                expected: "'if'",
+                expected: "'if' or identifier after 'do'",
                 found: token,
             }),
         }
@@ -140,7 +144,7 @@ impl<'p> Parse<'p> {
             }
             Some(Token::End) => Ok(Vec::new()),
             token => Err(SyntaxError::Grammar {
-                expected: "'else' or 'end'",
+                expected: "'else' or 'end' after 'if' body",
                 found: token.cloned(),
             }),
         }
@@ -166,7 +170,7 @@ impl<'p> Parse<'p> {
             Some(Token::In) => self.for_in(item),
             Some(Token::From) => self.for_from_to(item),
             token => Err(SyntaxError::Grammar {
-                expected: "'in' or 'from'",
+                expected: "'in' or 'from' after 'for'",
                 found: token,
             }),
         }
@@ -203,7 +207,7 @@ impl<'p> Parse<'p> {
         match next!(self.source) {
             Some(Token::To) => Ok(()),
             token => Err(SyntaxError::Grammar {
-                expected: "'to'",
+                expected: "'to' after 'from ...'",
                 found: token,
             }),
         }
@@ -247,7 +251,7 @@ impl<'p> Parse<'p> {
                 }
                 _ => {
                     return Err(SyntaxError::Grammar {
-                        expected: "expression ",
+                        expected: "expression",
                         found: Some(token.clone()),
                     })
                 }
@@ -287,7 +291,7 @@ impl<'p> Parse<'p> {
             }
             Some(Token::End) => Ok(None),
             token => Err(SyntaxError::Grammar {
-                expected: "'else' or 'end'",
+                expected: "'else' or 'end' after 'if' body",
                 found: token.cloned(),
             }),
         }
