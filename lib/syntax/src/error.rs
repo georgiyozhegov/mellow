@@ -80,6 +80,9 @@ impl Display for BinaryOperator {
                 Self::Subtract => "'-'",
                 Self::Multiply => "'*'",
                 Self::Divide => "'/'",
+                Self::Greater => "'>'",
+                Self::Less => "'<'",
+                Self::Equal => "'?'",
             }
         )
     }

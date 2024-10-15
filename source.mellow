@@ -1,5 +1,5 @@
-let mutable a = true
+let a = 1
 
-while a then
-      do a = false
+do if a > 1 then
+      do a = 1
 end

@@ -32,6 +32,9 @@ pub enum BinaryOperator {
     Subtract,
     Multiply,
     Divide,
+    Greater,
+    Less,
+    Equal,
 }
 
 #[derive(Debug, Clone, PartialEq)]

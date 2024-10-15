@@ -134,10 +134,13 @@ impl RpnItem {
 impl BinaryOperator {
     pub fn precedence(&self) -> u8 {
         match self {
-            Self::Add => 1,
-            Self::Subtract => 1,
-            Self::Multiply => 2,
-            Self::Divide => 2,
+            Self::Add => 2,
+            Self::Subtract => 2,
+            Self::Multiply => 3,
+            Self::Divide => 3,
+            Self::Greater => 1,
+            Self::Less => 1,
+            Self::Equal => 1,
         }
     }
 }

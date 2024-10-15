@@ -25,7 +25,7 @@ macro_rules! invisible {
 
 macro_rules! single {
     () => {
-        '+' | '-' | '*' | '/' | '(' | ')' | '='
+        '+' | '-' | '*' | '/' | '>' | '<' | '?' | '(' | ')' | '='
     };
 }
 
@@ -120,6 +120,9 @@ impl<'l> Lex<'l> {
             }
             '*' => Token::BinaryOperator(BinaryOperator::Multiply),
             '/' => Token::BinaryOperator(BinaryOperator::Divide),
+            '>' => Token::BinaryOperator(BinaryOperator::Greater),
+            '<' => Token::BinaryOperator(BinaryOperator::Less),
+            '?' => Token::BinaryOperator(BinaryOperator::Equal),
             '(' => Token::LeftParenthesis,
             ')' => Token::RightParenthesis,
             '=' => Token::Equal,
