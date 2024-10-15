@@ -122,13 +122,13 @@ impl<'p> Parse<'p> {
     fn do_if(&mut self) -> Result<Statement, SyntaxError> {
         let condition = self.expression()?;
         self.then()?;
-        let true_ = self.body()?;
-        let false_ = self.do_else()?;
+        let r#true = self.body()?;
+        let r#false = self.do_else()?;
         self.end()?;
         Ok(Statement::If {
             condition,
-            true_,
-            false_,
+            r#true,
+            r#false,
         })
     }
 
