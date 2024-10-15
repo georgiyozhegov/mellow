@@ -15,11 +15,17 @@ pub enum Statement {
         condition: Expression,
         body: Vec<Statement>,
     },
-    For {
+    ForIn {
         item: String,
         sequence: Expression,
         body: Vec<Statement>,
-    }
+    },
+    ForFromTo {
+        item: String,
+        start: Expression,
+        end: Expression,
+        body: Vec<Statement>,
+    },
 }
 
 #[derive(Debug)]

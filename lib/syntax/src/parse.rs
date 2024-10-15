@@ -144,19 +144,48 @@ impl<'p> Parse<'p> {
 
     fn r#for(&mut self) -> Result<Statement, SyntaxError> {
         let item = self.identifier()?;
-        self.r#in()?;
+        match next!(self.source) {
+            Some(Token::In) => self.for_in(item),
+            Some(Token::From) => self.for_from_to(item),
+            token => Err(SyntaxError::Grammar {
+                expected: "'in' or 'from'",
+                found: token,
+            }),
+        }
+    }
+
+    fn for_in(&mut self, item: String) -> Result<Statement, SyntaxError> {
         let sequence = self.expression()?;
         self.then()?;
         let body = self.body()?;
         self.end()?;
-        Ok(Statement::For { item, sequence, body })
+        Ok(Statement::ForIn {
+            item,
+            sequence,
+            body,
+        })
     }
 
-    fn r#in(&mut self) -> Result<(), SyntaxError> {
+    fn for_from_to(&mut self, item: String) -> Result<Statement, SyntaxError> {
+        let start = self.expression()?;
+        self.to()?;
+        let end = self.expression()?;
+        self.then()?;
+        let body = self.body()?;
+        self.end()?;
+        Ok(Statement::ForFromTo {
+            item,
+            start,
+            end,
+            body,
+        })
+    }
+
+    fn to(&mut self) -> Result<(), SyntaxError> {
         match next!(self.source) {
-            Some(Token::In) => Ok(()),
+            Some(Token::To) => Ok(()),
             token => Err(SyntaxError::Grammar {
-                expected: "'in'",
+                expected: "'to'",
                 found: token,
             }),
         }
