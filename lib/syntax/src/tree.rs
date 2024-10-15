@@ -7,6 +7,10 @@ pub enum Statement {
         mutable: bool,
         value: Expression,
     },
+    Change {
+        identifier: String,
+        value: Expression,
+    },
     If {
         condition: Expression,
         true_: Vec<Statement>,

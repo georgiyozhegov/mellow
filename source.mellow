@@ -1,1 +1,5 @@
 let mutable a = true
+
+while a then
+      do a = false
+end
