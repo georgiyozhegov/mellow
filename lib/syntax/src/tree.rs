@@ -4,6 +4,7 @@ use crate::token::{BinaryOperator, Token, UnaryOperator};
 pub enum Statement {
     Let {
         identifier: String,
+        mutable: bool,
         value: Expression,
     },
     If {

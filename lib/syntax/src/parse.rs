@@ -71,10 +71,21 @@ impl<'p> Parse<'p> {
     }
 
     fn r#let(&mut self) -> Result<Statement, SyntaxError> {
+        let mutable = self.mutable()?;
         let identifier = self.identifier()?;
         self.equal()?;
         let value = self.expression()?;
-        Ok(Statement::Let { identifier, value })
+        Ok(Statement::Let { identifier, mutable, value })
+    }
+
+    fn mutable(&mut self) -> Result<bool, SyntaxError> {
+        match peek!(self.source) {
+            Some(Token::Mutable) => {
+                self.source.next();
+                Ok(true)
+            }
+            _ => Ok(false),
+        }
     }
 
     fn identifier(&mut self) -> Result<String, SyntaxError> {

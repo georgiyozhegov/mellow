@@ -79,6 +79,7 @@ impl<'l> Lex<'l> {
     fn keyword(buffer: &str) -> Option<Token> {
         match buffer {
             "let" => Some(Token::Let),
+            "mutable" => Some(Token::Mutable),
             "if" => Some(Token::If),
             "match" => Some(Token::Match),
             "for" => Some(Token::For),
