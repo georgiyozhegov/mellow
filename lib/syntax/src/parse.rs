@@ -111,6 +111,7 @@ impl<'p> Parse<'p> {
     fn r#do(&mut self) -> Result<Statement, SyntaxError> {
         match next!(self.source) {
             Some(Token::If) => self.do_if(),
+            Some(Token::Identifier(value)) => self.change(value),
             token => Err(SyntaxError::Grammar {
                 expected: "'if'",
                 found: token,
@@ -143,6 +144,12 @@ impl<'p> Parse<'p> {
                 found: token.cloned(),
             }),
         }
+    }
+
+    fn change(&mut self, identifier: String) -> Result<Statement, SyntaxError> {
+        self.equal()?;
+        let value = self.expression()?;
+        Ok(Statement::Change { identifier, value })
     }
 
     fn r#while(&mut self) -> Result<Statement, SyntaxError> {
