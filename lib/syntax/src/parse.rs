@@ -62,6 +62,7 @@ impl<'p> Parse<'p> {
             Some(Token::Let) => self.r#let(),
             Some(Token::Do) => self.r#do(),
             Some(Token::While) => self.r#while(),
+            Some(Token::For) => self.r#for(),
             token => Err(SyntaxError::Grammar {
                 expected: "'let', 'do' or 'while'",
                 found: token,
@@ -139,6 +140,26 @@ impl<'p> Parse<'p> {
         let body = self.body()?;
         self.end()?;
         Ok(Statement::While { condition, body })
+    }
+
+    fn r#for(&mut self) -> Result<Statement, SyntaxError> {
+        let item = self.identifier()?;
+        self.r#in()?;
+        let sequence = self.expression()?;
+        self.then()?;
+        let body = self.body()?;
+        self.end()?;
+        Ok(Statement::For { item, sequence, body })
+    }
+
+    fn r#in(&mut self) -> Result<(), SyntaxError> {
+        match next!(self.source) {
+            Some(Token::In) => Ok(()),
+            token => Err(SyntaxError::Grammar {
+                expected: "'in'",
+                found: token,
+            }),
+        }
     }
 }
 
