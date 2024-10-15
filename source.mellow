@@ -1,2 +1,15 @@
-let a = true
-while a then a = false end
+let a = 1
+
+do if true then
+      let b = 1
+else
+      let c = 1
+end
+
+while true then
+      let d = 1
+end
+
+for e in a then
+      let f = 1
+end

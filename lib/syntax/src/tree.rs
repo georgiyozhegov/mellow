@@ -15,6 +15,11 @@ pub enum Statement {
         condition: Expression,
         body: Vec<Statement>,
     },
+    For {
+        item: String,
+        sequence: Expression,
+        body: Vec<Statement>,
+    }
 }
 
 #[derive(Debug)]
