@@ -7,7 +7,15 @@ use crate::{
 #[macro_export]
 macro_rules! end_of_expression {
     () => {
-        Token::Let | Token::While | Token::Do | Token::Then | Token::Else | Token::End
+        Token::Let
+            | Token::While
+            | Token::Do
+            | Token::Then
+            | Token::Else
+            | Token::In
+            | Token::From
+            | Token::To
+            | Token::End
     };
 }
 

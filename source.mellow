@@ -13,3 +13,7 @@ end
 for e in a then
       let f = 1
 end
+
+for g from 1 to 1 then
+      let h = 1
+end
