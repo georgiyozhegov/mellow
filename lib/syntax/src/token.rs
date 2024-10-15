@@ -8,6 +8,7 @@ pub enum Token {
     RightParenthesis,
     Equal,
     Let,
+    Mutable,
     If,
     Match,
     For,

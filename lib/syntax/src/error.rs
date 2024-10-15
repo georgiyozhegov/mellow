@@ -49,6 +49,7 @@ impl Display for Token {
                 Self::RightParenthesis => ")".to_string(),
                 Self::Equal => "'='".to_string(),
                 Self::Let => "'let'".to_string(),
+                Self::Mutable => "'mutable'".to_string(),
                 Self::If => "'if'".to_string(),
                 Self::Match => "'match'".to_string(),
                 Self::For => "'for'".to_string(),
