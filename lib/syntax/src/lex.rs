@@ -54,6 +54,7 @@ impl<'l> Lex<'l> {
         match self.source.peek()? {
             numeric!() => Some(Ok(self.numeric())),
             alphabetic!() => Some(Ok(self.alphabetic())),
+            '"' => Some(Ok(self.string())),
             invisible!() => self.invisible(),
             single!() => Some(Ok(self.single())),
             c => Some(Err(SyntaxError::InvalidCharacter(*c))),
@@ -74,6 +75,13 @@ impl<'l> Lex<'l> {
         } else {
             Token::Identifier(buffer)
         }
+    }
+
+    fn string(&mut self) -> Token {
+        self.source.next();
+        let buffer = take_until(&mut self.source, |c| c != '"');
+        self.source.next();
+        Token::String(buffer)
     }
 
     fn keyword(buffer: &str) -> Option<Token> {

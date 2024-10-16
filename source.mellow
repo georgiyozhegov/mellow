@@ -1,4 +1,1 @@
-let a = 1
-let b = 2
-
-let status = !(a ? b)
+let s = "Hello, World!"
