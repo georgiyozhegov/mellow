@@ -148,7 +148,8 @@ impl BinaryOperator {
 impl UnaryOperator {
     pub fn precedence(&self) -> u8 {
         match self {
-            Self::Negate => 3,
+            Self::Negate => 4,
+            Self::Not => 4,
         }
     }
 }
@@ -175,12 +176,12 @@ impl Grammar {
                 *self = Self::Item;
                 Ok(())
             }
-            (Self::Value, Token::LeftParenthesis) => Ok(()),
+            (Self::Value, Token::LeftParenthesis | Token::UnaryOperator(_)) => Ok(()),
             (Self::Item, Token::BinaryOperator(_)) => {
                 *self = Self::Value;
                 Ok(())
             }
-            (Self::Item, Token::RightParenthesis | Token::UnaryOperator(_)) => Ok(()),
+            (Self::Item, Token::RightParenthesis) => Ok(()),
             (Self::Item, end_of_expression!()) => Ok(()),
             (Self::Value, _) => Err(SyntaxError::Grammar {
                 expected: "literal, identifier or '('",
