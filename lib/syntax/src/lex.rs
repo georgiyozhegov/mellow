@@ -25,7 +25,7 @@ macro_rules! invisible {
 
 macro_rules! single {
     () => {
-        '+' | '-' | '*' | '/' | '>' | '<' | '?' | '(' | ')' | '='
+        '+' | '-' | '*' | '/' | '>' | '<' | '?' | '(' | ')' | '=' | '!'
     };
 }
 
@@ -126,6 +126,7 @@ impl<'l> Lex<'l> {
             '(' => Token::LeftParenthesis,
             ')' => Token::RightParenthesis,
             '=' => Token::Equal,
+            '!' => Token::UnaryOperator(UnaryOperator::Not),
             _ => unreachable!(),
         }
     }

@@ -1,3 +1,4 @@
-for a from 1 then
-      let a = 1
-end
+let a = 1
+let b = 2
+
+let status = !(a ? b)

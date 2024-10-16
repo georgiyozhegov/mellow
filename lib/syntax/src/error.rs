@@ -95,6 +95,7 @@ impl Display for UnaryOperator {
             "{}",
             match self {
                 Self::Negate => "'-'",
+                Self::Not => "'!'",
             }
         )
     }
