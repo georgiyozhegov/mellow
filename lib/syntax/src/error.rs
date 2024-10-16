@@ -41,8 +41,9 @@ impl Display for Token {
             formatter,
             "{}",
             match self {
-                Self::Integer(value) => value.to_string(),
+                Self::Integer(value) => format!("integer literal '{value}'"),
                 Self::Identifier(value) => format!("identifier '{value}'"),
+                Self::String(value) => format!("string literal \"{value}\""),
                 Self::BinaryOperator(operator) => operator.to_string(),
                 Self::UnaryOperator(operator) => operator.to_string(),
                 Self::LeftParenthesis => "(".to_string(),

@@ -3,6 +3,7 @@ pub enum Token {
     Integer(i128),
     Identifier(String),
     BinaryOperator(BinaryOperator),
+    String(String),
     UnaryOperator(UnaryOperator),
     LeftParenthesis,
     RightParenthesis,
