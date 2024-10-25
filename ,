@@ -1,0 +1,111 @@
+# Let
+
+let a = let b = 2
+
+### For & While
+
+for i from START to END do
+      # [STATEMENT]
+end
+
+for i in ITERATOR do 
+      # [STATEMENT]
+end
+
+while CONDITION do
+      # [STATEMENT]
+end
+
+
+### If
+
+do if CONDITION then
+      # [STATEMENT]
+end
+
+if CONDITION then
+      # EXPRESSION
+end
+
+do if CONDITION then
+      # [STATEMENT]
+else
+      # [STATEMENT]
+end
+
+if CONDITION then
+      # EXPRESSION
+else
+      # EXPRESSION
+end
+
+### Match
+
+do match VALUE then
+      case PATTERN then
+            # [STATEMENT]
+      end
+      case PATTERN then
+            # [STATEMENT]
+      end
+      case PATTERN then
+            # [STATEMENT]
+      end
+end
+
+do match name then
+      case "George" then io.print_line("You're Welcome!") end
+      case _ then io.print_line("Goddamn") end
+end
+
+####
+
+let a = 123
+
+if [condition][true][false]
+
+do if (2 + i) == 4 then
+      # ...
+else
+      # ...
+end
+
+while [condition][body]
+
+while (2 + i) == 4 then
+      # ...
+end
+
+loop
+      # ...
+end
+
+#################################### TYPES ####################################
+
+Let - Statement
+If - Expression
+Do-If - Statement
+Match - Expression
+Do-Match - Statement
+For-From-To - Statement
+For-In - Statement
+While - Statement
+Loop - Statement
+
+
+################################## KEYWORDS ##################################
+
+let
+=
+if
+match
+do
+for
+from
+to
+in
+while
+then
+else
+loop
+end

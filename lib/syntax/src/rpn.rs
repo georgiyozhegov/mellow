@@ -171,7 +171,12 @@ impl Grammar {
         match (&self, token) {
             (
                 Self::Value,
-                Token::Integer(_) | Token::Identifier(_) | Token::True | Token::False | Token::String(_) | Token::If,
+                Token::Integer(_)
+                | Token::Identifier(_)
+                | Token::True
+                | Token::False
+                | Token::String(_)
+                | Token::If,
             ) => {
                 *self = Self::Item;
                 Ok(())
