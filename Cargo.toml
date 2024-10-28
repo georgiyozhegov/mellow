@@ -6,7 +6,9 @@ edition = "2021"
 [workspace]
 members = [
     "lib/syntax",
+    "lib/assembly",
 ]
 
 [dependencies]
 syntax = { path = "lib/syntax" }
+assembly = { path = "lib/assembly" }
