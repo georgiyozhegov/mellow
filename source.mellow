@@ -1,7 +1,2 @@
-let mutable a  = 1
-
-do if a > 2 then
-      do a = a + 1
-else
-      do a = a - 1
-end
+let a = 1
+let b = 2
