@@ -1,7 +1,7 @@
 use std::iter::Peekable;
 
 use crate::{
-    end_of_expression,
+    end_of_expression, literal,
     rpn::{Grammar, Rpn, RpnItem},
     token::Token,
     tree::{Expression, Statement},
@@ -222,11 +222,7 @@ impl<'p> Parse<'p> {
         while let Some(token) = peek!(self.source) {
             grammar.check(token)?;
             match token {
-                Token::Integer(_)
-                | Token::Identifier(_)
-                | Token::True
-                | Token::False
-                | Token::String(_) => {
+                literal!() => {
                     rpn.value(Expression::from(token));
                     self.source.next();
                 }

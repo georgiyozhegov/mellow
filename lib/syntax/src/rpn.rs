@@ -5,6 +5,13 @@ use crate::{
 };
 
 #[macro_export]
+macro_rules! literal {
+    () => {
+        Token::Integer(_) | Token::Identifier(_) | Token::True | Token::False | Token::String(_)
+    };
+}
+
+#[macro_export]
 macro_rules! end_of_expression {
     () => {
         Token::Let
@@ -169,15 +176,7 @@ impl Default for Grammar {
 impl Grammar {
     pub fn check(&mut self, token: &Token) -> Result<(), SyntaxError> {
         match (&self, token) {
-            (
-                Self::Value,
-                Token::Integer(_)
-                | Token::Identifier(_)
-                | Token::True
-                | Token::False
-                | Token::String(_)
-                | Token::If,
-            ) => {
+            (Self::Value, literal!() | Token::If) => {
                 *self = Self::Item;
                 Ok(())
             }
