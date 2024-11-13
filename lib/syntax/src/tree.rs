@@ -13,8 +13,8 @@ pub enum Statement {
     },
     If {
         condition: Expression,
-        r#true: Vec<Statement>,
-        r#false: Vec<Statement>,
+        true_: Vec<Statement>,
+        false_: Vec<Statement>,
     },
     While {
         condition: Expression,
