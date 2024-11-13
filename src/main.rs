@@ -1,6 +1,7 @@
 use std::{fs, process::exit};
 
 use syntax::{Lex, Parse};
+use ir::constant_fold;
 
 fn main() {
     let source = fs::read_to_string("source.mellow").unwrap();
@@ -15,6 +16,7 @@ fn main() {
                 exit(1);
             }
         };
+        let statement = constant_fold::statement(statement);
         println!("{statement:?}");
     }
 }
