@@ -33,7 +33,7 @@ pub enum Statement {
     },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Expression {
     Integer(i128),
     Identifier(String),
