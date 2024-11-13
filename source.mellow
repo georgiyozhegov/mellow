@@ -1,1 +1,1 @@
-let a = 120 + 2
+let a = if true then -1 + 2 else -2 end

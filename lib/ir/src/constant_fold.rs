@@ -1,10 +1,21 @@
-use syntax::{token::BinaryOperator, tree::{Expression, Statement}};
+use syntax::{
+    token::{BinaryOperator, UnaryOperator},
+    tree::{Expression, Statement},
+};
 
 pub fn statement(statement: Statement) -> Statement {
     match statement {
-        Statement::Let { identifier, mutable, value } => {
+        Statement::Let {
+            identifier,
+            mutable,
+            value,
+        } => {
             let value = expression(value);
-            Statement::Let { identifier, mutable, value }
+            Statement::Let {
+                identifier,
+                mutable,
+                value,
+            }
         }
         _ => todo!(),
     }
@@ -29,8 +40,39 @@ pub fn expression(expression: Expression) -> Expression {
                 expression
             }
         }
-        Expression::Unary(operator, value) => todo!(),
-        Expression::If { condition, true_, false_ } => todo!(),
+        Expression::Unary(ref operator, ref value) => {
+            let value = self::expression(*value.clone());
+            if let Expression::Integer(value) = value {
+                match operator {
+                    UnaryOperator::Negate => Expression::Integer(-value),
+                    _ => todo!(),
+                }
+            } else {
+                expression
+            }
+        }
+        Expression::If {
+            condition,
+            true_,
+            false_,
+        } => {
+            let condition = self::expression(*condition);
+            let true_ = self::expression(*true_);
+            let false_ = self::expression(*false_.unwrap());
+            if let Expression::Boolean(condition) = condition {
+                if condition {
+                    true_
+                } else {
+                    false_
+                }
+            } else {
+                Expression::If {
+                    condition: Box::new(condition),
+                    true_: Box::new(true_),
+                    false_: Some(Box::new(false_)),
+                }
+            }
+        }
         expression => expression,
     }
 }
