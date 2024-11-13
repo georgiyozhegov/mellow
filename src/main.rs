@@ -1,7 +1,7 @@
 use std::{fs, process::exit};
 
-use syntax::{Lex, Parse};
 use ir::constant_fold;
+use syntax::{Lex, Parse};
 
 fn main() {
     let source = fs::read_to_string("source.mellow").unwrap();
