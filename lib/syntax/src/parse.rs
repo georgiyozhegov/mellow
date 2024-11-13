@@ -59,10 +59,10 @@ impl<'p> Iterator for Parse<'p> {
 impl<'p> Parse<'p> {
     pub fn statement(&mut self) -> Result<Statement, SyntaxError> {
         match next!(self.source) {
-            Some(Token::Let) => self.r#let(),
-            Some(Token::Do) => self.r#do(),
-            Some(Token::While) => self.r#while(),
-            Some(Token::For) => self.r#for(),
+            Some(Token::Let) => self.let_(),
+            Some(Token::Do) => self.do_(),
+            Some(Token::While) => self.while_(),
+            Some(Token::For) => self.for_(),
             token => Err(SyntaxError::Grammar {
                 expected: "statement",
                 found: token,
@@ -70,7 +70,7 @@ impl<'p> Parse<'p> {
         }
     }
 
-    fn r#let(&mut self) -> Result<Statement, SyntaxError> {
+    fn let_(&mut self) -> Result<Statement, SyntaxError> {
         let mutable = self.mutable()?;
         let identifier = self.identifier()?;
         self.equal()?;
@@ -112,7 +112,7 @@ impl<'p> Parse<'p> {
         }
     }
 
-    fn r#do(&mut self) -> Result<Statement, SyntaxError> {
+    fn do_(&mut self) -> Result<Statement, SyntaxError> {
         match next!(self.source) {
             Some(Token::If) => self.do_if(),
             Some(Token::Identifier(value)) => self.change(value),
@@ -126,13 +126,13 @@ impl<'p> Parse<'p> {
     fn do_if(&mut self) -> Result<Statement, SyntaxError> {
         let condition = self.expression()?;
         self.then()?;
-        let r#true = self.body()?;
-        let r#false = self.do_else()?;
+        let true_ = self.body()?;
+        let false_ = self.do_else()?;
         self.end()?;
         Ok(Statement::If {
             condition,
-            r#true,
-            r#false,
+            true_,
+            false_,
         })
     }
 
@@ -156,7 +156,7 @@ impl<'p> Parse<'p> {
         Ok(Statement::Change { identifier, value })
     }
 
-    fn r#while(&mut self) -> Result<Statement, SyntaxError> {
+    fn while_(&mut self) -> Result<Statement, SyntaxError> {
         let condition = self.expression()?;
         self.then()?;
         let body = self.body()?;
@@ -164,7 +164,7 @@ impl<'p> Parse<'p> {
         Ok(Statement::While { condition, body })
     }
 
-    fn r#for(&mut self) -> Result<Statement, SyntaxError> {
+    fn for_(&mut self) -> Result<Statement, SyntaxError> {
         let item = self.identifier()?;
         match next!(self.source) {
             Some(Token::In) => self.for_in(item),
@@ -244,7 +244,7 @@ impl<'p> Parse<'p> {
                 }
                 Token::If => {
                     self.source.next();
-                    rpn.value(self.r#if()?);
+                    rpn.value(self.if_()?);
                 }
                 end_of_expression!() => {
                     break;
@@ -260,11 +260,11 @@ impl<'p> Parse<'p> {
         Ok(rpn.collapse())
     }
 
-    fn r#if(&mut self) -> Result<Expression, SyntaxError> {
+    fn if_(&mut self) -> Result<Expression, SyntaxError> {
         let condition = self.expression()?;
         self.then()?;
         let true_ = self.expression()?;
-        let false_ = self.r#else()?;
+        let false_ = self.else_()?;
         self.end()?;
         Ok(Expression::If {
             condition: Box::new(condition),
@@ -283,7 +283,7 @@ impl<'p> Parse<'p> {
         }
     }
 
-    fn r#else(&mut self) -> Result<Option<Box<Expression>>, SyntaxError> {
+    fn else_(&mut self) -> Result<Option<Box<Expression>>, SyntaxError> {
         match peek!(self.source) {
             Some(Token::Else) => {
                 self.source.next();
