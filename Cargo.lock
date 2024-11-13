@@ -3,9 +3,14 @@
 version = 3
 
 [[package]]
+name = "ir"
+version = "0.1.0"
+
+[[package]]
 name = "mellow"
 version = "0.1.0"
 dependencies = [
+ "ir",
  "syntax",
 ]
 
