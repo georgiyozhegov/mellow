@@ -1,1 +1,7 @@
-let a = if true then -1 + 2 else -2 end
+let a = 1
+let c = 2
+do if a > 2 then
+      do c = 12
+else
+      do c = 1
+end
