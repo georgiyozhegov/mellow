@@ -1,30 +1,19 @@
 use std::{fs, process::exit};
 
-use ir::{constant_fold, ir::ir};
-use syntax::{Lex, Parse, SyntaxError};
+// use ir::{constant_fold, ir::ir};
+use syntax;
 
 fn main() {
     let source = fs::read_to_string("source.mellow").unwrap();
-    let lex = Lex::new(source.chars().peekable());
-    let parse = Parse::new(lex.peekable());
+    let ast = match syntax::construct(source.chars().peekable()) {
+        Ok(ast) => ast,
+        Err(error) => {
+            eprintln!("{error}");
+            exit(1);
+        }
+    };
 
-    let ir = ir(parse.collect::<Result<Vec<_>, SyntaxError>>().unwrap());
-
-    for block in ir {
-        println!("{block:?}");
-    }
-
-    /*
-    for statement in parse {
-        let statement = match statement {
-            Ok(statement) => statement,
-            Err(error) => {
-                eprintln!("{error}");
-                exit(1);
-            }
-        };
-        let statement = constant_fold::statement(statement);
+    for statement in ast {
         println!("{statement:?}");
     }
-    */
 }

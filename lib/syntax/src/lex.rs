@@ -29,7 +29,7 @@ macro_rules! single {
     };
 }
 
-type Source<'s> = Peekable<Chars<'s>>;
+pub type Source<'s> = Peekable<Chars<'s>>;
 
 pub struct Lex<'l> {
     source: Source<'l>,
