@@ -63,6 +63,14 @@ fn construct_(source: Vec<Statement>, cfg: &mut Cfg) -> (u64, u64) {
                 cfg.link(true_end, Link::Direct(end));
                 cfg.link(false_end, Link::Direct(end));
             }
+            Statement::While { condition, body } => {
+                let previous = cfg.insert(Block::Basic(current.clone()));
+                current.clear();
+                let (body_start, body_end) = construct_(body.clone(), cfg);
+                cfg.link(previous, Link::Direct(body_start));
+                let end = cfg.insert(Block::Empty);
+                cfg.link(body_end, Link::Branch { condition: condition.clone(), true_: body_start, false_: end });
+            }
             _ => todo!(),
         }
     }

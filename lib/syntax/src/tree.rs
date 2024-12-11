@@ -1,6 +1,6 @@
 use crate::token::{BinaryOperator, Token, UnaryOperator};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Statement {
     Let {
         identifier: String,
