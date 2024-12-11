@@ -1,7 +1,12 @@
-let a = 1
-let c = 2
-do if a > 2 then
-      do c = 12
+let mutable c = 3
+do if 1 > 2 then
+      do if true then
+            let c = 3
+            let b = 2
+            let a = 4
+      else
+            do c = 4
+      end
 else
       do c = 1
 end

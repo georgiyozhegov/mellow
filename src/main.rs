@@ -1,6 +1,6 @@
 use std::{fs, process::exit};
 
-// use ir::{constant_fold, ir::ir};
+use ir::cfg;
 use syntax;
 
 fn main() {
@@ -13,7 +13,6 @@ fn main() {
         }
     };
 
-    for statement in ast {
-        println!("{statement:?}");
-    }
+    let cfg = cfg::construct(ast);
+    println!("{:#?}", cfg);
 }
