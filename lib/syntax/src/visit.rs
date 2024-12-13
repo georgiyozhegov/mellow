@@ -3,7 +3,12 @@ use crate::{
     tree::{Expression, Statement},
 };
 
-pub trait VisitStatement {
+pub trait VisitStatement: Sized {
+    fn visit_tree(&mut self, tree: &Vec<Statement>) {
+        for statement in tree {
+            statement.accept(self);
+        }
+    }
     fn visit_let(&mut self, identifier: &String, mutable: bool, value: &Expression);
     fn visit_change(&mut self, identifier: &String, value: &Expression);
     fn visit_if(&mut self, condition: &Expression, true_: &Vec<Statement>, false_: &Vec<Statement>);
