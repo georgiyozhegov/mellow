@@ -22,6 +22,16 @@ pub struct Cfg {
 }
 
 impl Cfg {
+    pub fn new() -> Self {
+        Self {
+            blocks: HashMap::new(),
+            links: HashMap::new(),
+            id: 0,
+        }
+    }
+}
+
+impl Cfg {
     pub fn insert(&mut self, block: Block) -> u64 {
         let id = self.id;
         self.id += 1;
@@ -69,7 +79,14 @@ fn construct_(source: Vec<Statement>, cfg: &mut Cfg) -> (u64, u64) {
                 let (body_start, body_end) = construct_(body.clone(), cfg);
                 cfg.link(previous, Link::Direct(body_start));
                 let end = cfg.insert(Block::Empty);
-                cfg.link(body_end, Link::Branch { condition: condition.clone(), true_: body_start, false_: end });
+                cfg.link(
+                    body_end,
+                    Link::Branch {
+                        condition: condition.clone(),
+                        true_: body_start,
+                        false_: end,
+                    },
+                );
             }
             _ => todo!(),
         }
@@ -82,11 +99,7 @@ fn construct_(source: Vec<Statement>, cfg: &mut Cfg) -> (u64, u64) {
 }
 
 pub fn construct(source: Vec<Statement>) -> Cfg {
-    let mut cfg = Cfg {
-        blocks: HashMap::new(),
-        links: HashMap::new(),
-        id: 0,
-    };
+    let mut cfg = Cfg::new();
     construct_(source, &mut cfg);
     cfg
 }
