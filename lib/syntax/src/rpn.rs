@@ -15,13 +15,14 @@ macro_rules! literal {
 macro_rules! end_of_expression {
     () => {
         Token::Let
-            | Token::While
-            | Token::Do
+            | Token::Identifier(..)
+            | Token::If
+            | Token::Or
             | Token::Then
             | Token::Else
+            | Token::While
             | Token::In
-            | Token::From
-            | Token::To
+            | Token::Do
             | Token::End
     };
 }
@@ -174,19 +175,19 @@ impl Default for Grammar {
 }
 
 impl Grammar {
-    pub fn check(&mut self, token: &Token) -> Result<(), SyntaxError> {
+    pub fn stop(&mut self, token: &Token) -> Result<bool, SyntaxError> {
         match (&self, token) {
             (Self::Value, literal!() | Token::If) => {
                 *self = Self::Item;
-                Ok(())
+                Ok(false)
             }
-            (Self::Value, Token::LeftParenthesis | Token::UnaryOperator(_)) => Ok(()),
+            (Self::Value, Token::LeftParenthesis | Token::UnaryOperator(_)) => Ok(false),
             (Self::Item, Token::BinaryOperator(_)) => {
                 *self = Self::Value;
-                Ok(())
+                Ok(false)
             }
-            (Self::Item, Token::RightParenthesis) => Ok(()),
-            (Self::Item, end_of_expression!()) => Ok(()),
+            (Self::Item, Token::RightParenthesis) => Ok(false),
+            (Self::Item, end_of_expression!()) => Ok(true),
             (Self::Value, _) => Err(SyntaxError::Grammar {
                 expected: "literal, identifier or '('",
                 found: Some(token.clone()),

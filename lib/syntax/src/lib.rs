@@ -4,7 +4,7 @@ mod parse;
 mod rpn;
 pub mod token;
 pub mod tree;
-pub mod visit;
+//pub mod visit;
 pub use error::SyntaxError;
 pub use lex::Lex;
 pub use parse::Parse;

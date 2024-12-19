@@ -6,9 +6,9 @@ edition = "2021"
 [workspace]
 members = [ 
     "lib/syntax",
-    "lib/ir",
+#    "lib/ir",
 ]
 
 [dependencies]
 syntax = { path = "lib/syntax" }
-ir = { path = "lib/ir" }
+# ir = { path = "lib/ir" }
