@@ -2,9 +2,9 @@ use std::{env::Args, iter::Peekable, str::SplitWhitespace};
 
 use crate::{
     literal,
-    rpn::{Grammar, Rpn, RpnItem},
+    rpn::{ExpressionState, Rpn, RpnItem},
     token::Token,
-    tree::{Either, EitherKind, Expression, Statement},
+    tree::Expression, Statement},
     Lex, SyntaxError,
 };
 
@@ -184,13 +184,12 @@ impl<'p> Parse<'p> {
     }
 }
 
-// EXPRESSION
 impl<'p> Parse<'p> {
     pub fn expression(&mut self) -> Result<Expression, SyntaxError> {
         let mut rpn = Rpn::default();
-        let mut grammar = Grammar::default();
+        let mut status = ExpressionState::default();
         while let Some(token) = peek!(self.source) {
-            if grammar.stop(token)? {
+            if status.stop(token)? {
                 break;
             }
             match token {

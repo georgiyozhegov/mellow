@@ -163,18 +163,18 @@ impl UnaryOperator {
 }
 
 #[derive(PartialEq)]
-pub enum Grammar {
+pub enum ExpressionState {
     Value,
     Item,
 }
 
-impl Default for Grammar {
+impl Default for ExpressionState {
     fn default() -> Self {
         Self::Value
     }
 }
 
-impl Grammar {
+impl ExpressionState {
     pub fn stop(&mut self, token: &Token) -> Result<bool, SyntaxError> {
         match (&self, token) {
             (Self::Value, literal!() | Token::If) => {
