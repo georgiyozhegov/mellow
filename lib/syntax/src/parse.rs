@@ -1,10 +1,10 @@
-use std::{env::Args, iter::Peekable, str::SplitWhitespace};
+use std::iter::Peekable;
 
 use crate::{
     literal,
     rpn::{ExpressionState, Rpn, RpnItem},
     token::Token,
-    tree::Expression, Statement},
+    tree::{Expression, Statement},
     Lex, SyntaxError,
 };
 
@@ -108,7 +108,7 @@ impl<'p> Parse<'p> {
             }),
         }
     }
-    
+
     fn assign(&mut self, identifier: String) -> Result<Statement, SyntaxError> {
         except!(self.source, Token::Equal, "'='")?;
         let value = self.expression()?;
