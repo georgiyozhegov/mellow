@@ -1,6 +1,6 @@
 use std::{fs, process::exit};
 
-//use ir::cfg;
+use ir::cfg;
 use syntax;
 
 fn main() {
@@ -14,10 +14,6 @@ fn main() {
         }
     };
 
-    for statement in ast {
-        println!("{statement:#?}");
-    }
-
-    // let cfg = cfg::construct(ast);
-    // println!("{:#?}", cfg);
+    let cfg = cfg::construct(ast);
+    println!("{:#?}", cfg);
 }

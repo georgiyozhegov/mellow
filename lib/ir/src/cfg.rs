@@ -47,31 +47,18 @@ impl Cfg {
 fn construct_(source: Vec<Statement>, cfg: &mut Cfg) -> (u64, u64) {
     let start = cfg.id;
     let mut current = Vec::new();
-    for statement in source.iter() {
+    for statement in source {
         match statement {
-            Statement::Let { .. } | Statement::Change { .. } => {
+            Statement::Let { .. } | Statement::Assign { .. } => {
                 current.push(statement.clone());
             }
             Statement::If {
                 condition,
-                true_,
-                false_,
+                if_,
+                or,
+                else_,
             } => {
-                let previous = cfg.insert(Block::Basic(current.clone()));
-                current.clear();
-                let (true_start, true_end) = construct_(true_.clone(), cfg);
-                let (false_start, false_end) = construct_(false_.clone(), cfg);
-                cfg.link(
-                    previous,
-                    Link::Branch {
-                        condition: condition.clone(),
-                        true_: true_start,
-                        false_: false_start,
-                    },
-                );
-                let end = cfg.insert(Block::Empty);
-                cfg.link(true_end, Link::Direct(end));
-                cfg.link(false_end, Link::Direct(end));
+                self::if_(condition, if_, or, else_, &mut current, cfg);
             }
             Statement::While { condition, body } => {
                 let previous = cfg.insert(Block::Basic(current.clone()));
@@ -96,6 +83,19 @@ fn construct_(source: Vec<Statement>, cfg: &mut Cfg) -> (u64, u64) {
     }
     let end = cfg.id - 1;
     (start, end)
+}
+
+fn if_(condition: Expression, if_: Vec<Statement>, mut or: Vec<(Expression, Vec<Statement>)>, else_: Vec<Statement>, current: &mut Vec<Statement>, cfg: &mut Cfg) {
+    let mut previous = cfg.insert(Block::Basic(current.clone()));
+
+    or.insert(0, (condition, if_));
+    for (condition, body) in or {
+        let (start, end_) = construct_(body.clone(), cfg);
+        cfg.link(previous, Link::Branch { condition, true_: start, false_: cfg.id });
+        previous = end_;
+    }
+
+    construct_(else_, cfg);
 }
 
 pub fn construct(source: Vec<Statement>) -> Cfg {

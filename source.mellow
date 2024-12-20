@@ -1,16 +1,9 @@
-let a = 0
-
-if a < 0 then
+if 1 then
       a = 1
-or a > 0 then
+or 2 then
       a = 2
-or a ? 1 then
+or 3 then
       a = 3
 else
       a = 4
-end
-
-let mutable count = 0
-while count < 100 do
-      a = a + 1
 end
