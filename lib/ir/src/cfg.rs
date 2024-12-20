@@ -42,6 +42,14 @@ impl Cfg {
     pub fn link(&mut self, from: u64, to: Link) {
         self.links.insert(from, to);
     }
+
+    pub fn direct(&mut self, from: u64, to: u64) {
+        self.links.insert(from, Link::Direct(to));
+    }
+
+    pub fn branch(&mut self, from: u64, condition: Expression, true_: u64, false_: u64) {
+        self.links.insert(from, Link::Branch { condition, true_, false_ });
+    }
 }
 
 fn construct_(source: Vec<Statement>, cfg: &mut Cfg) -> (u64, u64) {
@@ -64,16 +72,9 @@ fn construct_(source: Vec<Statement>, cfg: &mut Cfg) -> (u64, u64) {
                 let previous = cfg.insert(Block::Basic(current.clone()));
                 current.clear();
                 let (body_start, body_end) = construct_(body.clone(), cfg);
-                cfg.link(previous, Link::Direct(body_start));
+                cfg.direct(previous, body_start);
                 let end = cfg.insert(Block::Empty);
-                cfg.link(
-                    body_end,
-                    Link::Branch {
-                        condition: condition.clone(),
-                        true_: body_start,
-                        false_: end,
-                    },
-                );
+                cfg.branch(body_end, condition, body_start, end);
             }
             _ => todo!(),
         }
@@ -87,14 +88,13 @@ fn construct_(source: Vec<Statement>, cfg: &mut Cfg) -> (u64, u64) {
 
 fn if_(condition: Expression, if_: Vec<Statement>, mut or: Vec<(Expression, Vec<Statement>)>, else_: Vec<Statement>, current: &mut Vec<Statement>, cfg: &mut Cfg) {
     let mut previous = cfg.insert(Block::Basic(current.clone()));
-
+    current.clear();
     or.insert(0, (condition, if_));
     for (condition, body) in or {
-        let (start, end_) = construct_(body.clone(), cfg);
-        cfg.link(previous, Link::Branch { condition, true_: start, false_: cfg.id });
-        previous = end_;
+        let (start, end) = construct_(body.clone(), cfg);
+        cfg.branch(previous, condition, start, cfg.id);
+        previous = end;
     }
-
     construct_(else_, cfg);
 }
 
