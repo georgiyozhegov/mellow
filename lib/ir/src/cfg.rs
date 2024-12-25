@@ -48,7 +48,14 @@ impl Cfg {
     }
 
     pub fn branch(&mut self, from: u64, condition: Expression, true_: u64, false_: u64) {
-        self.links.insert(from, Link::Branch { condition, true_, false_ });
+        self.links.insert(
+            from,
+            Link::Branch {
+                condition,
+                true_,
+                false_,
+            },
+        );
     }
 }
 
@@ -65,17 +72,8 @@ fn construct_(source: Vec<Statement>, cfg: &mut Cfg) -> (u64, u64) {
                 if_,
                 or,
                 else_,
-            } => {
-                self::if_(condition, if_, or, else_, &mut current, cfg);
-            }
-            Statement::While { condition, body } => {
-                let previous = cfg.insert(Block::Basic(current.clone()));
-                current.clear();
-                let (body_start, body_end) = construct_(body.clone(), cfg);
-                cfg.direct(previous, body_start);
-                let end = cfg.insert(Block::Empty);
-                cfg.branch(body_end, condition, body_start, end);
-            }
+            } => self::if_(condition, if_, or, else_, &mut current, cfg),
+            Statement::While { condition, body } => while_(condition, body, &mut current, cfg),
             _ => todo!(),
         }
     }
@@ -86,7 +84,14 @@ fn construct_(source: Vec<Statement>, cfg: &mut Cfg) -> (u64, u64) {
     (start, end)
 }
 
-fn if_(condition: Expression, if_: Vec<Statement>, mut or: Vec<(Expression, Vec<Statement>)>, else_: Vec<Statement>, current: &mut Vec<Statement>, cfg: &mut Cfg) {
+fn if_(
+    condition: Expression,
+    if_: Vec<Statement>,
+    mut or: Vec<(Expression, Vec<Statement>)>,
+    else_: Vec<Statement>,
+    current: &mut Vec<Statement>,
+    cfg: &mut Cfg,
+) {
     let mut previous = cfg.insert(Block::Basic(current.clone()));
     current.clear();
     or.insert(0, (condition, if_));
@@ -96,6 +101,22 @@ fn if_(condition: Expression, if_: Vec<Statement>, mut or: Vec<(Expression, Vec<
         previous = end;
     }
     construct_(else_, cfg);
+}
+
+fn while_(
+    condition: Expression,
+    body: Vec<Statement>,
+    current: &mut Vec<Statement>,
+    cfg: &mut Cfg,
+) {
+    let previous = cfg.insert(Block::Basic(current.clone()));
+    current.clear();
+    let start = cfg.insert(Block::Empty);
+    cfg.direct(previous, start);
+    let (body_start, body_end) = construct_(body.clone(), cfg);
+    let end = cfg.id;
+    cfg.branch(start, condition, body_start, end);
+    cfg.direct(body_end, start);
 }
 
 pub fn construct(source: Vec<Statement>) -> Cfg {
