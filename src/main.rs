@@ -5,7 +5,6 @@ use syntax;
 
 fn main() {
     let source = fs::read_to_string("source.mellow").unwrap();
-    let ast = syntax::construct(source.chars().peekable());
     let ast = match syntax::construct(source.chars().peekable()) {
         Ok(ast) => ast,
         Err(error) => {
