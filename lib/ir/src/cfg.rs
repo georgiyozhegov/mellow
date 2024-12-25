@@ -57,10 +57,18 @@ impl Cfg {
             },
         );
     }
+
+    pub fn last_id(&self) -> u64 {
+        self.id - 1
+    }
+
+    pub fn next_id(&self) -> u64 {
+        self.id
+    }
 }
 
 fn construct_(source: Vec<Statement>, cfg: &mut Cfg) -> (u64, u64) {
-    let start = cfg.id;
+    let start = cfg.next_id();
     let mut current = Vec::new();
     for statement in source {
         match statement {
@@ -80,7 +88,7 @@ fn construct_(source: Vec<Statement>, cfg: &mut Cfg) -> (u64, u64) {
     if !current.is_empty() {
         cfg.insert(Block::Basic(current));
     }
-    let end = cfg.id - 1;
+    let end = cfg.last_id();
     (start, end)
 }
 
@@ -97,7 +105,8 @@ fn if_(
     or.insert(0, (condition, if_));
     for (condition, body) in or {
         let (start, end) = construct_(body.clone(), cfg);
-        cfg.branch(previous, condition, start, cfg.id);
+        let next = cfg.next_id();
+        cfg.branch(previous, condition, start, next);
         previous = end;
     }
     construct_(else_, cfg);
