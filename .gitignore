@@ -2,3 +2,4 @@
 Cargo.lock
 example
 example.o
+test/__pycache__

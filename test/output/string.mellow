@@ -1,0 +1,17 @@
+Cfg {
+    blocks: {
+        0: Basic(
+            [
+                Let {
+                    identifier: "a",
+                    mutable: false,
+                    value: String(
+                        "Hello, World!",
+                    ),
+                },
+            ],
+        ),
+    },
+    links: {},
+    id: 1,
+}

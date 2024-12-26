@@ -1,0 +1,24 @@
+Cfg {
+    blocks: {
+        0: Basic(
+            [
+                Let {
+                    identifier: "a",
+                    mutable: false,
+                    value: Integer(
+                        1,
+                    ),
+                },
+                Let {
+                    identifier: "a",
+                    mutable: true,
+                    value: Integer(
+                        1,
+                    ),
+                },
+            ],
+        ),
+    },
+    links: {},
+    id: 1,
+}
