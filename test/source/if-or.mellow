@@ -1,0 +1,6 @@
+let mutable a = "Undefined"
+if 1 > 2 then
+      a = "Impossible"
+or 2 > 1 then
+      a = "Possible"
+end

@@ -1,0 +1,74 @@
+Cfg {
+    blocks: {
+        0: Basic(
+            [
+                Let {
+                    identifier: "a",
+                    mutable: true,
+                    value: String(
+                        "Undefined",
+                    ),
+                },
+            ],
+        ),
+        1: Basic(
+            [
+                Assign {
+                    identifier: "a",
+                    value: String(
+                        "Impossible",
+                    ),
+                },
+            ],
+        ),
+        2: Basic(
+            [
+                Assign {
+                    identifier: "a",
+                    value: String(
+                        "Impossible Too",
+                    ),
+                },
+            ],
+        ),
+        3: Basic(
+            [
+                Assign {
+                    identifier: "a",
+                    value: String(
+                        "Possible",
+                    ),
+                },
+            ],
+        ),
+    },
+    links: {
+        0: Branch {
+            condition: Binary(
+                Greater,
+                Integer(
+                    1,
+                ),
+                Integer(
+                    2,
+                ),
+            ),
+            true_: 1,
+            false_: 2,
+        },
+        1: Branch {
+            condition: Binary(
+                Equal,
+                Integer(
+                    1,
+                ),
+                Integer(
+                    2,
+                ),
+            ),
+            true_: 2,
+            false_: 3,
+        },
+    },
+    id: 4,
+}

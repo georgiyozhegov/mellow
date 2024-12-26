@@ -1,0 +1,41 @@
+Cfg {
+    blocks: {
+        0: Basic(
+            [
+                Let {
+                    identifier: "a",
+                    mutable: true,
+                    value: String(
+                        "Undefined",
+                    ),
+                },
+            ],
+        ),
+        1: Basic(
+            [
+                Assign {
+                    identifier: "a",
+                    value: String(
+                        "Impossible",
+                    ),
+                },
+            ],
+        ),
+    },
+    links: {
+        0: Branch {
+            condition: Binary(
+                Greater,
+                Integer(
+                    1,
+                ),
+                Integer(
+                    2,
+                ),
+            ),
+            true_: 1,
+            false_: 2,
+        },
+    },
+    id: 2,
+}
