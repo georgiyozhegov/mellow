@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use syntax::tree::{Expression, Statement};
 
-use crate::block::Block;
+use crate::block::{Block, BlockRange};
 
 #[derive(Debug)]
 pub enum Link {
@@ -64,7 +64,7 @@ impl Cfg {
     }
 }
 
-fn construct_(source: Vec<Statement>, cfg: &mut Cfg) -> (u64, u64) {
+fn construct_(source: Vec<Statement>, cfg: &mut Cfg) -> BlockRange {
     let start = cfg.next_id();
     let mut current = Vec::new();
     for statement in source {
@@ -86,7 +86,7 @@ fn construct_(source: Vec<Statement>, cfg: &mut Cfg) -> (u64, u64) {
         cfg.insert(Block::Basic(current));
     }
     let end = cfg.last_id();
-    (start, end)
+    BlockRange::new(start, end)
 }
 
 fn if_(
@@ -101,10 +101,10 @@ fn if_(
     current.clear();
     or.insert(0, (condition, if_));
     for (condition, body) in or {
-        let (start, end) = construct_(body.clone(), cfg);
+        let body = construct_(body.clone(), cfg);
         let next = cfg.next_id();
-        cfg.branch(previous, condition, start, next);
-        previous = end;
+        cfg.branch(previous, condition, body.start, next);
+        previous = body.end;
     }
     construct_(else_, cfg);
 }
@@ -119,10 +119,10 @@ fn while_(
     current.clear();
     let start = cfg.insert(Block::Empty);
     cfg.direct(previous, start);
-    let (body_start, body_end) = construct_(body.clone(), cfg);
+    let body = construct_(body.clone(), cfg);
     let end = cfg.next_id();
-    cfg.branch(start, condition, body_start, end);
-    cfg.direct(body_end, start);
+    cfg.branch(start, condition, body.start, end);
+    cfg.direct(body.end, start);
 }
 
 pub fn construct(source: Vec<Statement>) -> Cfg {
