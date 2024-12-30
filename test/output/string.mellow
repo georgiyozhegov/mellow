@@ -1,6 +1,6 @@
 Cfg {
-    blocks: {
-        0: Basic(
+    blocks: [
+        Basic(
             [
                 Let {
                     identifier: "a",
@@ -11,7 +11,6 @@ Cfg {
                 },
             ],
         ),
-    },
+    ],
     links: {},
-    id: 1,
 }

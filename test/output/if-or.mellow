@@ -1,16 +1,6 @@
 Cfg {
-    blocks: {
-        2: Basic(
-            [
-                Assign {
-                    identifier: "a",
-                    value: String(
-                        "Possible",
-                    ),
-                },
-            ],
-        ),
-        0: Basic(
+    blocks: [
+        Basic(
             [
                 Let {
                     identifier: "a",
@@ -21,7 +11,7 @@ Cfg {
                 },
             ],
         ),
-        1: Basic(
+        Basic(
             [
                 Assign {
                     identifier: "a",
@@ -31,7 +21,17 @@ Cfg {
                 },
             ],
         ),
-    },
+        Basic(
+            [
+                Assign {
+                    identifier: "a",
+                    value: String(
+                        "Possible",
+                    ),
+                },
+            ],
+        ),
+    ],
     links: {
         0: Branch {
             condition: Binary(
@@ -60,5 +60,4 @@ Cfg {
             false_: 3,
         },
     },
-    id: 3,
 }

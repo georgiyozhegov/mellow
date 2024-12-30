@@ -1,6 +1,6 @@
 Cfg {
-    blocks: {
-        0: Basic(
+    blocks: [
+        Basic(
             [
                 Let {
                     identifier: "a",
@@ -11,7 +11,7 @@ Cfg {
                 },
             ],
         ),
-        1: Basic(
+        Basic(
             [
                 Assign {
                     identifier: "a",
@@ -21,7 +21,7 @@ Cfg {
                 },
             ],
         ),
-        2: Basic(
+        Basic(
             [
                 Assign {
                     identifier: "a",
@@ -31,7 +31,7 @@ Cfg {
                 },
             ],
         ),
-        3: Basic(
+        Basic(
             [
                 Assign {
                     identifier: "a",
@@ -41,21 +41,8 @@ Cfg {
                 },
             ],
         ),
-    },
+    ],
     links: {
-        0: Branch {
-            condition: Binary(
-                Greater,
-                Integer(
-                    1,
-                ),
-                Integer(
-                    2,
-                ),
-            ),
-            true_: 1,
-            false_: 2,
-        },
         1: Branch {
             condition: Binary(
                 Equal,
@@ -69,6 +56,18 @@ Cfg {
             true_: 2,
             false_: 3,
         },
+        0: Branch {
+            condition: Binary(
+                Greater,
+                Integer(
+                    1,
+                ),
+                Integer(
+                    2,
+                ),
+            ),
+            true_: 1,
+            false_: 2,
+        },
     },
-    id: 4,
 }

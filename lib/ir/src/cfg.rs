@@ -16,26 +16,23 @@ pub enum Link {
 
 #[derive(Debug)]
 pub struct Cfg {
-    blocks: HashMap<u64, Block>,
+    blocks: Vec<Block>,
     links: HashMap<u64, Link>,
-    id: u64,
 }
 
 impl Cfg {
     pub fn new() -> Self {
         Self {
-            blocks: HashMap::new(),
+            blocks: Vec::new(),
             links: HashMap::new(),
-            id: 0,
         }
     }
 }
 
 impl Cfg {
     pub fn insert(&mut self, block: Block) -> u64 {
-        let id = self.id;
-        self.id += 1;
-        self.blocks.insert(id, block);
+        let id = self.blocks.len() as u64;
+        self.blocks.push(block);
         id
     }
 
@@ -59,11 +56,11 @@ impl Cfg {
     }
 
     pub fn last_id(&self) -> u64 {
-        self.id - 1
+        self.blocks.len() as u64 - 1
     }
 
     pub fn next_id(&self) -> u64 {
-        self.id
+        self.blocks.len() as u64
     }
 }
 
@@ -123,7 +120,7 @@ fn while_(
     let start = cfg.insert(Block::Empty);
     cfg.direct(previous, start);
     let (body_start, body_end) = construct_(body.clone(), cfg);
-    let end = cfg.id;
+    let end = cfg.next_id();
     cfg.branch(start, condition, body_start, end);
     cfg.direct(body_end, start);
 }
