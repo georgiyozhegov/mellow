@@ -1,30 +1,30 @@
 use crate::token::{BinaryOperator, Token, UnaryOperator};
 
 #[derive(Debug, Clone)]
-pub enum Statement {
+pub enum Statement<I: Sized> {
     Let {
-        identifier: String,
+        identifier: I,
         mutable: bool,
         value: Expression,
     },
     Assign {
-        identifier: String,
+        identifier: I,
         value: Expression,
     },
     If {
         condition: Expression,
-        if_: Vec<Statement>,
-        or: Vec<(Expression, Vec<Statement>)>,
-        else_: Vec<Statement>,
+        if_: Vec<Statement<I>>,
+        or: Vec<(Expression, Vec<Statement<I>>)>,
+        else_: Vec<Statement<I>>,
     },
     While {
         condition: Expression,
-        body: Vec<Statement>,
+        body: Vec<Statement<I>>,
     },
     For {
         item: String,
         sequence: Expression,
-        body: Vec<Statement>,
+        body: Vec<Statement<I>>,
     },
 }
 
@@ -52,34 +52,6 @@ impl From<&Token> for Expression {
             Token::True => Self::Boolean(true),
             Token::False => Self::Boolean(false),
             Token::String(value) => Self::String(value.to_owned()),
-            _ => panic!(),
-        }
-    }
-}
-
-pub enum EitherKind {
-    Statement,
-    Expression,
-}
-
-pub enum Either {
-    Statement(Statement),
-    Expression(Expression),
-}
-
-impl Either {
-    pub fn statement(self) -> Statement {
-        match self {
-            Self::Statement(statement) => statement,
-            _ => panic!(),
-        }
-    }
-}
-
-impl Either {
-    pub fn expression(self) -> Expression {
-        match self {
-            Self::Expression(expression) => expression,
             _ => panic!(),
         }
     }

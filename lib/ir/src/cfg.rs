@@ -89,7 +89,7 @@ fn construct_<T>(source: Vec<Statement>, cfg: &mut Cfg<Statement>) -> BlockRange
     BlockRange::new(start, end)
 }
 
-fn if_(
+fn if_<I: Clone>(
     condition: Expression,
     if_: Vec<Statement>,
     mut or: Vec<(Expression, Vec<Statement>)>,
@@ -109,7 +109,7 @@ fn if_(
     construct_::<Statement>(else_, cfg);
 }
 
-fn while_(
+fn while_<I: Clone>(
     condition: Expression,
     body: Vec<Statement>,
     current: &mut Vec<Statement>,

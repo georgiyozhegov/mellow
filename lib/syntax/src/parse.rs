@@ -53,7 +53,7 @@ impl<'p> Parse<'p> {
 }
 
 impl<'p> Iterator for Parse<'p> {
-    type Item = Result<Statement, SyntaxError>;
+    type Item = Result<Statement<String>, SyntaxError>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.source.peek()?;
@@ -62,7 +62,7 @@ impl<'p> Iterator for Parse<'p> {
 }
 
 impl<'p> Parse<'p> {
-    pub fn statement(&mut self) -> Result<Statement, SyntaxError> {
+    pub fn statement(&mut self) -> Result<Statement<String>, SyntaxError> {
         match next!(self.source) {
             Some(Token::Let) => self.let_(),
             Some(Token::Identifier(identifier)) => self.assign(identifier),
@@ -77,7 +77,7 @@ impl<'p> Parse<'p> {
     }
 
     // LET
-    fn let_(&mut self) -> Result<Statement, SyntaxError> {
+    fn let_(&mut self) -> Result<Statement<String>, SyntaxError> {
         let mutable = self.mutable()?;
         let identifier = self.identifier()?;
         except!(self.source, Token::Equal, "'='")?;
@@ -109,13 +109,13 @@ impl<'p> Parse<'p> {
         }
     }
 
-    fn assign(&mut self, identifier: String) -> Result<Statement, SyntaxError> {
+    fn assign(&mut self, identifier: String) -> Result<Statement<String>, SyntaxError> {
         except!(self.source, Token::Equal, "'='")?;
         let value = self.expression()?;
         Ok(Statement::Assign { identifier, value })
     }
 
-    fn if_s(&mut self) -> Result<Statement, SyntaxError> {
+    fn if_s(&mut self) -> Result<Statement<String>, SyntaxError> {
         let condition = self.expression()?;
         except!(self.source, Token::Then, "'then'")?;
         let if_ = self.body()?;
@@ -130,7 +130,7 @@ impl<'p> Parse<'p> {
         })
     }
 
-    fn or_s(&mut self) -> Result<Vec<(Expression, Vec<Statement>)>, SyntaxError> {
+    fn or_s(&mut self) -> Result<Vec<(Expression, Vec<Statement<String>>)>, SyntaxError> {
         let mut or = Vec::new();
         while peek!(self.source).is_some_and(|token| *token == Token::Or) {
             self.source.next();
@@ -148,7 +148,7 @@ impl<'p> Parse<'p> {
         }
     }
 
-    fn else_s(&mut self) -> Result<Vec<Statement>, SyntaxError> {
+    fn else_s(&mut self) -> Result<Vec<Statement<String>>, SyntaxError> {
         match peek!(self.source) {
             Some(Token::Else) => {
                 self.source.next();
@@ -162,7 +162,7 @@ impl<'p> Parse<'p> {
         }
     }
 
-    fn while_(&mut self) -> Result<Statement, SyntaxError> {
+    fn while_(&mut self) -> Result<Statement<String>, SyntaxError> {
         let condition = self.expression()?;
         except!(self.source, Token::Do, "'do'")?;
         let body = self.body()?;
@@ -170,7 +170,7 @@ impl<'p> Parse<'p> {
         Ok(Statement::While { condition, body })
     }
 
-    fn for_(&mut self) -> Result<Statement, SyntaxError> {
+    fn for_(&mut self) -> Result<Statement<String>, SyntaxError> {
         let item = self.identifier()?;
         let sequence = self.expression()?;
         except!(self.source, Token::Then, "'then'")?;
@@ -277,7 +277,7 @@ impl<'p> Parse<'p> {
 }
 
 impl<'p> Parse<'p> {
-    fn body(&mut self) -> Result<Vec<Statement>, SyntaxError> {
+    fn body(&mut self) -> Result<Vec<Statement<String>>, SyntaxError> {
         let mut body = Vec::new();
         while let Some(token) = peek!(self.source) {
             match token {
