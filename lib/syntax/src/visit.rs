@@ -4,7 +4,7 @@ use crate::{
 };
 
 pub trait VisitStatement<I: Sized>: Sized {
-    fn visit_tree(&mut self, tree: &Vec<Statement<I>>) {
+    fn visit(&mut self, tree: &Vec<Statement<I>>) {
         for statement in tree {
             statement.accept(self);
         }
