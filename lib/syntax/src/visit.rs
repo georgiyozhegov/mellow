@@ -3,16 +3,24 @@ use crate::{
     tree::{Expression, Statement},
 };
 
-pub trait VisitStatement<I: Sized>: Sized {
-    fn visit(&mut self, tree: &Vec<Statement<I>>) {
+pub trait VisitStatement<I: Sized, O: Sized>: Sized {
+    fn visit(&mut self, tree: &Vec<Statement<I>>) -> Vec<Statement<O>> {
+        let mut output = Vec::new();
         for statement in tree {
-            statement.accept(self);
+            let statement = statement.accept(self);
+            output.push(statement);
         }
+        output
     }
-    fn visit_let(&mut self, identifier: &I, mutable: bool, value: &Expression);
-    fn visit_change(&mut self, identifier: &I, value: &Expression);
-    fn visit_while(&mut self, condition: &Expression, body: &Vec<Statement<I>>);
-    fn visit_for(&mut self, item: &I, sequence: &Expression, body: &Vec<Statement<I>>);
+    fn visit_let(&mut self, identifier: &I, mutable: bool, value: &Expression) -> Statement<O>;
+    fn visit_change(&mut self, identifier: &I, value: &Expression) -> Statement<O>;
+    fn visit_while(&mut self, condition: &Expression, body: &Vec<Statement<I>>) -> Statement<O>;
+    fn visit_for(
+        &mut self,
+        item: &I,
+        sequence: &Expression,
+        body: &Vec<Statement<I>>,
+    ) -> Statement<O>;
 }
 
 pub trait VisitExpression {
@@ -24,30 +32,22 @@ pub trait VisitExpression {
     fn visit_unary(&mut self, operator: &UnaryOperator, operand: &Expression);
 }
 
-impl<I: Sized> Statement<I> {
-    pub fn accept<V: VisitStatement<I>>(&self, visit: &mut V) {
+impl<I: Sized, O: Sized> Statement<I> {
+    pub fn accept<V: VisitStatement<I, O>>(&self, visit: &mut V) -> Statement<O> {
         match self {
             Statement::Let {
                 identifier,
                 mutable,
                 value,
-            } => {
-                visit.visit_let(identifier, *mutable, value);
-            }
-            Statement::Assign { identifier, value } => {
-                visit.visit_change(identifier, value);
-            }
-            Statement::While { condition, body } => {
-                visit.visit_while(condition, body);
-            }
+            } => visit.visit_let(identifier, *mutable, value),
+            Statement::Assign { identifier, value } => visit.visit_change(identifier, value),
+            Statement::While { condition, body } => visit.visit_while(condition, body),
             Statement::For {
                 item,
                 sequence,
                 body,
-            } => {
-                visit.visit_for(item, sequence, body);
-            }
-            _ => todo!()
+            } => visit.visit_for(item, sequence, body),
+            _ => todo!(),
         }
     }
 }
