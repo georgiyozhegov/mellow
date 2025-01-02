@@ -3,24 +3,16 @@ use crate::{
     tree::{Expression, Statement},
 };
 
-pub trait VisitStatement: Sized {
-    fn visit_tree(&mut self, tree: &Vec<Statement>) {
+pub trait VisitStatement<I: Sized>: Sized {
+    fn visit_tree(&mut self, tree: &Vec<Statement<I>>) {
         for statement in tree {
             statement.accept(self);
         }
     }
-    fn visit_let(&mut self, identifier: &String, mutable: bool, value: &Expression);
-    fn visit_change(&mut self, identifier: &String, value: &Expression);
-    fn visit_if(&mut self, condition: &Expression, true_: &Vec<Statement>, false_: &Vec<Statement>);
-    fn visit_while(&mut self, condition: &Expression, body: &[Statement]);
-    fn visit_for_in(&mut self, item: &String, sequence: &Expression, body: &Vec<Statement>);
-    fn visit_for_from_to(
-        &mut self,
-        item: &String,
-        start: &Expression,
-        end: &Expression,
-        body: &Vec<Statement>,
-    );
+    fn visit_let(&mut self, identifier: &I, mutable: bool, value: &Expression);
+    fn visit_change(&mut self, identifier: &I, value: &Expression);
+    fn visit_while(&mut self, condition: &Expression, body: &Vec<Statement<I>>);
+    fn visit_for(&mut self, item: &I, sequence: &Expression, body: &Vec<Statement<I>>);
 }
 
 pub trait VisitExpression {
@@ -30,11 +22,10 @@ pub trait VisitExpression {
     fn visit_string(&mut self, value: &String);
     fn visit_binary(&mut self, operator: &BinaryOperator, left: &Expression, right: &Expression);
     fn visit_unary(&mut self, operator: &UnaryOperator, operand: &Expression);
-    fn visit_if(&mut self, condition: &Expression, true_: &Expression, false_: Option<&Expression>);
 }
 
-impl Statement {
-    pub fn accept<V: VisitStatement>(&self, visit: &mut V) {
+impl<I: Sized> Statement<I> {
+    pub fn accept<V: VisitStatement<I>>(&self, visit: &mut V) {
         match self {
             Statement::Let {
                 identifier,
@@ -43,34 +34,20 @@ impl Statement {
             } => {
                 visit.visit_let(identifier, *mutable, value);
             }
-            Statement::Change { identifier, value } => {
+            Statement::Assign { identifier, value } => {
                 visit.visit_change(identifier, value);
-            }
-            Statement::If {
-                condition,
-                true_,
-                false_,
-            } => {
-                visit.visit_if(condition, true_, false_);
             }
             Statement::While { condition, body } => {
                 visit.visit_while(condition, body);
             }
-            Statement::ForIn {
+            Statement::For {
                 item,
                 sequence,
                 body,
             } => {
-                visit.visit_for_in(item, sequence, body);
+                visit.visit_for(item, sequence, body);
             }
-            Statement::ForFromTo {
-                item,
-                start,
-                end,
-                body,
-            } => {
-                visit.visit_for_from_to(item, start, end, body);
-            }
+            _ => todo!()
         }
     }
 }
@@ -96,13 +73,7 @@ impl Expression {
             Expression::Unary(operator, operand) => {
                 visit.visit_unary(operator, operand);
             }
-            Expression::If {
-                condition,
-                true_,
-                false_,
-            } => {
-                visit.visit_if(condition, true_, false_.as_deref());
-            }
+            _ => todo!(),
         }
     }
 }

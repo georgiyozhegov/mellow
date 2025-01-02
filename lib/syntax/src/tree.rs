@@ -22,7 +22,7 @@ pub enum Statement<I: Sized> {
         body: Vec<Statement<I>>,
     },
     For {
-        item: String,
+        item: I,
         sequence: Expression,
         body: Vec<Statement<I>>,
     },
