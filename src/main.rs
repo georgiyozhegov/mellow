@@ -15,5 +15,6 @@ fn main() {
     };
 
     let cfg = cfg::construct(ast);
-    println!("{:#?}", cfg);
+    let assembly = assembly::construct(cfg);
+    println!("{:#?}", assembly);
 }

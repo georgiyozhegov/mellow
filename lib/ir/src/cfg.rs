@@ -15,12 +15,12 @@ pub enum Link {
 }
 
 #[derive(Debug)]
-pub struct Cfg {
-    blocks: Vec<Block>,
-    links: HashMap<u64, Link>,
+pub struct Cfg<T> {
+    pub blocks: Vec<Block<T>>,
+    pub links: HashMap<u64, Link>,
 }
 
-impl Cfg {
+impl<T> Cfg<T> {
     pub fn new() -> Self {
         Self {
             blocks: Vec::new(),
@@ -29,8 +29,8 @@ impl Cfg {
     }
 }
 
-impl Cfg {
-    pub fn insert(&mut self, block: Block) -> u64 {
+impl<T> Cfg<T> {
+    pub fn insert(&mut self, block: Block<T>) -> u64 {
         let id = self.blocks.len() as u64;
         self.blocks.push(block);
         id
@@ -64,7 +64,7 @@ impl Cfg {
     }
 }
 
-fn construct_(source: Vec<Statement>, cfg: &mut Cfg) -> BlockRange {
+fn construct_<T>(source: Vec<Statement>, cfg: &mut Cfg<Statement>) -> BlockRange {
     let start = cfg.next_id();
     let mut current = Vec::new();
     for statement in source {
@@ -95,38 +95,38 @@ fn if_(
     mut or: Vec<(Expression, Vec<Statement>)>,
     else_: Vec<Statement>,
     current: &mut Vec<Statement>,
-    cfg: &mut Cfg,
+    cfg: &mut Cfg<Statement>,
 ) {
     let mut previous = cfg.insert(Block::Basic(current.clone()));
     current.clear();
     or.insert(0, (condition, if_));
     for (condition, body) in or {
-        let body = construct_(body.clone(), cfg);
+        let body = construct_::<Statement>(body.clone(), cfg);
         let next = cfg.next_id();
         cfg.branch(previous, condition, body.start, next);
         previous = body.end;
     }
-    construct_(else_, cfg);
+    construct_::<Statement>(else_, cfg);
 }
 
 fn while_(
     condition: Expression,
     body: Vec<Statement>,
     current: &mut Vec<Statement>,
-    cfg: &mut Cfg,
+    cfg: &mut Cfg<Statement>,
 ) {
     let previous = cfg.insert(Block::Basic(current.clone()));
     current.clear();
     let start = cfg.insert(Block::Empty);
     cfg.direct(previous, start);
-    let body = construct_(body.clone(), cfg);
+    let body = construct_::<Statement>(body.clone(), cfg);
     let end = cfg.next_id();
     cfg.branch(start, condition, body.start, end);
     cfg.direct(body.end, start);
 }
 
-pub fn construct(source: Vec<Statement>) -> Cfg {
+pub fn construct(source: Vec<Statement>) -> Cfg<Statement> {
     let mut cfg = Cfg::new();
-    construct_(source, &mut cfg);
+    construct_::<Statement>(source, &mut cfg);
     cfg
 }

@@ -1,5 +1,2 @@
 let mutable a = 0
-
-while a < 100 do
-      a = a + 1
-end
+let b = 1

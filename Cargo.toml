@@ -7,8 +7,10 @@ edition = "2021"
 members = [ 
     "lib/syntax",
     "lib/ir",
+    "lib/assembly",
 ]
 
 [dependencies]
 syntax = { path = "lib/syntax" }
 ir = { path = "lib/ir" }
+assembly = { path = "lib/assembly" }
