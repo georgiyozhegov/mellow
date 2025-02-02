@@ -11,12 +11,13 @@ pub struct Assembly {
     variables: HashMap<String, u64>,
 }
 
-pub fn construct(mut cfg: Cfg<Statement>) -> Assembly {
+pub fn construct(cfg: Cfg<Statement>) -> Assembly {
     let mut to = 0;
     let mut variables = HashMap::new();
-    let mut output = Vec::new();
-    for block in cfg.blocks {
-        let block = match block {
+    let output = cfg
+        .blocks
+        .into_iter()
+        .map(|block| match block {
             Block::Basic(body) => {
                 let mut instructions = Vec::new();
                 for statement in body {
@@ -25,9 +26,8 @@ pub fn construct(mut cfg: Cfg<Statement>) -> Assembly {
                 Block::Basic(instructions)
             }
             Block::Empty => Block::Empty,
-        };
-        output.push(block);
-    }
+        })
+        .collect();
     let cfg = Cfg {
         blocks: output,
         links: cfg.links,
