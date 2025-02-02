@@ -1,30 +1,30 @@
 use crate::token::{BinaryOperator, Token, UnaryOperator};
 
 #[derive(Debug, Clone)]
-pub enum Statement<I: Sized> {
+pub enum Statement {
     Let {
-        identifier: I,
+        identifier: String,
         mutable: bool,
         value: Expression,
     },
     Assign {
-        identifier: I,
+        identifier: String,
         value: Expression,
     },
     If {
         condition: Expression,
-        if_: Vec<Statement<I>>,
-        or: Vec<(Expression, Vec<Statement<I>>)>,
-        else_: Vec<Statement<I>>,
+        if_: Vec<Statement>,
+        or: Vec<(Expression, Vec<Statement>)>,
+        else_: Vec<Statement>,
     },
     While {
         condition: Expression,
-        body: Vec<Statement<I>>,
+        body: Vec<Statement>,
     },
     For {
-        item: I,
+        item: String,
         sequence: Expression,
-        body: Vec<Statement<I>>,
+        body: Vec<Statement>,
     },
 }
 
