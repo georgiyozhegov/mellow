@@ -66,7 +66,7 @@ impl Instruction {
                     variable_not_found(&identifier);
                 }
             }
-            _ => todo!(),
+            _ => unreachable!("conditional statements are not present in control flow graph"),
         }
     }
 }
