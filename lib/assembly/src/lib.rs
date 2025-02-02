@@ -11,17 +11,24 @@ pub struct Assembly {
     variables: HashMap<String, u64>,
 }
 
+pub struct Allocator {
+    pub id: u64,
+    pub variables: HashMap<String, u64>,
+}
+
 pub fn construct(cfg: Cfg<Statement>) -> Assembly {
-    let mut to = 0;
-    let mut variables = HashMap::new();
-    let output = cfg
+    let mut allocator = Allocator {
+        id: 0,
+        variables: HashMap::new(),
+    };
+    let blocks = cfg
         .blocks
         .into_iter()
         .map(|block| match block {
             Block::Basic(body) => {
                 let mut instructions = Vec::new();
                 for statement in body {
-                    Instruction::statement(statement, &mut to, &mut variables, &mut instructions);
+                    Instruction::statement(statement, &mut allocator, &mut instructions);
                 }
                 Block::Basic(instructions)
             }
@@ -29,8 +36,11 @@ pub fn construct(cfg: Cfg<Statement>) -> Assembly {
         })
         .collect();
     let cfg = Cfg {
-        blocks: output,
+        blocks,
         links: cfg.links,
     };
-    Assembly { cfg, variables }
+    Assembly {
+        cfg,
+        variables: allocator.variables,
+    }
 }
