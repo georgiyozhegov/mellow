@@ -1,8 +1,8 @@
 mod instruction;
-pub use instruction::Instruction;
-use ir::cfg::Cfg;
-use ir::Block;
 use std::collections::HashMap;
+
+pub use instruction::Instruction;
+use ir::{cfg::Cfg, Block};
 use syntax::tree::Statement;
 
 #[derive(Debug)]
@@ -20,8 +20,7 @@ pub fn construct(mut cfg: Cfg<Statement>) -> Assembly {
             Block::Basic(body) => {
                 let mut instructions = Vec::new();
                 for statement in body {
-                    Instruction::statement(
-                        statement, &mut to, &mut variables, &mut instructions);
+                    Instruction::statement(statement, &mut to, &mut variables, &mut instructions);
                 }
                 Block::Basic(instructions)
             }

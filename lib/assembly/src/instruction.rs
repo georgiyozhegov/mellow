@@ -1,5 +1,6 @@
-use syntax::tree::{Expression, Statement};
 use std::collections::HashMap;
+
+use syntax::tree::{Expression, Statement};
 
 #[derive(Debug)]
 pub enum Instruction {
