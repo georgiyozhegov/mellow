@@ -21,10 +21,10 @@ impl BlockRange {
 impl<Instruction: Display> Display for Block<Instruction> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
-            Self::Empty => writeln!(f, ""),
+            Self::Empty => Ok(()),
             Self::Basic(block) => {
                 for instruction in block.iter() {
-                    writeln!(f, "{instruction}")?;
+                    writeln!(f, "    {instruction}")?;
                 }
                 Ok(())
             }

@@ -13,7 +13,6 @@ pub enum Instruction {
     Integer { to: u64, value: i128 },
     Get { to: u64, identifier: String },
     Set { identifier: String, from: u64 },
-    Copy { to: u64, from: u64 },
     Add { to: u64, left: u64, right: u64 },
     Subtract { to: u64, left: u64, right: u64 },
     Multiply { to: u64, left: u64, right: u64 },

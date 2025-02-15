@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::{self, Display, Formatter};
 
 use syntax::tree::{Expression, Statement};
 
@@ -129,4 +130,40 @@ pub fn construct(source: Vec<Statement>) -> Cfg<Statement> {
     let mut cfg = Cfg::new();
     construct_::<Statement>(source, &mut cfg);
     cfg
+}
+
+impl<Instruction: Display> Display for Cfg<Instruction> {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        for (id, block) in self.blocks.iter().enumerate() {
+            writeln!(f, "@{id}")?;
+            writeln!(f, "{block}")?;
+            if let Some(link) = self.links.get(&(id as u64)) {
+                writeln!(f, "{link}")?;
+            }
+        }
+        Ok(())
+    }
+}
+
+impl Display for Link {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self {
+            Self::Direct(id) => {
+                write!(f, "jump @{id}")
+            }
+            Self::Branch {
+                condition,
+                true_,
+                false_,
+            } => {
+                write!(f, "    ")?;
+                writeln!(f, "on {condition:?}")?;
+                write!(f, "    ")?;
+                writeln!(f, "true @{true_}")?;
+                write!(f, "    ")?;
+                writeln!(f, "false @{false_}")?;
+                Ok(())
+            }
+        }
+    }
 }
