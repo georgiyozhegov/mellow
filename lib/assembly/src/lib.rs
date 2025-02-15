@@ -2,8 +2,13 @@ mod instruction;
 use std::collections::HashMap;
 
 pub use instruction::Instruction;
-use ir::{cfg::Cfg, Block};
-use syntax::tree::Statement;
+use ir::{cfg::{Cfg, Link}, Block};
+use syntax::tree::{Statement, Expression};
+
+#[derive(Debug)]
+pub struct Tac {
+    pub blocks: Vec<Vec<Instruction>>,
+}
 
 pub struct Allocator {
     pub id: u64,
@@ -17,24 +22,36 @@ impl Allocator {
     }
 }
 
-pub fn construct(cfg: Cfg<Statement>) -> Cfg<Instruction> {
+pub fn construct(cfg: Cfg<Block, Link>) -> Tac {
     let mut allocator = Allocator { id: 0 };
     let blocks = cfg
         .blocks
         .into_iter()
-        .map(|block| match block {
-            Block::Basic(body) => {
-                let mut instructions = Vec::new();
-                for statement in body {
-                    Instruction::statement(statement, &mut allocator, &mut instructions);
+        .enumerate()
+        .map(|(id, block)| {
+            let mut block = match block {
+                Block::Basic(body) => {
+                    let mut instructions = Vec::new();
+                    for statement in body {
+                        Instruction::statement(statement, &mut allocator, &mut instructions);
+                    }
+                    instructions
                 }
-                Block::Basic(instructions)
+                Block::Empty => vec![],
+            };
+            match cfg.links.get(&(id as u64)) {
+                Some(Link::Direct(to)) =>  {
+                    block.push(Instruction::Jump { to: *to });
+                }
+                Some(Link::Branch { condition, true_, false_ }) => {
+                    let condition = Instruction::expression(condition.clone(), &mut allocator, &mut block);
+                    block.push(Instruction::JumpIf { condition, to: *true_ });
+                    block.push(Instruction::Jump { to: *false_ });
+                }
+                _ => {}
             }
-            Block::Empty => Block::Empty,
+            block
         })
-        .collect();
-    Cfg {
-        blocks,
-        links: cfg.links,
-    }
+        .collect::<Vec<Vec<Instruction>>>();
+    Tac { blocks }
 }

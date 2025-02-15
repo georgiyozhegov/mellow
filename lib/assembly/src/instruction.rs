@@ -17,10 +17,12 @@ pub enum Instruction {
     Subtract { to: u64, left: u64, right: u64 },
     Multiply { to: u64, left: u64, right: u64 },
     Divide { to: u64, left: u64, right: u64 },
+    Jump { to: u64 },
+    JumpIf { condition: u64, to: u64 },
 }
 
 impl Instruction {
-    fn expression(
+    pub fn expression(
         expression: Expression,
         allocator: &mut Allocator,
         output: &mut Vec<Self>,

@@ -16,12 +16,12 @@ pub enum Link {
 }
 
 #[derive(Debug)]
-pub struct Cfg<T> {
-    pub blocks: Vec<Block<T>>,
-    pub links: HashMap<u64, Link>,
+pub struct Cfg<B, L> {
+    pub blocks: Vec<B>,
+    pub links: HashMap<u64, L>,
 }
 
-impl<T> Cfg<T> {
+impl<B, L> Cfg<B, L> {
     pub fn new() -> Self {
         Self {
             blocks: Vec::new(),
@@ -30,8 +30,8 @@ impl<T> Cfg<T> {
     }
 }
 
-impl<T> Cfg<T> {
-    pub fn insert(&mut self, block: Block<T>) -> u64 {
+impl Cfg<Block, Link> {
+    pub fn insert(&mut self, block: Block) -> u64 {
         let id = self.blocks.len() as u64;
         self.blocks.push(block);
         id
@@ -65,7 +65,7 @@ impl<T> Cfg<T> {
     }
 }
 
-fn construct_<T>(source: Vec<Statement>, cfg: &mut Cfg<Statement>) -> BlockRange {
+fn construct_(source: Vec<Statement>, cfg: &mut Cfg<Block, Link>) -> BlockRange {
     let start = cfg.next_id();
     let mut current = Vec::new();
     for statement in source {
@@ -96,74 +96,38 @@ fn if_(
     mut or: Vec<(Expression, Vec<Statement>)>,
     else_: Vec<Statement>,
     current: &mut Vec<Statement>,
-    cfg: &mut Cfg<Statement>,
+    cfg: &mut Cfg<Block, Link>,
 ) {
     let mut previous = cfg.insert(Block::Basic(current.clone()));
     current.clear();
     or.insert(0, (condition, if_));
     for (condition, body) in or {
-        let body = construct_::<Statement>(body.clone(), cfg);
+        let body = construct_(body.clone(), cfg);
         let next = cfg.next_id();
         cfg.branch(previous, condition, body.start, next);
         previous = body.end;
     }
-    construct_::<Statement>(else_, cfg);
+    construct_(else_, cfg);
 }
 
 fn while_(
     condition: Expression,
     body: Vec<Statement>,
     current: &mut Vec<Statement>,
-    cfg: &mut Cfg<Statement>,
+    cfg: &mut Cfg<Block, Link>,
 ) {
     let previous = cfg.insert(Block::Basic(current.clone()));
     current.clear();
     let start = cfg.insert(Block::Empty);
     cfg.direct(previous, start);
-    let body = construct_::<Statement>(body.clone(), cfg);
+    let body = construct_(body.clone(), cfg);
     let end = cfg.next_id();
     cfg.branch(start, condition, body.start, end);
     cfg.direct(body.end, start);
 }
 
-pub fn construct(source: Vec<Statement>) -> Cfg<Statement> {
+pub fn construct(source: Vec<Statement>) -> Cfg<Block, Link> {
     let mut cfg = Cfg::new();
-    construct_::<Statement>(source, &mut cfg);
+    construct_(source, &mut cfg);
     cfg
-}
-
-impl<Instruction: Display> Display for Cfg<Instruction> {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        for (id, block) in self.blocks.iter().enumerate() {
-            writeln!(f, "@{id}")?;
-            writeln!(f, "{block}")?;
-            if let Some(link) = self.links.get(&(id as u64)) {
-                writeln!(f, "{link}")?;
-            }
-        }
-        Ok(())
-    }
-}
-
-impl Display for Link {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match self {
-            Self::Direct(id) => {
-                write!(f, "jump @{id}")
-            }
-            Self::Branch {
-                condition,
-                true_,
-                false_,
-            } => {
-                write!(f, "    ")?;
-                writeln!(f, "on {condition:?}")?;
-                write!(f, "    ")?;
-                writeln!(f, "true @{true_}")?;
-                write!(f, "    ")?;
-                writeln!(f, "false @{false_}")?;
-                Ok(())
-            }
-        }
-    }
 }
