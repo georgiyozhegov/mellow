@@ -1,3 +1,4 @@
+use std::fmt::{self, Display, Formatter};
 use syntax::tree::Statement;
 
 #[derive(Debug)]
@@ -14,5 +15,19 @@ pub struct BlockRange {
 impl BlockRange {
     pub fn new(start: u64, end: u64) -> Self {
         Self { start, end }
+    }
+}
+
+impl<Instruction: Display> Display for Block<Instruction> {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self {
+            Self::Empty => writeln!(f, ""),
+            Self::Basic(block) => {
+                for instruction in block.iter() {
+                    writeln!(f, "{instruction}")?;
+                }
+                Ok(())
+            }
+        }
     }
 }

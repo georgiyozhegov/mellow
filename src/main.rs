@@ -16,5 +16,7 @@ fn main() {
 
     let cfg = cfg::construct(ast);
     let assembly = assembly::construct(cfg);
-    println!("{:#?}", assembly);
+    for instruction in assembly.blocks.iter() {
+        println!("{instruction}");
+    }
 }

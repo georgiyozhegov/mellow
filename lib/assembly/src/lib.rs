@@ -5,22 +5,20 @@ pub use instruction::Instruction;
 use ir::{cfg::Cfg, Block};
 use syntax::tree::Statement;
 
-#[derive(Debug)]
-pub struct Assembly {
-    cfg: Cfg<Instruction>,
-    variables: HashMap<String, u64>,
-}
-
 pub struct Allocator {
     pub id: u64,
-    pub variables: HashMap<String, u64>,
 }
 
-pub fn construct(cfg: Cfg<Statement>) -> Assembly {
-    let mut allocator = Allocator {
-        id: 0,
-        variables: HashMap::new(),
-    };
+impl Allocator {
+    pub fn allocate(&mut self) -> u64 {
+        let id = self.id;
+        self.id += 1;
+        id
+    }
+}
+
+pub fn construct(cfg: Cfg<Statement>) -> Cfg<Instruction> {
+    let mut allocator = Allocator { id: 0 };
     let blocks = cfg
         .blocks
         .into_iter()
@@ -35,12 +33,8 @@ pub fn construct(cfg: Cfg<Statement>) -> Assembly {
             Block::Empty => Block::Empty,
         })
         .collect();
-    let cfg = Cfg {
+    Cfg {
         blocks,
         links: cfg.links,
-    };
-    Assembly {
-        cfg,
-        variables: allocator.variables,
     }
 }
