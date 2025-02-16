@@ -41,7 +41,10 @@ impl Instruction {
             }
             Expression::Boolean(value) => {
                 let id = allocator.allocate();
-                let instruction = Self::Integer { to: id, value: value as i128 };
+                let instruction = Self::Integer {
+                    to: id,
+                    value: value as i128,
+                };
                 output.push(instruction);
                 id
             }
@@ -100,25 +103,25 @@ impl Display for Instruction {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
             Self::Integer { to, value } => {
-                write!(f, "#{to} = {value}")
+                write!(f, "#{to} int {value}")
             }
             Self::Get { to, identifier } => {
-                write!(f, "#{to} = ${identifier}")
+                write!(f, "#{to} get ${identifier}")
             }
             Self::Set { identifier, from } => {
-                write!(f, "${identifier} = #{from}")
+                write!(f, "${identifier} set #{from}")
             }
             Self::Add { to, left, right } => {
-                write!(f, "#{to} = #{left} + #{right}")
+                write!(f, "#{to} add #{left} #{right}")
             }
             Self::Subtract { to, left, right } => {
-                write!(f, "#{to} = #{left} - #{right}")
+                write!(f, "#{to} sub #{left} #{right}")
             }
             Self::Multiply { to, left, right } => {
-                write!(f, "#{to} = #{left} * #{right}")
+                write!(f, "#{to} mul #{left} #{right}")
             }
             Self::Divide { to, left, right } => {
-                write!(f, "#{to} = #{left} / #{right}")
+                write!(f, "#{to} div #{left} #{right}")
             }
             Self::Jump { to } => {
                 write!(f, "jump @{to}")
