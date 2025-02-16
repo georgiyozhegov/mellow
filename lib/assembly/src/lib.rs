@@ -30,6 +30,12 @@ pub struct Allocator {
 }
 
 impl Allocator {
+    pub fn new() -> Self {
+        Self { id: 0 }
+    }
+}
+
+impl Allocator {
     pub fn allocate(&mut self) -> u64 {
         let id = self.id;
         self.id += 1;
@@ -37,44 +43,51 @@ impl Allocator {
     }
 }
 
+fn block(block: Block, allocator: &mut Allocator, output: &mut Vec<Instruction>) {
+    match block {
+        Block::Basic(body) => {
+            for statement in body {
+                Instruction::statement(statement, allocator, output);
+            }
+        }
+        Block::Empty => {}
+    };
+}
+
+fn link(link: &Link, allocator: &mut Allocator, output: &mut Vec<Instruction>) {
+    match link {
+        Link::Direct(to) => {
+            output.push(Instruction::Jump { to: *to });
+        }
+        Link::Branch {
+            condition,
+            true_,
+            false_,
+        } => {
+            let condition = Instruction::expression(condition.clone(), allocator, output);
+            output.push(Instruction::JumpIf {
+                condition,
+                to: *true_,
+            });
+            output.push(Instruction::Jump { to: *false_ });
+        }
+    }
+}
+
 pub fn construct(cfg: Cfg<Block, Link>) -> Tac {
-    let mut allocator = Allocator { id: 0 };
+    let mut allocator = Allocator::new();
     let blocks = cfg
         .blocks
         .into_iter()
         .enumerate()
         .map(|(id, block)| {
-            let mut block = match block {
-                Block::Basic(body) => {
-                    let mut instructions = Vec::new();
-                    for statement in body {
-                        Instruction::statement(statement, &mut allocator, &mut instructions);
-                    }
-                    instructions
-                }
-                Block::Empty => vec![],
-            };
-            match cfg.links.get(&(id as u64)) {
-                Some(Link::Direct(to)) => {
-                    block.push(Instruction::Jump { to: *to });
-                }
-                Some(Link::Branch {
-                    condition,
-                    true_,
-                    false_,
-                }) => {
-                    let condition =
-                        Instruction::expression(condition.clone(), &mut allocator, &mut block);
-                    block.push(Instruction::JumpIf {
-                        condition,
-                        to: *true_,
-                    });
-                    block.push(Instruction::Jump { to: *false_ });
-                }
-                _ => {}
+            let mut output = Vec::new();
+            self::block(block, &mut allocator, &mut output);
+            if let Some(link) = cfg.links.get(&(id as u64)) {
+                self::link(link, &mut allocator, &mut output);
             }
-            block
+            output
         })
-        .collect::<Vec<Vec<Instruction>>>();
+        .collect();
     Tac { blocks }
 }
