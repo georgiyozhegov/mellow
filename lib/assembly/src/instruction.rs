@@ -1,7 +1,4 @@
-use std::{
-    collections::HashMap,
-    fmt::{self, Display, Formatter},
-};
+use std::fmt::{self, Display, Formatter};
 
 use syntax::{
     token::BinaryOperator,
@@ -42,6 +39,12 @@ impl Instruction {
                 output.push(instruction);
                 id
             }
+            Expression::Boolean(value) => {
+                let id = allocator.allocate();
+                let instruction = Self::Integer { to: id, value: value as i128 };
+                output.push(instruction);
+                id
+            }
             Expression::Binary(operator, left, right) => {
                 let left = Self::expression(*left, allocator, output);
                 let right = Self::expression(*right, allocator, output);
@@ -72,7 +75,7 @@ impl Instruction {
                 output.push(instruction);
                 id
             }
-            _ => todo!(),
+            expression => todo!("{expression:?}"),
         }
     }
 }
@@ -117,7 +120,12 @@ impl Display for Instruction {
             Self::Divide { to, left, right } => {
                 write!(f, "#{to} = #{left} / #{right}")
             }
-            _ => todo!(),
+            Self::Jump { to } => {
+                write!(f, "jump @{to}")
+            }
+            Self::JumpIf { condition, to } => {
+                write!(f, "jump @{to} if #{condition}")
+            }
         }
     }
 }

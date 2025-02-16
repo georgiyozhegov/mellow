@@ -15,6 +15,6 @@ fn main() {
     };
 
     let cfg = cfg::construct(ast);
-    let assembly = assembly::construct(cfg);
-    println!("{assembly}");
+    let tac = assembly::construct(cfg);
+    println!("{tac}");
 }

@@ -1,16 +1,28 @@
 mod instruction;
-use std::collections::HashMap;
+
+use std::fmt::{self, Display, Formatter};
 
 pub use instruction::Instruction;
 use ir::{
     cfg::{Cfg, Link},
     Block,
 };
-use syntax::tree::{Expression, Statement};
 
 #[derive(Debug)]
 pub struct Tac {
     pub blocks: Vec<Vec<Instruction>>,
+}
+
+impl Display for Tac {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        for (id, block) in self.blocks.iter().enumerate() {
+            writeln!(f, "@{id}")?;
+            for instruction in block.iter() {
+                writeln!(f, " {instruction}")?;
+            }
+        }
+        Ok(())
+    }
 }
 
 pub struct Allocator {
