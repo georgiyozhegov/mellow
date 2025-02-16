@@ -1,73 +1,23 @@
-Cfg {
-    blocks: [
-        Basic(
-            [
-                Let {
-                    identifier: "a",
-                    mutable: true,
-                    value: String(
-                        "Undefined",
-                    ),
-                },
-            ],
-        ),
-        Basic(
-            [
-                Assign {
-                    identifier: "a",
-                    value: String(
-                        "Impossible",
-                    ),
-                },
-            ],
-        ),
-        Basic(
-            [
-                Assign {
-                    identifier: "a",
-                    value: String(
-                        "Impossible Too",
-                    ),
-                },
-            ],
-        ),
-        Basic(
-            [
-                Assign {
-                    identifier: "a",
-                    value: String(
-                        "Possible",
-                    ),
-                },
-            ],
-        ),
-    ],
-    links: {
-        1: Branch {
-            condition: Binary(
-                Equal,
-                Integer(
-                    1,
-                ),
-                Integer(
-                    2,
-                ),
-            ),
-            true_: 2,
-            false_: 3,
-        },
-        0: Branch {
-            condition: Binary(
-                Greater,
-                Integer(
-                    1,
-                ),
-                Integer(
-                    2,
-                ),
-            ),
-            true_: 1,
-            false_: 2,
-        },
-    },
-}
+@0
+ $0 str "Undefined"
+ $a set #0
+ #1 int 1
+ #2 int 2
+ #3 gt #1 #2
+ jump @1 if #3
+ jump @2
+@1
+ $4 str "Impossible"
+ $a set #4
+ #5 int 1
+ #6 int 2
+ #7 eq #5 #6
+ jump @2 if #7
+ jump @3
+@2
+ $8 str "Impossible Too"
+ $a set #8
+@3
+ $9 str "Possible"
+ $a set #9
+

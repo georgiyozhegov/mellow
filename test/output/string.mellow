@@ -1,16 +1,4 @@
-Cfg {
-    blocks: [
-        Basic(
-            [
-                Let {
-                    identifier: "a",
-                    mutable: false,
-                    value: String(
-                        "Hello, World!",
-                    ),
-                },
-            ],
-        ),
-    ],
-    links: {},
-}
+@0
+ $0 str "Hello, World!"
+ $a set #0
+

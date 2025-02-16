@@ -1,23 +1,6 @@
-Cfg {
-    blocks: [
-        Basic(
-            [
-                Let {
-                    identifier: "a",
-                    mutable: false,
-                    value: Boolean(
-                        true,
-                    ),
-                },
-                Let {
-                    identifier: "a",
-                    mutable: false,
-                    value: Boolean(
-                        false,
-                    ),
-                },
-            ],
-        ),
-    ],
-    links: {},
-}
+@0
+ #0 int 1
+ $a set #0
+ #1 int 0
+ $a set #1
+

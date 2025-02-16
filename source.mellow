@@ -1,1 +1,4 @@
-let fkfk = "String"
+let hi = "Hello, World"
+
+let mutable a = 1
+a = a + 1
