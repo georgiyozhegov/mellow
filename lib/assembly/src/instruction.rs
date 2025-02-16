@@ -17,6 +17,9 @@ pub enum Instruction {
     Subtract { to: u64, left: u64, right: u64 },
     Multiply { to: u64, left: u64, right: u64 },
     Divide { to: u64, left: u64, right: u64 },
+    Greater { to: u64, left: u64, right: u64 },
+    Less { to: u64, left: u64, right: u64 },
+    Equal { to: u64, left: u64, right: u64 },
     Jump { to: u64 },
     JumpIf { condition: u64, to: u64 },
 }
@@ -83,7 +86,21 @@ impl Instruction {
                         left,
                         right,
                     },
-                    _ => todo!(),
+                    BinaryOperator::Greater => Self::Greater {
+                        to: id,
+                        left,
+                        right,
+                    },
+                    BinaryOperator::Less => Self::Less {
+                        to: id,
+                        left,
+                        right,
+                    },
+                    BinaryOperator::Equal => Self::Equal {
+                        to: id,
+                        left,
+                        right,
+                    },
                 };
                 output.push(instruction);
                 id
@@ -135,6 +152,15 @@ impl Display for Instruction {
             }
             Self::Divide { to, left, right } => {
                 write!(f, "#{to} div #{left} #{right}")
+            }
+            Self::Greater { to, left, right } => {
+                write!(f, "#{to} gt #{left} #{right}")
+            }
+            Self::Less { to, left, right } => {
+                write!(f, "#{to} lt #{left} #{right}")
+            }
+            Self::Equal { to, left, right } => {
+                write!(f, "#{to} eq #{left} #{right}")
             }
             Self::Jump { to } => {
                 write!(f, "jump @{to}")
