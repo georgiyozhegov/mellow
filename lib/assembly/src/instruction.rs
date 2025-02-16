@@ -12,6 +12,7 @@ pub enum Instruction {
     Integer { to: u64, value: i128 },
     Get { to: u64, identifier: String },
     Set { identifier: String, from: u64 },
+    String { to: u64, value: String },
     Add { to: u64, left: u64, right: u64 },
     Subtract { to: u64, left: u64, right: u64 },
     Multiply { to: u64, left: u64, right: u64 },
@@ -44,6 +45,15 @@ impl Instruction {
                 let instruction = Self::Integer {
                     to: id,
                     value: value as i128,
+                };
+                output.push(instruction);
+                id
+            }
+            Expression::String(value) => {
+                let id = allocator.allocate();
+                let instruction = Self::String {
+                    to: id,
+                    value,
                 };
                 output.push(instruction);
                 id
@@ -110,6 +120,9 @@ impl Display for Instruction {
             }
             Self::Set { identifier, from } => {
                 write!(f, "${identifier} set #{from}")
+            }
+            Self::String { to, value } => {
+                write!(f, "${to} str \"{value}\"")
             }
             Self::Add { to, left, right } => {
                 write!(f, "#{to} add #{left} #{right}")
