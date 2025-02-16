@@ -2,8 +2,11 @@ mod instruction;
 use std::collections::HashMap;
 
 pub use instruction::Instruction;
-use ir::{cfg::{Cfg, Link}, Block};
-use syntax::tree::{Statement, Expression};
+use ir::{
+    cfg::{Cfg, Link},
+    Block,
+};
+use syntax::tree::{Expression, Statement};
 
 #[derive(Debug)]
 pub struct Tac {
@@ -40,12 +43,20 @@ pub fn construct(cfg: Cfg<Block, Link>) -> Tac {
                 Block::Empty => vec![],
             };
             match cfg.links.get(&(id as u64)) {
-                Some(Link::Direct(to)) =>  {
+                Some(Link::Direct(to)) => {
                     block.push(Instruction::Jump { to: *to });
                 }
-                Some(Link::Branch { condition, true_, false_ }) => {
-                    let condition = Instruction::expression(condition.clone(), &mut allocator, &mut block);
-                    block.push(Instruction::JumpIf { condition, to: *true_ });
+                Some(Link::Branch {
+                    condition,
+                    true_,
+                    false_,
+                }) => {
+                    let condition =
+                        Instruction::expression(condition.clone(), &mut allocator, &mut block);
+                    block.push(Instruction::JumpIf {
+                        condition,
+                        to: *true_,
+                    });
                     block.push(Instruction::Jump { to: *false_ });
                 }
                 _ => {}

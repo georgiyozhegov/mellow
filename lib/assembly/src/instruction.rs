@@ -1,5 +1,7 @@
-use std::collections::HashMap;
-use std::fmt::{self, Display, Formatter};
+use std::{
+    collections::HashMap,
+    fmt::{self, Display, Formatter},
+};
 
 use syntax::{
     token::BinaryOperator,
