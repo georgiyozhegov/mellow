@@ -1,5 +1,3 @@
-use std::fmt::{self, Display, Formatter};
-
 use syntax::tree::Statement;
 
 #[derive(Debug)]

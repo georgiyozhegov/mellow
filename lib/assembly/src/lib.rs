@@ -35,6 +35,12 @@ impl Allocator {
     }
 }
 
+impl Default for Allocator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Allocator {
     pub fn allocate(&mut self) -> u64 {
         let id = self.id;

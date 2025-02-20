@@ -41,7 +41,7 @@ impl<'l> Lex<'l> {
     }
 }
 
-impl<'l> Iterator for Lex<'l> {
+impl Iterator for Lex<'_> {
     type Item = Result<Token, SyntaxError>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -49,7 +49,7 @@ impl<'l> Iterator for Lex<'l> {
     }
 }
 
-impl<'l> Lex<'l> {
+impl Lex<'_> {
     pub fn token(&mut self) -> Option<Result<Token, SyntaxError>> {
         match self.source.peek()? {
             numeric!() => Some(Ok(self.numeric())),

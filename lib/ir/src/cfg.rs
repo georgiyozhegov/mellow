@@ -1,7 +1,4 @@
-use std::{
-    collections::HashMap,
-    fmt::{self, Display, Formatter},
-};
+use std::collections::HashMap;
 
 use syntax::tree::{Expression, Statement};
 
@@ -29,6 +26,12 @@ impl<B, L> Cfg<B, L> {
             blocks: Vec::new(),
             links: HashMap::new(),
         }
+    }
+}
+
+impl<B, L> Default for Cfg<B, L> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

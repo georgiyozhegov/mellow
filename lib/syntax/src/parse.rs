@@ -52,7 +52,7 @@ impl<'p> Parse<'p> {
     }
 }
 
-impl<'p> Iterator for Parse<'p> {
+impl Iterator for Parse<'_> {
     type Item = Result<Statement, SyntaxError>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -61,7 +61,7 @@ impl<'p> Iterator for Parse<'p> {
     }
 }
 
-impl<'p> Parse<'p> {
+impl Parse<'_> {
     pub fn statement(&mut self) -> Result<Statement, SyntaxError> {
         match next!(self.source) {
             Some(Token::Let) => self.let_(),
@@ -76,7 +76,6 @@ impl<'p> Parse<'p> {
         }
     }
 
-    // LET
     fn let_(&mut self) -> Result<Statement, SyntaxError> {
         let mutable = self.mutable()?;
         let identifier = self.identifier()?;
@@ -184,7 +183,7 @@ impl<'p> Parse<'p> {
     }
 }
 
-impl<'p> Parse<'p> {
+impl Parse<'_> {
     pub fn expression(&mut self) -> Result<Expression, SyntaxError> {
         let mut rpn = Rpn::default();
         let mut status = ExpressionState::default();
@@ -276,7 +275,7 @@ impl<'p> Parse<'p> {
     }
 }
 
-impl<'p> Parse<'p> {
+impl Parse<'_> {
     fn body(&mut self) -> Result<Vec<Statement>, SyntaxError> {
         let mut body = Vec::new();
         while let Some(token) = peek!(self.source) {
