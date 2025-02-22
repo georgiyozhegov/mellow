@@ -22,6 +22,7 @@ pub enum Instruction {
     Equal { to: u64, left: u64, right: u64 },
     Jump { to: u64 },
     JumpIf { condition: u64, to: u64 },
+    Free(u64),
 }
 
 impl Instruction {
@@ -103,6 +104,8 @@ impl Instruction {
                     },
                 };
                 output.push(instruction);
+                output.push(Self::Free(left));
+                output.push(Self::Free(right));
                 id
             }
             expression => todo!("{expression:?}"),
@@ -120,6 +123,7 @@ impl Instruction {
                 let from = Self::expression(value, allocator, output);
                 let instruction = Self::Set { identifier, from };
                 output.push(instruction);
+                output.push(Self::Free(from));
             }
             _ => unreachable!("conditional statements are not present in control flow graph"),
         }
@@ -167,6 +171,9 @@ impl Display for Instruction {
             }
             Self::JumpIf { condition, to } => {
                 write!(f, "jump @{to} if #{condition}")
+            }
+            Self::Free(id) => {
+                write!(f, "free #{id}")
             }
         }
     }
