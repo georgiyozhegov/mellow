@@ -1,5 +1,4 @@
 use std::{env, fs, process::exit};
-
 use ir::cfg;
 
 fn main() {
@@ -16,4 +15,8 @@ fn main() {
     let cfg = cfg::construct(ast);
     let tac = assembly::construct(cfg);
     println!("{tac}");
+    let assembly = assembly::convert(tac);
+    for instruction in assembly {
+        println!("{instruction}")
+    }
 }

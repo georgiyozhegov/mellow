@@ -1,4 +1,6 @@
 mod instruction;
+mod native;
+pub use native::convert;
 
 use std::fmt::{self, Display, Formatter};
 
