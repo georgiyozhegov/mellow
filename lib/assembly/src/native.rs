@@ -9,8 +9,8 @@ pub enum Assembly {
     Cmp(&'static str, &'static str),
     Add(&'static str, &'static str),
     Sete(&'static str), // =
-    Seta(&'static str), // >
-    Setb(&'static str), // <
+    Setg(&'static str), // >
+    Setl(&'static str), // <
     Jmp(u64),
     Je(u64),
 }
@@ -33,11 +33,11 @@ impl Display for Assembly {
             Self::Sete(register) => {
                 write!(f, "sete {register}")
             }
-            Self::Seta(register) => {
-                write!(f, "seta {register}")
+            Self::Setg(register) => {
+                write!(f, "setg {register}")
             }
-            Self::Setb(register) => {
-                write!(f, "setb {register}")
+            Self::Setl(register) => {
+                write!(f, "setl {register}")
             }
             Self::Jmp(label) => {
                 write!(f, "jmp _{label}")
