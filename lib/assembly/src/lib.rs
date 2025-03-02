@@ -1,8 +1,6 @@
 mod instruction;
 pub mod lifetime;
 mod native;
-pub use native::convert;
-
 use std::fmt::{self, Display, Formatter};
 
 pub use instruction::Instruction;
@@ -10,6 +8,7 @@ use ir::{
     cfg::{Cfg, Link},
     Block,
 };
+pub use native::convert;
 
 #[derive(Debug)]
 pub struct Tac {
