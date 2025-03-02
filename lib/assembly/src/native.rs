@@ -1,16 +1,41 @@
-use std::{collections::HashSet, fmt::{self, Display, Formatter}};
+use std::{
+    collections::HashMap,
+    fmt::{self, Display, Formatter},
+};
 
-use crate::{Instruction, Tac};
+use crate::{
+    lifetime::{self, scan, Register, RegisterKind, Size},
+    Instruction, Tac,
+};
+
+#[derive(Debug, Clone)]
+pub enum Data {
+    Register(Register),
+    Stack(u8),
+    Integer(i128),
+    Identifier(String), // NOTE: Temporary, will be removed
+}
+
+impl Display for Data {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self {
+            Self::Register(register) => write!(f, "{register}"),
+            Self::Stack(offset) => write!(f, "[rsp - {offset}]"),
+            Self::Integer(value) => write!(f, "{value}"),
+            Self::Identifier(identifier) => write!(f, "[{identifier}]"),
+        }
+    }
+}
 
 #[derive(Debug)]
 pub enum Assembly {
     Label(u64),
-    Mov(String, String),
-    Cmp(&'static str, &'static str),
-    Add(&'static str, &'static str),
-    Sete(&'static str), // =
-    Setg(&'static str), // >
-    Setl(&'static str), // <
+    Mov(Data, Data),
+    Cmp(Data, Data),
+    Add(Data, Data),
+    Sete(Data), // =
+    Setg(Data), // >
+    Setl(Data), // <
     Jmp(u64),
     Je(u64),
 }
@@ -42,34 +67,40 @@ impl Display for Assembly {
             Self::Jmp(label) => {
                 write!(f, "jmp _{label}")
             }
-            Self::Je(label)   => {
+            Self::Je(label) => {
                 write!(f, "je _{label}")
             }
         }
     }
 }
 
-pub const REGISTERS: [&str; 6] = ["rax", "rbx", "rcx", "rdx", "rsi", "rdi"];
+fn qword(kind: RegisterKind) -> Data {
+    Data::Register(Register::new(kind, Size::Qword))
+}
 
-fn generate(block: Vec<Instruction>, output: &mut Vec<Assembly>, variables: &mut HashSet<String>) {
+fn generate(
+    block: Vec<Instruction>,
+    output: &mut Vec<Assembly>,
+    allocated: &HashMap<u64, RegisterKind>,
+) {
     for instruction in block {
         match instruction {
             Instruction::Integer { to, value } => {
-                let to = REGISTERS[to as usize];
-                output.push(Assembly::Mov(to.to_string(), value.to_string()));
+                let to = qword(allocated.get(&to).unwrap().clone());
+                let value = Data::Integer(value);
+                output.push(Assembly::Mov(to, value));
             }
             Instruction::Add { to, left, right } => {
-                let to = REGISTERS[to as usize];
-                let left = REGISTERS[left as usize];
-                let right = REGISTERS[right as usize];
-                output.push(Assembly::Add(left, right));
-                output.push(Assembly::Mov(to.into(), left.into()));
+                let to = qword(allocated.get(&to).unwrap().clone());
+                let left = qword(allocated.get(&left).unwrap().clone());
+                let right = qword(allocated.get(&right).unwrap().clone());
+                output.push(Assembly::Add(left.clone(), right));
+                output.push(Assembly::Mov(to, left));
             }
             Instruction::Set { identifier, from } => {
-                variables.insert(identifier.clone());
-                let to = format!("[{identifier}]");
-                let from = REGISTERS[from as usize];
-                output.push(Assembly::Mov(to, from.into()));
+                let to = Data::Identifier(identifier);
+                let from = qword(allocated.get(&from).unwrap().clone());
+                output.push(Assembly::Mov(to, from));
             }
             _ => todo!(),
         }
@@ -78,10 +109,11 @@ fn generate(block: Vec<Instruction>, output: &mut Vec<Assembly>, variables: &mut
 
 pub fn convert(tac: Tac) -> Vec<Assembly> {
     let mut output = Vec::new();
-    let mut variables = HashSet::new();
+    let lifetimes = lifetime::scan(&tac);
+    let allocated = lifetime::allocate(lifetimes);
     for (id, block) in tac.blocks.into_iter().enumerate() {
         output.push(Assembly::Label(id as u64));
-        generate(block, &mut output, &mut variables);
+        generate(block, &mut output, &allocated);
     }
     output
 }

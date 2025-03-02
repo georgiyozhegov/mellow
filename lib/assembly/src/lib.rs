@@ -1,4 +1,5 @@
 mod instruction;
+pub mod lifetime;
 mod native;
 pub use native::convert;
 
