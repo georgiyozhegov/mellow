@@ -1,26 +1,22 @@
 section .bss
 a: resq 1
-b: resq 1
 section .text
 global _start
 _start:
 _0:
-mov rbx, 1
-mov rcx, 3
-add rbx, rcx
-mov rcx, rbx
-mov rbx, 3
-add rcx, rbx
-mov rbx, rcx
-mov [a], rbx
+mov rcx, 4
 mov rbx, 2
-mov rcx, 3
+mov rax, rcx
+cqo
+idiv rbx
+mov rbx, rax
+mov rcx, 1
+mov rsi, 2
+imul rcx, rsi
+mov rcx, rcx
 add rbx, rcx
 mov rbx, rbx
-mov rcx, 2
-add rbx, rcx
-mov rbx, rbx
-mov [b], rbx
+mov [a], rbx
 mov rax, 60
 mov rdi, [a]
 syscall

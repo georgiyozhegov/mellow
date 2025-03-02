@@ -33,6 +33,10 @@ pub enum Assembly {
     Mov(Data, Data),
     Cmp(Data, Data),
     Add(Data, Data),
+    Sub(Data, Data),
+    Imul(Data, Data),
+    Idiv(Data),
+    Cqo,
     Sete(Data), // =
     Setg(Data), // >
     Setl(Data), // <
@@ -54,6 +58,18 @@ impl Display for Assembly {
             }
             Self::Add(to, value) => {
                 write!(f, "add {to}, {value}")
+            }
+            Self::Sub(to, value) => {
+                write!(f, "sub {to}, {value}")
+            }
+            Self::Imul(to, value) => {
+                write!(f, "imul {to}, {value}")
+            }
+            Self::Idiv(data) => {
+                write!(f, "idiv {data}")
+            }
+            Self::Cqo => {
+                write!(f, "cqo")
             }
             Self::Sete(register) => {
                 write!(f, "sete {register}")
@@ -96,6 +112,30 @@ fn generate(
                 let right = qword(allocated.get(&right).unwrap().clone());
                 output.push(Assembly::Add(left.clone(), right));
                 output.push(Assembly::Mov(to, left));
+            }
+            Instruction::Subtract { to, left, right } => {
+                let to = qword(allocated.get(&to).unwrap().clone());
+                let left = qword(allocated.get(&left).unwrap().clone());
+                let right = qword(allocated.get(&right).unwrap().clone());
+                output.push(Assembly::Sub(left.clone(), right));
+                output.push(Assembly::Mov(to, left));
+            }
+            Instruction::Multiply { to, left, right } => {
+                let to = qword(allocated.get(&to).unwrap().clone());
+                let left = qword(allocated.get(&left).unwrap().clone());
+                let right = qword(allocated.get(&right).unwrap().clone());
+                output.push(Assembly::Imul(left.clone(), right));
+                output.push(Assembly::Mov(to, left));
+            }
+            Instruction::Divide { to, left, right } => {
+                let to = qword(allocated.get(&to).unwrap().clone());
+                let left = qword(allocated.get(&left).unwrap().clone());
+                let right = qword(allocated.get(&right).unwrap().clone());
+                let rax = qword(RegisterKind::A);
+                output.push(Assembly::Mov(rax.clone(), left));
+                output.push(Assembly::Cqo);
+                output.push(Assembly::Idiv(right));
+                output.push(Assembly::Mov(to, rax));
             }
             Instruction::Set { identifier, from } => {
                 let to = Data::Identifier(identifier);
