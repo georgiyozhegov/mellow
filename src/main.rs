@@ -1,6 +1,6 @@
 use std::{collections::HashSet, env, fs, process::exit};
 
-use assembly::{lifetime, Instruction};
+use assembly::Instruction;
 use ir::cfg;
 fn main() {
     let path = env::args().nth(1).unwrap_or("source.mellow".into());
@@ -14,6 +14,9 @@ fn main() {
     };
 
     let cfg = cfg::construct(ast);
+
+    // println!("{cfg:#?}");
+
     let tac = assembly::construct(cfg);
     // println!("{tac}");
 

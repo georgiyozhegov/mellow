@@ -106,13 +106,19 @@ fn if_(
     let mut previous = cfg.insert(Block::Basic(current.clone()));
     current.clear();
     or.insert(0, (condition, if_));
-    for (condition, body) in or {
+    let mut last_condition = None;
+    for (condition, body) in or.into_iter() {
         let body = construct_(body.clone(), cfg);
         let next = cfg.next_id();
-        cfg.branch(previous, condition, body.start, next);
+        cfg.branch(previous, condition.clone(), body.start, next);
         previous = body.end;
+        last_condition = Some(condition);
     }
-    construct_(else_, cfg);
+    let else_ = construct_(else_, cfg);
+    if let Some(condition) = last_condition {
+        let next = cfg.next_id();
+        cfg.branch(previous, condition, next, else_.start);
+    }
 }
 
 fn while_(
@@ -134,5 +140,6 @@ fn while_(
 pub fn construct(source: Vec<Statement>) -> Cfg<Block, Link> {
     let mut cfg = Cfg::new();
     construct_(source, &mut cfg);
+    cfg.insert(Block::Empty);
     cfg
 }

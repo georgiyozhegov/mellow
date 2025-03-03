@@ -147,6 +147,14 @@ fn generate(
                 let from = Data::Identifier(identifier);
                 output.push(Assembly::Mov(to, from));
             }
+            Instruction::Jump { to } => {
+                output.push(Assembly::Jmp(to));
+            }
+            Instruction::JumpIf { condition, to } => {
+                let condition = qword(allocated.get(&condition).unwrap().clone());
+                output.push(Assembly::Cmp(condition, Data::Integer(1)));
+                output.push(Assembly::Je(to));
+            }
             _ => todo!(),
         }
     }

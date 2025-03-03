@@ -1,2 +1,8 @@
-let b = 5
-let a = b + 2
+let a = 0
+if 0 then
+      a = 1
+or 1 then
+      a = 2
+else
+      a = 3
+end

@@ -1,7 +1,6 @@
 use std::{
     collections::{HashMap, HashSet},
     fmt::{self, Display},
-    thread::available_parallelism,
 };
 
 use crate::{Instruction, Tac};
@@ -167,6 +166,13 @@ pub fn scan(tac: &Tac) -> HashMap<u64, Lifetime> {
                     end: index,
                 };
                 lifetimes.insert(*right, lifetime);
+            }
+            Instruction::JumpIf { condition, .. } => {
+                let lifetime = Lifetime {
+                    start: *start.get(condition).unwrap(),
+                    end: index,
+                };
+                lifetimes.insert(*condition, lifetime);
             }
             Instruction::Integer { to, .. }
             | Instruction::Get { to, .. }
