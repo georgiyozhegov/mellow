@@ -94,6 +94,10 @@ fn qword(kind: RegisterKind) -> Data {
     Data::Register(Register::new(kind, Size::Qword))
 }
 
+fn byte(kind: RegisterKind) -> Data {
+    Data::Register(Register::new(kind, Size::Byte))
+}
+
 fn generate(
     block: Vec<Instruction>,
     output: &mut Vec<Assembly>,
@@ -136,6 +140,33 @@ fn generate(
                 output.push(Assembly::Cqo);
                 output.push(Assembly::Idiv(right));
                 output.push(Assembly::Mov(to, rax));
+            }
+            Instruction::Equal { to, left, right } => {
+                let b_to = byte(allocated.get(&to).unwrap().clone());
+                let q_to = qword(allocated.get(&to).unwrap().clone());
+                let left = qword(allocated.get(&left).unwrap().clone());
+                let right = qword(allocated.get(&right).unwrap().clone());
+                output.push(Assembly::Cmp(left, right));
+                output.push(Assembly::Mov(q_to, Data::Integer(0)));
+                output.push(Assembly::Sete(b_to));
+            }
+            Instruction::Greater { to, left, right } => {
+                let b_to = byte(allocated.get(&to).unwrap().clone());
+                let q_to = qword(allocated.get(&to).unwrap().clone());
+                let left = qword(allocated.get(&left).unwrap().clone());
+                let right = qword(allocated.get(&right).unwrap().clone());
+                output.push(Assembly::Cmp(left, right));
+                output.push(Assembly::Mov(q_to, Data::Integer(0)));
+                output.push(Assembly::Setg(b_to));
+            }
+            Instruction::Less { to, left, right } => {
+                let b_to = byte(allocated.get(&to).unwrap().clone());
+                let q_to = qword(allocated.get(&to).unwrap().clone());
+                let left = qword(allocated.get(&left).unwrap().clone());
+                let right = qword(allocated.get(&right).unwrap().clone());
+                output.push(Assembly::Cmp(left, right));
+                output.push(Assembly::Mov(q_to, Data::Integer(0)));
+                output.push(Assembly::Setl(b_to));
             }
             Instruction::Set { identifier, from } => {
                 let to = Data::Identifier(identifier);

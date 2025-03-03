@@ -1,8 +1,10 @@
-let a = 0
-if 0 then
-      a = 1
-or 1 then
-      a = 2
-else
-      a = 3
+let a = 1
+let b = 0 - 1
+while a < 100 do
+      if a + 1 ? 2 then
+            b = 10
+      end
+      a = a + 1
 end
+
+a = b
