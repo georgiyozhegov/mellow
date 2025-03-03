@@ -142,6 +142,11 @@ fn generate(
                 let from = qword(allocated.get(&from).unwrap().clone());
                 output.push(Assembly::Mov(to, from));
             }
+            Instruction::Get { to, identifier } => {
+                let to = qword(allocated.get(&to).unwrap().clone());
+                let from = Data::Identifier(identifier);
+                output.push(Assembly::Mov(to, from));
+            }
             _ => todo!(),
         }
     }
