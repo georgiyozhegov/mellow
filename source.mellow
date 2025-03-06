@@ -1,10 +1,1 @@
-let a = 1
-let b = 0 - 1
-while a < 100 do
-      if a + 1 ? 2 then
-            b = 10
-      end
-      a = a + 1
-end
-
-a = b
+a = 100
