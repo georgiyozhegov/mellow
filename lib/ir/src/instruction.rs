@@ -9,6 +9,7 @@ use crate::tac::Allocator;
 
 #[derive(Debug)]
 pub enum Instruction {
+    Label(u64),
     Integer { to: u64, value: i128 },
     Get { to: u64, identifier: String },
     Set { identifier: String, from: u64 },
@@ -135,6 +136,9 @@ impl Instruction {
 impl Display for Instruction {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
+            Self::Label(id) => {
+                write!(f, "@{id}")
+            }
             Self::Integer { to, value } => {
                 write!(f, "#{to} int {value}")
             }

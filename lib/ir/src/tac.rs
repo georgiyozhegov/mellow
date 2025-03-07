@@ -1,27 +1,8 @@
-use std::fmt::{self, Display, Formatter};
-
 use crate::{
     cfg::{Cfg, Link},
     instruction::Instruction,
     Block,
 };
-
-#[derive(Debug)]
-pub struct Tac {
-    pub blocks: Vec<Vec<Instruction>>,
-}
-
-impl Display for Tac {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        for (id, block) in self.blocks.iter().enumerate() {
-            writeln!(f, "@{id}")?;
-            for instruction in block.iter() {
-                writeln!(f, " {instruction}")?;
-            }
-        }
-        Ok(())
-    }
-}
 
 pub struct Allocator {
     pub id: u64,
@@ -78,20 +59,19 @@ fn link(link: &Link, allocator: &mut Allocator, output: &mut Vec<Instruction>) {
     }
 }
 
-pub fn construct(cfg: Cfg<Block, Link>) -> Tac {
+pub fn construct(cfg: Cfg<Block, Link>) -> Vec<Instruction> {
     let mut allocator = Allocator::new();
-    let blocks = cfg
-        .blocks
+    cfg.blocks
         .into_iter()
         .enumerate()
         .map(|(id, block)| {
-            let mut output = Vec::new();
+            let mut output = vec![Instruction::Label(id as u64)];
             self::block(block, &mut allocator, &mut output);
             if let Some(link) = cfg.links.get(&(id as u64)) {
                 self::link(link, &mut allocator, &mut output);
             }
             output
         })
-        .collect();
-    Tac { blocks }
+        .flatten()
+        .collect()
 }

@@ -1,7 +1,6 @@
 use std::{collections::HashSet, env, fs, process::exit};
 
-use assembly::Instruction;
-use ir::cfg;
+use ir::Instruction;
 fn main() {
     let path = env::args().nth(1).unwrap_or("source.mellow".into());
     let source = fs::read_to_string(path).unwrap();
@@ -13,17 +12,16 @@ fn main() {
         }
     };
 
-    let cfg = cfg::construct(ast);
-
+    let cfg = ir::cfg::construct(ast);
     // println!("{cfg:#?}");
 
-    let tac = assembly::construct(cfg);
+    let tac = ir::tac::construct(cfg);
     // println!("{tac}");
 
     println!("section .bss");
     let mut identifiers = HashSet::new();
     let mut labels = HashSet::new();
-    for instruction in tac.blocks.iter().flatten() {
+    for instruction in tac.iter() {
         match instruction {
             Instruction::Set { identifier, .. } => {
                 identifiers.insert(identifier);

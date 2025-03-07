@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::{tac::Tac, Instruction};
+use crate::Instruction;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Lifetime {
@@ -23,17 +23,17 @@ macro_rules! begin {
 macro_rules! end {
     ($lifetimes:expr, $start:expr, $id:expr, $index:expr) => {
         let lifetime = Lifetime {
-            start: *$start.get($id).unwrap(),
+            start: *$start.get(&$id).unwrap(),
             end: $index,
         };
         $lifetimes.insert(*$id, lifetime);
     };
 }
 
-fn scan(tac: &Tac) -> HashMap<u64, Lifetime> {
+fn scan(tac: &Vec<Instruction>) -> HashMap<u64, Lifetime> {
     let mut start = HashMap::new();
     let mut lifetimes = HashMap::new();
-    for (index, instruction) in tac.blocks.iter().flatten().enumerate() {
+    for (index, instruction) in tac.iter().enumerate() {
         match instruction {
             Instruction::Add { to, left, right }
             | Instruction::Subtract { to, left, right }
@@ -85,7 +85,7 @@ fn interference_graph(lifetimes: HashMap<u64, Lifetime>) -> HashMap<u64, HashSet
     graph
 }
 
-pub fn allocate(tac: &Tac, registers: u64) -> HashMap<u64, u64> {
+pub fn allocate(tac: &Vec<Instruction>, registers: u64) -> HashMap<u64, u64> {
     let lifetimes = scan(tac);
     let graph = interference_graph(lifetimes);
     let registers = (0..registers).collect::<Vec<u64>>();
