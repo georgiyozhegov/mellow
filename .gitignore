@@ -1,5 +1,6 @@
 target
 Cargo.lock
 test/__pycache__
-output
+output/*
+!output/main.asm
 sl/output
