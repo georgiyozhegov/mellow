@@ -22,10 +22,14 @@ fn main() {
 
     println!("section .bss");
     let mut identifiers = HashSet::new();
+    let mut labels = HashSet::new();
     for instruction in tac.blocks.iter().flatten() {
         match instruction {
             Instruction::Set { identifier, .. } => {
                 identifiers.insert(identifier);
+            }
+            Instruction::Call { label, .. } => {
+                labels.insert(label);
             }
             _ => {}
         }
@@ -35,8 +39,12 @@ fn main() {
     }
 
     println!("section .text");
-    println!("global _start");
+    println!("global _start:");
     println!("_start:");
+
+    for label in labels.iter() {
+        println!("extern {label}");
+    }
 
     let assembly = assembly::convert(tac);
     for instruction in assembly {

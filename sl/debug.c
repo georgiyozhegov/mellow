@@ -6,7 +6,7 @@ extern void write_c(char value) {
             "mov $1, %%rdi\n"
             "lea %0, %%rsi\n"
             "mov $1, %%rdx\n"
-            "syscall\n"
+            "syscall"
             : : "m"(value)
       );
 }
