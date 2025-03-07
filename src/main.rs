@@ -45,6 +45,7 @@ fn main() {
     }
 
     let assembly = assembly::convert(tac);
+    let assembly = assembly::optimize(assembly);
     for instruction in assembly {
         println!("{instruction}")
     }

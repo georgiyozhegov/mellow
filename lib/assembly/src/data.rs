@@ -2,7 +2,7 @@ use std::fmt::{self, Display, Formatter};
 
 use crate::Register;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Data {
     Register(Register),
     Stack(u8),

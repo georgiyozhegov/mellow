@@ -2,7 +2,7 @@ use std::fmt::{self, Display, Formatter};
 
 use crate::data::Data;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Assembly {
     Label(u64),
     Mov(Data, Data),

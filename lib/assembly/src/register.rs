@@ -27,7 +27,7 @@ impl RegisterKind {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Size {
     Byte = 8,
     Word = 16,
@@ -35,7 +35,7 @@ pub enum Size {
     Qword = 64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Register {
     kind: RegisterKind,
     size: Size,

@@ -1,5 +1,5 @@
-a = 10
-a = a + 1
-b = (a + 2) / 2
-debug a
-debug b
+let a = 1
+while a < 10 do
+      debug a
+      a = a + 1
+end
