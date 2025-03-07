@@ -8,6 +8,7 @@ extern void write_c(char value) {
             "mov $1, %%rdx\n"
             "syscall"
             : : "m"(value)
+            : "rax", "rdi", "rsi", "rdx"
       );
 }
 
@@ -36,9 +37,9 @@ extern void write_i64(long long value) {
       }
 
       if (negative)
-            buffer[size] = '-';
+            buffer[size++] = '-';
 
-      for (int index = size; index >= 0; index--)
+      for (int index = size - 1; index >= 0; index--)
             write_c(buffer[index]);
 }
 
