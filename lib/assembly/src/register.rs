@@ -21,13 +21,6 @@ pub enum RegisterKind {
 }
 
 impl RegisterKind {
-    pub fn all() -> Vec<Self> {
-        use RegisterKind::*;
-        vec![
-            A, B, C, D, Sp, Bp, Si, Di, R8, R9, R10, R11, R12, R13, R14, R15,
-        ]
-    }
-
     pub fn allocable() -> Vec<Self> {
         use RegisterKind::*;
         vec![B, C, Si, Di, R8, R9, R10, R11, R12, R13, R14, R15]

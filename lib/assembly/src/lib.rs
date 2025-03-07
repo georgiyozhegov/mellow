@@ -7,21 +7,17 @@ use std::collections::HashMap;
 use assembly::Assembly;
 use data::Data;
 use ir::Instruction;
-pub use register::{Register, RegisterKind, Size};
-
-fn register(id: u64, size: Size, allocated: &HashMap<u64, RegisterKind>) -> Data {
-    let kind = allocated.get(&id).unwrap().clone();
-    let register = Register::new(kind, size);
-    Data::Register(register)
-}
+use register::{Register, RegisterKind, Size};
 
 macro_rules! arithmetic {
     ($operation:ident, $to:expr, $left:expr, $right:expr, $allocated:expr, $output:expr) => {
         let to = register($to, Size::Qword, $allocated);
         let left = register($left, Size::Qword, $allocated);
         let right = register($right, Size::Qword, $allocated);
-        $output.push(Assembly::$operation(left.clone(), right));
-        $output.push(Assembly::Mov(to, left));
+        $output.extend(vec![
+            Assembly::$operation(left.clone(), right),
+            Assembly::Mov(to, left),
+        ]);
     };
 }
 
@@ -31,10 +27,18 @@ macro_rules! comparision {
         let qword_to = register($to, Size::Qword, $allocated);
         let left = register($left, Size::Qword, $allocated);
         let right = register($right, Size::Qword, $allocated);
-        $output.push(Assembly::Cmp(left, right));
-        $output.push(Assembly::Mov(qword_to, Data::Integer(0)));
-        $output.push(Assembly::$operation(byte_to));
+        $output.extend(vec![
+            Assembly::Cmp(left, right),
+            Assembly::Mov(qword_to, Data::Integer(0)),
+            Assembly::$operation(byte_to),
+        ]);
     };
+}
+
+fn register(id: u64, size: Size, allocated: &HashMap<u64, RegisterKind>) -> Data {
+    let kind = allocated.get(&id).unwrap().clone();
+    let register = Register::new(kind, size);
+    Data::Register(register)
 }
 
 fn generate(
@@ -65,10 +69,12 @@ fn generate(
             let left = register(left, Size::Qword, allocated);
             let right = register(right, Size::Qword, allocated);
             let rax = Data::Register(Register::new(RegisterKind::A, Size::Qword));
-            output.push(Assembly::Mov(rax.clone(), left));
-            output.push(Assembly::Cqo);
-            output.push(Assembly::Idiv(right));
-            output.push(Assembly::Mov(to, rax));
+            output.extend(vec![
+                Assembly::Mov(rax.clone(), left),
+                Assembly::Cqo,
+                Assembly::Idiv(right),
+                Assembly::Mov(to, rax),
+            ]);
         }
         Instruction::Equal { to, left, right } => {
             comparision!(Sete, to, left, right, allocated, output);
@@ -89,19 +95,20 @@ fn generate(
             let from = Data::Identifier(identifier);
             output.push(Assembly::Mov(to, from));
         }
-        Instruction::Jump { to } => {
+        Instruction::Jump(to) => {
             output.push(Assembly::Jmp(to));
         }
         Instruction::JumpIf { condition, to } => {
             let condition = register(condition, Size::Qword, allocated);
-            output.push(Assembly::Cmp(condition, Data::Integer(1)));
-            output.push(Assembly::Je(to));
+            output.extend(vec![
+                Assembly::Cmp(condition, Data::Integer(1)),
+                Assembly::Je(to),
+            ]);
         }
         Instruction::Call { label, value } => {
             let value = register(value, Size::Qword, allocated);
             let rdi = Data::Register(Register::new(RegisterKind::Di, Size::Qword));
-            output.push(Assembly::Mov(rdi, value));
-            output.push(Assembly::Call(label));
+            output.extend(vec![Assembly::Mov(rdi, value), Assembly::Call(label)]);
         }
         _ => todo!(),
     }
@@ -118,8 +125,8 @@ fn map(allocated: HashMap<u64, u64>) -> HashMap<u64, RegisterKind> {
 
 pub fn convert(tac: Vec<Instruction>) -> Vec<Assembly> {
     let mut output = Vec::new();
-    let registers = RegisterKind::allocable().len();
-    let allocated = map(ir::allocate(&tac, registers as u64));
+    let n = RegisterKind::allocable().len();
+    let allocated = map(ir::allocate(&tac, n as u64));
     for instruction in tac.into_iter() {
         generate(instruction, &mut output, &allocated);
     }

@@ -9,7 +9,7 @@ struct Lifetime {
 }
 
 impl Lifetime {
-    pub fn is_overlap(&self, other: &Self) -> bool {
+    pub fn overlaps(&self, other: &Self) -> bool {
         self.start <= other.start && other.end <= self.end
     }
 }
@@ -75,7 +75,7 @@ fn interference_graph(lifetimes: HashMap<u64, Lifetime>) -> HashMap<u64, HashSet
 
     for a in lifetimes.iter() {
         for b in lifetimes.iter() {
-            if a.1.is_overlap(b.1) {
+            if a.1.overlaps(b.1) {
                 graph.get_mut(a.0).unwrap().insert(*b.0);
                 graph.get_mut(b.0).unwrap().insert(*a.0);
             }
@@ -104,7 +104,7 @@ pub fn allocate(tac: &Vec<Instruction>, registers: u64) -> HashMap<u64, u64> {
         if let Some(register) = registers.iter().find(|register| !used.contains(register)) {
             allocated.insert(*id, register.clone());
         } else {
-            panic!("error: all registers have been allocated")
+            panic!("error: all registers have been allocated") // TODO: memory spilling
         }
     }
 

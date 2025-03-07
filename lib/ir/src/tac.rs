@@ -4,23 +4,17 @@ use crate::{
     Block,
 };
 
-pub struct Allocator {
+pub struct TemporaryAllocator {
     pub id: u64,
 }
 
-impl Allocator {
+impl TemporaryAllocator {
     pub fn new() -> Self {
         Self { id: 0 }
     }
 }
 
-impl Default for Allocator {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl Allocator {
+impl TemporaryAllocator {
     pub fn allocate(&mut self) -> u64 {
         let id = self.id;
         self.id += 1;
@@ -28,7 +22,7 @@ impl Allocator {
     }
 }
 
-fn block(block: Block, allocator: &mut Allocator, output: &mut Vec<Instruction>) {
+fn block(block: Block, allocator: &mut TemporaryAllocator, output: &mut Vec<Instruction>) {
     match block {
         Block::Basic(body) => {
             for statement in body {
@@ -39,10 +33,10 @@ fn block(block: Block, allocator: &mut Allocator, output: &mut Vec<Instruction>)
     };
 }
 
-fn link(link: &Link, allocator: &mut Allocator, output: &mut Vec<Instruction>) {
+fn link(link: &Link, allocator: &mut TemporaryAllocator, output: &mut Vec<Instruction>) {
     match link {
         Link::Direct(to) => {
-            output.push(Instruction::Jump { to: *to });
+            output.push(Instruction::Jump(*to));
         }
         Link::Branch {
             condition,
@@ -50,17 +44,19 @@ fn link(link: &Link, allocator: &mut Allocator, output: &mut Vec<Instruction>) {
             false_,
         } => {
             let condition = Instruction::expression(condition.clone(), allocator, output);
-            output.push(Instruction::JumpIf {
-                condition,
-                to: *true_,
-            });
-            output.push(Instruction::Jump { to: *false_ });
+            output.extend(vec![
+                Instruction::JumpIf {
+                    condition,
+                    to: *true_,
+                },
+                Instruction::Jump(*false_),
+            ]);
         }
     }
 }
 
 pub fn construct(cfg: Cfg<Block, Link>) -> Vec<Instruction> {
-    let mut allocator = Allocator::new();
+    let mut allocator = TemporaryAllocator::new();
     cfg.blocks
         .into_iter()
         .enumerate()

@@ -12,9 +12,9 @@ pub enum Assembly {
     Imul(Data, Data),
     Idiv(Data),
     Cqo,
-    Sete(Data), // =
-    Setg(Data), // >
-    Setl(Data), // <
+    Sete(Data),
+    Setg(Data),
+    Setl(Data),
     Jmp(u64),
     Je(u64),
     Call(String),

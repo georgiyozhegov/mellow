@@ -5,7 +5,7 @@ use syntax::{
     tree::{Expression, Statement},
 };
 
-use crate::tac::Allocator;
+use crate::tac::TemporaryAllocator;
 
 #[derive(Debug)]
 pub enum Instruction {
@@ -21,7 +21,7 @@ pub enum Instruction {
     Greater { to: u64, left: u64, right: u64 },
     Less { to: u64, left: u64, right: u64 },
     Equal { to: u64, left: u64, right: u64 },
-    Jump { to: u64 },
+    Jump(u64),
     JumpIf { condition: u64, to: u64 },
     Call { label: String, value: u64 },
 }
@@ -29,35 +29,31 @@ pub enum Instruction {
 impl Instruction {
     pub fn expression(
         expression: Expression,
-        allocator: &mut Allocator,
+        allocator: &mut TemporaryAllocator,
         output: &mut Vec<Self>,
     ) -> u64 {
         match expression {
             Expression::Integer(value) => {
                 let id = allocator.allocate();
-                let instruction = Self::Integer { to: id, value };
-                output.push(instruction);
+                output.push(Self::Integer { to: id, value });
                 id
             }
             Expression::Identifier(identifier) => {
                 let id = allocator.allocate();
-                let instruction = Self::Get { to: id, identifier };
-                output.push(instruction);
+                output.push(Self::Get { to: id, identifier });
                 id
             }
             Expression::Boolean(value) => {
                 let id = allocator.allocate();
-                let instruction = Self::Integer {
+                output.push(Self::Integer {
                     to: id,
                     value: value as i128,
-                };
-                output.push(instruction);
+                });
                 id
             }
             Expression::String(value) => {
                 let id = allocator.allocate();
-                let instruction = Self::String { to: id, value };
-                output.push(instruction);
+                output.push(Self::String { to: id, value });
                 id
             }
             Expression::Binary(operator, left, right) => {
@@ -110,7 +106,7 @@ impl Instruction {
 }
 
 impl Instruction {
-    pub fn statement(statement: Statement, allocator: &mut Allocator, output: &mut Vec<Self>) {
+    pub fn statement(statement: Statement, allocator: &mut TemporaryAllocator, output: &mut Vec<Self>) {
         match statement {
             Statement::Let {
                 identifier, value, ..
@@ -172,8 +168,8 @@ impl Display for Instruction {
             Self::Equal { to, left, right } => {
                 write!(f, "#{to} eq #{left} #{right}")
             }
-            Self::Jump { to } => {
-                write!(f, "jump @{to}")
+            Self::Jump(label) => {
+                write!(f, "jump @{label}")
             }
             Self::JumpIf { condition, to } => {
                 write!(f, "jump @{to} if #{condition}")
