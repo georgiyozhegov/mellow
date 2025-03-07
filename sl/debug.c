@@ -17,6 +17,11 @@ extern void debug_c(char value) {
 }
 
 extern void write_i64(long long value) {
+      if (value == 0) {
+            write_c('0');
+            return;
+      }
+
       char buffer[20];
       int size = 0;
       int negative = value < 0;
