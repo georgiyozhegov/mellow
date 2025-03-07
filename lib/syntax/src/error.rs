@@ -63,6 +63,7 @@ impl Display for Token {
                 Self::End => "'end'".to_string(),
                 Self::True => "'true'".to_string(),
                 Self::False => "'false'".to_string(),
+                Self::Debug => "'debug'".to_string(),
             }
         )
     }

@@ -26,6 +26,7 @@ pub enum Statement {
         sequence: Expression,
         body: Vec<Statement>,
     },
+    Debug(Expression),
 }
 
 #[derive(Debug, Clone)]

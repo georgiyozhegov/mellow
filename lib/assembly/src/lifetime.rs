@@ -186,6 +186,13 @@ pub fn scan(tac: &Tac) -> HashMap<u64, Lifetime> {
                 };
                 lifetimes.insert(*from, lifetime);
             }
+            Instruction::Call { value, .. } => {
+                let lifetime = Lifetime {
+                    start: *start.get(value).unwrap(),
+                    end: index,
+                };
+                lifetimes.insert(*value, lifetime);
+            }
             _ => {}
         }
     }

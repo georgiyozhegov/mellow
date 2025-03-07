@@ -75,7 +75,7 @@ fn construct_(source: Vec<Statement>, cfg: &mut Cfg<Block, Link>) -> BlockRange 
     let mut current = Vec::new();
     for statement in source {
         match statement {
-            Statement::Let { .. } | Statement::Assign { .. } => {
+            Statement::Let { .. } | Statement::Assign { .. } | Statement::Debug(..) => {
                 current.push(statement.clone());
             }
             Statement::If {

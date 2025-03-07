@@ -24,6 +24,7 @@ macro_rules! end_of_expression {
             | Token::In
             | Token::Do
             | Token::End
+            | Token::Debug
     };
 }
 

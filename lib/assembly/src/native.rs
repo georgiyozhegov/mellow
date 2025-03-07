@@ -4,7 +4,7 @@ use std::{
 };
 
 use crate::{
-    lifetime::{self, scan, Register, RegisterKind, Size},
+    lifetime::{self, Register, RegisterKind, Size},
     Instruction, Tac,
 };
 
@@ -42,6 +42,7 @@ pub enum Assembly {
     Setl(Data), // <
     Jmp(u64),
     Je(u64),
+    Call(String),
 }
 
 impl Display for Assembly {
@@ -85,6 +86,9 @@ impl Display for Assembly {
             }
             Self::Je(label) => {
                 write!(f, "je _{label}")
+            }
+            Self::Call(label) => {
+                write!(f, "call {label}")
             }
         }
     }
@@ -185,6 +189,12 @@ fn generate(
                 let condition = qword(allocated.get(&condition).unwrap().clone());
                 output.push(Assembly::Cmp(condition, Data::Integer(1)));
                 output.push(Assembly::Je(to));
+            }
+            Instruction::Call { label, value } => {
+                let value = qword(allocated.get(&value).unwrap().clone());
+                let rdi = qword(RegisterKind::Di);
+                output.push(Assembly::Mov(rdi, value));
+                output.push(Assembly::Call(label));
             }
             _ => todo!(),
         }

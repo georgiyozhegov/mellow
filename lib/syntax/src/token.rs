@@ -22,6 +22,7 @@ pub enum Token {
     End,
     True,
     False,
+    Debug,
 }
 
 #[derive(Debug, Clone, PartialEq)]

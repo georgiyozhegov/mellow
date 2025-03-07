@@ -69,6 +69,7 @@ impl Parse<'_> {
             Some(Token::If) => self.if_s(),
             Some(Token::While) => self.while_(),
             Some(Token::For) => self.for_(),
+            Some(Token::Debug) => self.debug(),
             token => Err(SyntaxError::Grammar {
                 expected: "statement",
                 found: token,
@@ -180,6 +181,11 @@ impl Parse<'_> {
             sequence,
             body,
         })
+    }
+
+    fn debug(&mut self) -> Result<Statement, SyntaxError> {
+        let value = self.expression()?;
+        Ok(Statement::Debug(value))
     }
 }
 

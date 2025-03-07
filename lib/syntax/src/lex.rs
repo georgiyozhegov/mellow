@@ -100,6 +100,7 @@ impl Lex<'_> {
             "end" => Some(Token::End),
             "true" => Some(Token::True),
             "false" => Some(Token::False),
+            "debug" => Some(Token::Debug),
             _ => None,
         }
     }
