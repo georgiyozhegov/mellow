@@ -5,7 +5,7 @@ use syntax::{
     tree::{Expression, Statement},
 };
 
-use crate::Allocator;
+use crate::tac::Allocator;
 
 #[derive(Debug)]
 pub enum Instruction {
@@ -121,7 +121,10 @@ impl Instruction {
             }
             Statement::Debug(value) => {
                 let value = Self::expression(value, allocator, output);
-                let instruction = Self::Call { label: "debug_i64".into(), value }; // TODO: implement type system
+                let instruction = Self::Call {
+                    label: "debug_i64".into(),
+                    value,
+                }; // TODO: implement type system
                 output.push(instruction);
             }
             _ => unreachable!("conditional statements are not present in control flow graph"),
