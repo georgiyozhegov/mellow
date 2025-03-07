@@ -20,9 +20,10 @@ _2:
 mov rbx, [a]
 mov rdi, rbx
 call debug_i64
-mov rbx, [a]
-mov rcx, 1
-add rbx, rcx
+mov rcx, [a]
+mov rbx, 1
+add rcx, rbx
+mov rbx, rcx
 mov [a], rbx
 jmp _1
 _3:

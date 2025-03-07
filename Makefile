@@ -1,4 +1,5 @@
 compile:
+	mkdir -p output
 	cargo r > output/main.asm
 	make -C sl compile
 	nasm -f elf64 output/main.asm -o output/main.o
