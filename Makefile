@@ -7,3 +7,6 @@ compile:
 clean:
 	make -C sl clean
 	rm output/*
+
+run: compile
+	./output/main

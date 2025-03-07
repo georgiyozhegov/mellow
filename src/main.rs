@@ -52,6 +52,6 @@ fn main() {
     }
 
     println!("mov rax, 60");
-    println!("mov rdi, [a]");
+    println!("mov rdi, 0");
     println!("syscall");
 }
