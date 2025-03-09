@@ -6,3 +6,5 @@ mod lifetime;
 pub mod tac;
 pub use instruction::Instruction;
 pub use lifetime::allocate;
+pub mod symbol_table;
+pub use symbol_table::SymbolTable;

@@ -1,6 +1,5 @@
-use std::{collections::HashSet, env, fs, process::exit};
+use std::{env, fs, process::exit};
 
-use ir::Instruction;
 fn main() {
     let path = env::args().nth(1).unwrap_or("source.mellow".into());
     let source = fs::read_to_string(path).unwrap();
@@ -12,27 +11,12 @@ fn main() {
         }
     };
 
+    let symbol_table = ir::symbol_table::construct(&ast);
     let cfg = ir::cfg::construct(ast);
-    // println!("{cfg:#?}");
-
     let tac = ir::tac::construct(cfg);
-    // println!("{tac}");
 
     println!("section .bss");
-    let mut identifiers = HashSet::new();
-    let mut labels = HashSet::new();
-    for instruction in tac.iter() {
-        match instruction {
-            Instruction::Set { identifier, .. } => {
-                identifiers.insert(identifier);
-            }
-            Instruction::Call { label, .. } => {
-                labels.insert(label);
-            }
-            _ => {}
-        }
-    }
-    for identifier in identifiers.iter() {
+    for (identifier, _) in symbol_table.variables() {
         println!("{identifier}: resq 1");
     }
 
@@ -40,8 +24,10 @@ fn main() {
     println!("global _start:");
     println!("_start:");
 
-    for label in labels.iter() {
-        println!("extern {label}");
+    for (identifier, meta) in symbol_table.functions() {
+        if meta.external {
+            println!("extern {identifier}");
+        }
     }
 
     let assembly = assembly::convert(tac);
