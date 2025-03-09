@@ -16,7 +16,7 @@ impl Display for Data {
             Self::Register(register) => write!(f, "{register}"),
             Self::Stack(offset) => write!(f, "[rsp - {offset}]"),
             Self::Integer(value) => write!(f, "{value}"),
-            Self::Identifier(identifier) => write!(f, "[{identifier}]"),
+            Self::Identifier(identifier) => write!(f, "qword [{identifier}]"),
         }
     }
 }

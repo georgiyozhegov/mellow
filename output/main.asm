@@ -5,26 +5,23 @@ global _start:
 _start:
 extern debug_i64
 _0:
-mov rbx, 1
-mov [a], rbx
+mov qword [a], 0
 _1:
-mov rcx, [a]
-mov rbx, 10
-cmp rcx, rbx
+mov rbx, qword [a]
+mov rcx, 10
+cmp rbx, rcx
 mov rbx, 0
 setl bl
 cmp rbx, 1
 je _2
 jmp _3
 _2:
-mov rbx, [a]
-mov rdi, rbx
-call debug_i64
-mov rcx, [a]
-mov rbx, 1
+mov rcx, qword [a]
+mov rbx, 2
 add rcx, rbx
-mov rbx, rcx
-mov [a], rbx
+mov qword [a], rcx
+mov rdi, qword [a]
+call debug_i64
 jmp _1
 _3:
 mov rax, 60

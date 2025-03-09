@@ -18,6 +18,7 @@ pub enum Assembly {
     Jmp(u64),
     Je(u64),
     Call(String),
+    Empty,
 }
 
 impl Display for Assembly {
@@ -64,6 +65,9 @@ impl Display for Assembly {
             }
             Self::Call(label) => {
                 write!(f, "call {label}")
+            }
+            Self::Empty => {
+                Ok(())
             }
         }
     }
