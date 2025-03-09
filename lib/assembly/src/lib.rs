@@ -1,15 +1,15 @@
 mod assembly;
 mod data;
-mod register;
 mod optimize;
+mod register;
 
 use std::collections::HashMap;
 
 use assembly::Assembly;
 use data::Data;
 use ir::Instruction;
-use register::{Register, RegisterKind, Size};
 pub use optimize::optimize;
+use register::{Register, RegisterKind, Size};
 
 macro_rules! arithmetic {
     ($operation:ident, $to:expr, $left:expr, $right:expr, $allocated:expr, $output:expr) => {

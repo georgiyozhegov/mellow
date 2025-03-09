@@ -66,9 +66,7 @@ impl Display for Assembly {
             Self::Call(label) => {
                 write!(f, "call {label}")
             }
-            Self::Empty => {
-                Ok(())
-            }
+            Self::Empty => Ok(()),
         }
     }
 }

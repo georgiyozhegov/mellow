@@ -1,6 +1,6 @@
+use std::{iter::Peekable, slice::Iter};
+
 use crate::assembly::Assembly;
-use std::slice::Iter;
-use std::iter::Peekable;
 
 impl Assembly {
     pub fn optimize(self) -> Self {
@@ -10,35 +10,31 @@ impl Assembly {
                     return Self::Empty;
                 }
             }
-            _ => {},
+            _ => {}
         }
         self
     }
 
     pub fn optimize_with(self, source: &mut Peekable<Iter<Self>>) -> Self {
         match &self {
-            Self::Mov(to, from) => {
-                match source.peek() {
-                    Some(Self::Mov(next_to, next_from)) => {
-                        if to == next_from {
-                            source.next();
-                            return Self::Mov(next_to.clone(), from.clone());
-                        }
+            Self::Mov(to, from) => match source.peek() {
+                Some(Self::Mov(next_to, next_from)) => {
+                    if to == next_from {
+                        source.next();
+                        return Self::Mov(next_to.clone(), from.clone());
                     }
-                    _ => {},
                 }
-            }
-            Self::Jmp(label) => {
-                match source.peek() {
-                    Some(Self::Label(id)) => {
-                        if label == id {
-                            return Self::Empty;
-                        }
+                _ => {}
+            },
+            Self::Jmp(label) => match source.peek() {
+                Some(Self::Label(id)) => {
+                    if label == id {
+                        return Self::Empty;
                     }
-                    _ => {},
                 }
-            }
-            _ => {},
+                _ => {}
+            },
+            _ => {}
         }
         self
     }

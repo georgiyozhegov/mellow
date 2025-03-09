@@ -20,7 +20,10 @@ pub struct SymbolTable {
 
 impl SymbolTable {
     pub fn new() -> Self {
-        Self { variables: HashMap::new(), functions: HashMap::new() }
+        Self {
+            variables: HashMap::new(),
+            functions: HashMap::new(),
+        }
     }
 }
 
@@ -67,10 +70,14 @@ pub fn construct(source: &Vec<Statement>) -> SymbolTable {
 
     for statement in source.iter() {
         match statement {
-            Statement::Let { identifier, mutable, .. } => {
+            Statement::Let {
+                identifier,
+                mutable,
+                ..
+            } => {
                 table.insert_variable(identifier.into(), VariableMeta { mutable: *mutable });
             }
-            _ => {},
+            _ => {}
         }
     }
     table

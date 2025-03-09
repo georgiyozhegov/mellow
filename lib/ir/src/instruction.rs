@@ -106,7 +106,11 @@ impl Instruction {
 }
 
 impl Instruction {
-    pub fn statement(statement: Statement, allocator: &mut TemporaryAllocator, output: &mut Vec<Self>) {
+    pub fn statement(
+        statement: Statement,
+        allocator: &mut TemporaryAllocator,
+        output: &mut Vec<Self>,
+    ) {
         match statement {
             Statement::Let {
                 identifier, value, ..
