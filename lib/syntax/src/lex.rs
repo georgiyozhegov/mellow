@@ -5,7 +5,7 @@ use crate::{
     error::Result,
     numeric, quote, single, skip,
     token::{BinaryOperator, Token, UnaryOperator},
-    SyntaxError,
+    Error,
 };
 
 pub type Source<'s> = Peekable<Chars<'s>>;
@@ -30,7 +30,7 @@ impl Iterator for Lex<'_> {
             quote!() => Some(Ok(self.string())),
             skip!() => self.skip(),
             single!() => Some(Ok(self.single())),
-            c => Some(Err(SyntaxError::InvalidCharacter(*c))),
+            c => Some(Err(Error::InvalidCharacter(*c))),
         }
     }
 }

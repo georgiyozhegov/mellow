@@ -1,7 +1,7 @@
 use crate::{
     token::{BinaryOperator, Token, UnaryOperator},
     tree::Expression,
-    SyntaxError,
+    Error,
 };
 
 #[macro_export]
@@ -29,15 +29,15 @@ macro_rules! end_of_expression {
 }
 
 pub struct Rpn {
-    value_stack: Vec<Expression>,
-    item_stack: Vec<RpnItem>,
+    values: Vec<Expression>,
+    items: Vec<RpnItem>,
 }
 
 impl Rpn {
-    pub fn new(value_stack: Vec<Expression>, item_stack: Vec<RpnItem>) -> Self {
+    pub fn new(values: Vec<Expression>, items: Vec<RpnItem>) -> Self {
         Self {
-            value_stack,
-            item_stack,
+            values,
+            items,
         }
     }
 }
@@ -50,31 +50,31 @@ impl Default for Rpn {
 
 impl Rpn {
     pub fn value(&mut self, value: Expression) {
-        self.value_stack.push(value);
+        self.values.push(value);
     }
 
     pub fn item(&mut self, item: RpnItem) {
-        self.item_stack.push(item);
+        self.items.push(item);
     }
 
     pub fn binary(&mut self, item: RpnItem) {
         while self
-            .item_stack
+            .items
             .last()
-            .is_some_and(|previous_item| previous_item.precedence() >= item.precedence())
+            .is_some_and(|previous| previous.precedence() >= item.precedence())
         {
-            let previous_item = self.item_stack.pop().unwrap();
-            self.fold(previous_item);
+            let previous = self.items.pop().unwrap();
+            self.fold(previous);
         }
-        self.item_stack.push(item);
+        self.items.push(item);
     }
 
     pub fn unary(&mut self, item: RpnItem) {
-        self.item_stack.push(item);
+        self.items.push(item);
     }
 
     pub fn parenthesis(&mut self) {
-        while let Some(item) = self.item_stack.pop() {
+        while let Some(item) = self.items.pop() {
             if item == RpnItem::Parenthesis {
                 break;
             }
@@ -83,10 +83,10 @@ impl Rpn {
     }
 
     pub fn collapse(&mut self) -> Expression {
-        while let Some(item) = self.item_stack.pop() {
+        while let Some(item) = self.items.pop() {
             self.fold(item);
         }
-        self.value_stack.pop().unwrap()
+        self.values.pop().unwrap()
     }
 }
 
@@ -94,17 +94,17 @@ impl Rpn {
     fn fold(&mut self, item: RpnItem) {
         match item {
             RpnItem::Binary(operator) => {
-                let left = self.value_stack.pop().unwrap();
-                let right = self.value_stack.pop().unwrap();
-                self.value_stack.push(Expression::Binary(
+                let right = self.values.pop().unwrap();
+                let left = self.values.pop().unwrap();
+                self.values.push(Expression::Binary(
                     operator,
-                    Box::new(right),
                     Box::new(left),
+                    Box::new(right),
                 ));
             }
             RpnItem::Unary(operator) => {
-                let value = self.value_stack.pop().unwrap();
-                self.value_stack
+                let value = self.values.pop().unwrap();
+                self.values
                     .push(Expression::Unary(operator, Box::new(value)));
             }
             _ => panic!(),
@@ -176,7 +176,7 @@ impl Default for ExpressionState {
 }
 
 impl ExpressionState {
-    pub fn stop(&mut self, token: &Token) -> Result<bool, SyntaxError> {
+    pub fn stop(&mut self, token: &Token) -> Result<bool, Error> {
         match (&self, token) {
             (Self::Value, literal!() | Token::If) => {
                 *self = Self::Item;
@@ -189,14 +189,14 @@ impl ExpressionState {
             }
             (Self::Item, Token::RightParenthesis) => Ok(false),
             (Self::Item, end_of_expression!()) => Ok(true),
-            (Self::Value, _) => Err(SyntaxError::Grammar {
-                expected: "literal, identifier or '('",
-                found: Some(token.clone()),
-            }),
-            (Self::Item, _) => Err(SyntaxError::Grammar {
-                expected: "operator, statement or ')'",
-                found: Some(token.clone()),
-            }),
+            (Self::Value, _) => Err(Error::grammar(
+                "literal, identifier or '('",
+                Some(token.clone()),
+            )),
+            (Self::Item, _) => Err(Error::grammar(
+                "operator, statement or ')'",
+                Some(token.clone()),
+            )),
         }
     }
 }
