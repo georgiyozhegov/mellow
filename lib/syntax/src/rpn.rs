@@ -119,11 +119,11 @@ pub enum RpnItem {
     Parenthesis,
 }
 
-impl From<&Token> for RpnItem {
-    fn from(value: &Token) -> Self {
+impl From<Token> for RpnItem {
+    fn from(value: Token) -> Self {
         match value {
-            Token::BinaryOperator(operator) => Self::Binary(operator.clone()),
-            Token::UnaryOperator(operator) => Self::Unary(operator.clone()),
+            Token::BinaryOperator(operator) => Self::Binary(operator),
+            Token::UnaryOperator(operator) => Self::Unary(operator),
             Token::LeftParenthesis => Self::Parenthesis,
             _ => panic!(),
         }

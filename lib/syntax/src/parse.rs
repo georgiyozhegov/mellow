@@ -1,46 +1,15 @@
 use std::iter::Peekable;
 
 use crate::{
+    error::Result,
     literal,
     rpn::{ExpressionState, Rpn, RpnItem},
     token::Token,
     tree::{Expression, Statement},
-    Lex, SyntaxError,
+    Error, Lex,
 };
 
-type Source<'s> = Peekable<Lex<'s>>;
-
-macro_rules! next {
-    ($source: expr) => {
-        match $source.next() {
-            Some(Ok(token)) => Some(token),
-            None => None,
-            Some(Err(error)) => return Err(error),
-        }
-    };
-}
-
-macro_rules! peek {
-    ($source: expr) => {
-        match $source.peek() {
-            Some(Ok(token)) => Some(token),
-            None => None,
-            Some(Err(error)) => return Err(error.clone()),
-        }
-    };
-}
-
-macro_rules! except {
-    ($source: expr, $token: pat, $expected: expr) => {
-        match next!($source) {
-            Some($token) => Ok(()),
-            token => Err(SyntaxError::Grammar {
-                expected: $expected,
-                found: token,
-            }),
-        }
-    };
-}
+pub type Source<'s> = Peekable<Lex<'s>>;
 
 pub struct Parse<'p> {
     source: Source<'p>,
@@ -53,7 +22,7 @@ impl<'p> Parse<'p> {
 }
 
 impl Iterator for Parse<'_> {
-    type Item = Result<Statement, SyntaxError>;
+    type Item = Result<Statement>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.source.peek()?;
@@ -62,25 +31,41 @@ impl Iterator for Parse<'_> {
 }
 
 impl Parse<'_> {
-    pub fn statement(&mut self) -> Result<Statement, SyntaxError> {
-        match next!(self.source) {
-            Some(Token::Let) => self.let_(),
-            Some(Token::Identifier(identifier)) => self.assign(identifier),
-            Some(Token::If) => self.if_s(),
-            Some(Token::While) => self.while_(),
-            Some(Token::For) => self.for_(),
-            Some(Token::Debug) => self.debug(),
-            token => Err(SyntaxError::Grammar {
-                expected: "statement",
-                found: token,
-            }),
+    fn next(&mut self) -> Result<Token> {
+        self.source
+            .next()
+            .unwrap_or(Err(Error::grammar("statement", None)))
+    }
+
+    fn peek(&mut self) -> Result<Option<Token>> {
+        self.source.peek().cloned().transpose()
+    }
+
+    fn expect(&mut self, token: Token) -> Result<()> {
+        let next = self.next()?;
+        if next == token {
+            Ok(())
+        } else {
+            Err(Error::grammar(token.to_string(), Some(next)))
         }
     }
 
-    fn let_(&mut self) -> Result<Statement, SyntaxError> {
+    pub fn statement(&mut self) -> Result<Statement> {
+        match self.next()? {
+            Token::Let => self.let_(),
+            Token::Identifier(identifier) => self.assign(identifier),
+            Token::If => self.if_s(),
+            Token::While => self.while_(),
+            Token::For => self.for_(),
+            Token::Debug => self.debug(),
+            token => Err(Error::grammar("statement", Some(token))),
+        }
+    }
+
+    fn let_(&mut self) -> Result<Statement> {
         let mutable = self.mutable()?;
         let identifier = self.identifier()?;
-        except!(self.source, Token::Equal, "'='")?;
+        self.expect(Token::Equal)?;
         let value = self.expression()?;
         Ok(Statement::Let {
             identifier,
@@ -89,39 +74,36 @@ impl Parse<'_> {
         })
     }
 
-    fn mutable(&mut self) -> Result<bool, SyntaxError> {
-        match peek!(self.source) {
+    fn mutable(&mut self) -> Result<bool> {
+        match self.peek()? {
             Some(Token::Mutable) => {
-                self.source.next();
+                self.next()?;
                 Ok(true)
             }
             _ => Ok(false),
         }
     }
 
-    fn identifier(&mut self) -> Result<String, SyntaxError> {
-        match next!(self.source) {
-            Some(Token::Identifier(identifier)) => Ok(identifier),
-            token => Err(SyntaxError::Grammar {
-                expected: "identifier",
-                found: token,
-            }),
+    fn identifier(&mut self) -> Result<String> {
+        match self.next()? {
+            Token::Identifier(identifier) => Ok(identifier),
+            token => Err(Error::grammar("identifier", Some(token))),
         }
     }
 
-    fn assign(&mut self, identifier: String) -> Result<Statement, SyntaxError> {
-        except!(self.source, Token::Equal, "'='")?;
+    fn assign(&mut self, identifier: String) -> Result<Statement> {
+        self.expect(Token::Equal)?;
         let value = self.expression()?;
         Ok(Statement::Assign { identifier, value })
     }
 
-    fn if_s(&mut self) -> Result<Statement, SyntaxError> {
+    fn if_s(&mut self) -> Result<Statement> {
         let condition = self.expression()?;
-        except!(self.source, Token::Then, "'then'")?;
+        self.expect(Token::Then)?;
         let if_ = self.body()?;
         let or = self.or_s()?;
         let else_ = self.else_s()?;
-        except!(self.source, Token::End, "'end'")?;
+        self.expect(Token::End)?;
         Ok(Statement::If {
             condition,
             if_,
@@ -130,52 +112,47 @@ impl Parse<'_> {
         })
     }
 
-    fn or_s(&mut self) -> Result<Vec<(Expression, Vec<Statement>)>, SyntaxError> {
+    fn or_s(&mut self) -> Result<Vec<(Expression, Vec<Statement>)>> {
         let mut or = Vec::new();
-        while peek!(self.source).is_some_and(|token| *token == Token::Or) {
-            self.source.next();
+        while self.peek()?.is_some_and(|token| token == Token::Or) {
+            self.next()?;
             let condition = self.expression()?;
-            except!(self.source, Token::Then, "'then'")?;
+            self.expect(Token::Then)?;
             let body = self.body()?;
             or.push((condition, body));
         }
-        match peek!(self.source) {
+        match self.peek()? {
             Some(Token::Else) | Some(Token::End) => Ok(or),
-            token => Err(SyntaxError::Grammar {
-                expected: "'else' or 'end' after 'or' body",
-                found: token.cloned(),
-            }),
+            token => Err(Error::grammar("'else' or 'end' after 'or' body", token)),
         }
     }
 
-    fn else_s(&mut self) -> Result<Vec<Statement>, SyntaxError> {
-        match peek!(self.source) {
+    fn else_s(&mut self) -> Result<Vec<Statement>> {
+        match self.peek()? {
             Some(Token::Else) => {
-                self.source.next();
+                self.next()?;
                 self.body()
             }
             Some(Token::End) => Ok(vec![]),
-            token => Err(SyntaxError::Grammar {
-                expected: "'else', 'or' or 'end'",
-                found: token.cloned(),
-            }),
+            token => Err(Error::grammar("'else', 'or' or 'end'", token)),
         }
     }
 
-    fn while_(&mut self) -> Result<Statement, SyntaxError> {
+    fn while_(&mut self) -> Result<Statement> {
         let condition = self.expression()?;
-        except!(self.source, Token::Do, "'do'")?;
+        self.expect(Token::Do)?;
         let body = self.body()?;
-        except!(self.source, Token::End, "'end'")?;
+        self.expect(Token::End)?;
         Ok(Statement::While { condition, body })
     }
 
-    fn for_(&mut self) -> Result<Statement, SyntaxError> {
+    fn for_(&mut self) -> Result<Statement> {
         let item = self.identifier()?;
+        self.expect(Token::In)?;
         let sequence = self.expression()?;
-        except!(self.source, Token::Then, "'then'")?;
+        self.expect(Token::Do)?;
         let body = self.body()?;
-        except!(self.source, Token::End, "'end'")?;
+        self.expect(Token::End)?;
         Ok(Statement::For {
             item,
             sequence,
@@ -183,63 +160,60 @@ impl Parse<'_> {
         })
     }
 
-    fn debug(&mut self) -> Result<Statement, SyntaxError> {
+    fn debug(&mut self) -> Result<Statement> {
         let value = self.expression()?;
         Ok(Statement::Debug(value))
     }
 }
 
 impl Parse<'_> {
-    pub fn expression(&mut self) -> Result<Expression, SyntaxError> {
+    pub fn expression(&mut self) -> Result<Expression> {
         let mut rpn = Rpn::default();
         let mut status = ExpressionState::default();
-        while let Some(token) = peek!(self.source) {
-            if status.stop(token)? {
+        while let Some(token) = self.peek()? {
+            if status.stop(&token)? {
                 break;
             }
             match token {
                 literal!() => {
                     rpn.value(Expression::from(token));
-                    self.source.next();
+                    self.next()?;
                 }
                 Token::BinaryOperator(_) => {
                     rpn.binary(RpnItem::from(token));
-                    self.source.next();
+                    self.next()?;
                 }
                 Token::UnaryOperator(_) => {
                     rpn.unary(RpnItem::from(token));
-                    self.source.next();
+                    self.next()?;
                 }
                 Token::LeftParenthesis => {
                     rpn.item(RpnItem::from(token));
-                    self.source.next();
+                    self.next()?;
                 }
                 Token::RightParenthesis => {
-                    self.source.next();
+                    self.next()?;
                     rpn.parenthesis();
                 }
                 Token::If => {
-                    self.source.next();
+                    self.next()?;
                     rpn.value(self.if_e()?);
                 }
                 _ => {
-                    return Err(SyntaxError::Grammar {
-                        expected: "expression",
-                        found: Some(token.clone()),
-                    })
+                    return Err(Error::grammar("expression", Some(token)));
                 }
             }
         }
         Ok(rpn.collapse())
     }
 
-    fn if_e(&mut self) -> Result<Expression, SyntaxError> {
+    fn if_e(&mut self) -> Result<Expression> {
         let condition = self.expression()?;
-        except!(self.source, Token::Then, "'then'")?;
+        self.expect(Token::Then)?;
         let true_ = self.expression()?;
         let or = self.or_e()?;
         let else_ = self.else_e()?;
-        except!(self.source, Token::End, "'end'")?;
+        self.expect(Token::End)?;
         Ok(Expression::If {
             condition: Box::new(condition),
             if_: Box::new(true_),
@@ -248,43 +222,40 @@ impl Parse<'_> {
         })
     }
 
-    fn or_e(&mut self) -> Result<Vec<(Expression, Expression)>, SyntaxError> {
+    fn or_e(&mut self) -> Result<Vec<(Expression, Expression)>> {
         let mut or = Vec::new();
-        while peek!(self.source).is_some_and(|token| *token == Token::Or) {
-            self.source.next();
+        while self.peek()?.is_some_and(|token| token == Token::Or) {
+            self.next()?;
             let condition = self.expression()?;
-            except!(self.source, Token::Then, "'then'")?;
+            self.expect(Token::Then)?;
             let body = self.expression()?;
             or.push((condition, body));
         }
-        match peek!(self.source) {
+        match self.peek()? {
             Some(Token::Else) | Some(Token::End) => Ok(or),
-            token => Err(SyntaxError::Grammar {
-                expected: "'else' or 'end' after 'or' body",
-                found: token.cloned(),
-            }),
+            token => Err(Error::grammar("'else' or 'end' after 'or' body", token)),
         }
     }
 
-    fn else_e(&mut self) -> Result<Option<Box<Expression>>, SyntaxError> {
-        match peek!(self.source) {
+    fn else_e(&mut self) -> Result<Option<Box<Expression>>> {
+        match self.peek()? {
             Some(Token::Else) => {
-                self.source.next();
+                self.next()?;
                 Ok(Some(Box::new(self.expression()?)))
             }
             Some(Token::End) => Ok(None),
-            token => Err(SyntaxError::Grammar {
-                expected: "'else', 'or' or 'end' after 'if' body",
-                found: token.cloned(),
-            }),
+            token => Err(Error::grammar(
+                "'else', 'or' or 'end' after 'if' body",
+                token,
+            )),
         }
     }
 }
 
 impl Parse<'_> {
-    fn body(&mut self) -> Result<Vec<Statement>, SyntaxError> {
+    fn body(&mut self) -> Result<Vec<Statement>> {
         let mut body = Vec::new();
-        while let Some(token) = peek!(self.source) {
+        while let Some(token) = self.peek()? {
             match token {
                 Token::Or | Token::Else | Token::End => break,
                 _ => body.push(self.statement()?),

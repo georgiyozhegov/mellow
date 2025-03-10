@@ -2,16 +2,27 @@ use std::fmt::{self, Display, Formatter};
 
 use crate::token::{BinaryOperator, Token, UnaryOperator};
 
+pub type Result<T> = std::result::Result<T, Error>;
+
 #[derive(Debug, Clone)]
-pub enum SyntaxError {
+pub enum Error {
     InvalidCharacter(char),
     Grammar {
-        expected: &'static str,
+        expected: String,
         found: Option<Token>,
     },
 }
 
-impl Display for SyntaxError {
+impl Error {
+    pub fn grammar<T: ToString>(expected: T, found: Option<Token>) -> Self {
+        Self::Grammar {
+            expected: expected.to_string(),
+            found,
+        }
+    }
+}
+
+impl Display for Error {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
         match self {
             Self::InvalidCharacter(c) => write!(formatter, "error: invalid character: '{c}'"),

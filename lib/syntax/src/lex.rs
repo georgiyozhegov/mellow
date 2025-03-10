@@ -1,33 +1,12 @@
 use std::{iter::Peekable, str::Chars};
 
 use crate::{
+    alphabetic,
+    error::Result,
+    numeric, quote, single, skip,
     token::{BinaryOperator, Token, UnaryOperator},
     SyntaxError,
 };
-
-macro_rules! numeric {
-    () => {
-        '0'..='9'
-    };
-}
-
-macro_rules! alphabetic {
-    () => {
-        'a'..='z' | 'A'..='Z'
-    };
-}
-
-macro_rules! invisible {
-    () => {
-        ' ' | '\t' | '\n'
-    };
-}
-
-macro_rules! single {
-    () => {
-        '+' | '-' | '*' | '/' | '>' | '<' | '?' | '(' | ')' | '=' | '!'
-    };
-}
 
 pub type Source<'s> = Peekable<Chars<'s>>;
 
@@ -42,46 +21,24 @@ impl<'l> Lex<'l> {
 }
 
 impl Iterator for Lex<'_> {
-    type Item = Result<Token, SyntaxError>;
+    type Item = Result<Token>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.token()
-    }
-}
-
-impl Lex<'_> {
-    pub fn token(&mut self) -> Option<Result<Token, SyntaxError>> {
         match self.source.peek()? {
             numeric!() => Some(Ok(self.numeric())),
             alphabetic!() => Some(Ok(self.alphabetic())),
-            '"' => Some(Ok(self.string())),
-            invisible!() => self.invisible(),
+            quote!() => Some(Ok(self.string())),
+            skip!() => self.skip(),
             single!() => Some(Ok(self.single())),
             c => Some(Err(SyntaxError::InvalidCharacter(*c))),
         }
     }
+}
 
+impl Lex<'_> {
     fn numeric(&mut self) -> Token {
-        let buffer = take_until(&mut self.source, |c| matches!(c, numeric!()));
+        let buffer = self.take_while(|c| matches!(c, numeric!()));
         Token::Integer(buffer.parse().unwrap())
-    }
-
-    fn alphabetic(&mut self) -> Token {
-        let buffer = take_until(&mut self.source, |c| {
-            matches!(c, alphabetic!() | numeric!())
-        });
-        if let Some(token) = Lex::keyword(&buffer) {
-            token
-        } else {
-            Token::Identifier(buffer)
-        }
-    }
-
-    fn string(&mut self) -> Token {
-        self.source.next();
-        let buffer = take_until(&mut self.source, |c| c != '"');
-        self.source.next();
-        Token::String(buffer)
     }
 
     fn keyword(buffer: &str) -> Option<Token> {
@@ -105,20 +62,28 @@ impl Lex<'_> {
         }
     }
 
-    fn invisible(&mut self) -> Option<Result<Token, SyntaxError>> {
-        take_until(&mut self.source, |c| matches!(c, invisible!()));
-        self.token()
+    fn alphabetic(&mut self) -> Token {
+        let buffer = self.take_while(|c| matches!(c, alphabetic!() | numeric!()));
+        Self::keyword(&buffer).unwrap_or(Token::Identifier(buffer))
+    }
+
+    fn string(&mut self) -> Token {
+        self.source.next();
+        let buffer = self.take_while(|c| *c != quote!());
+        self.source.next();
+        Token::String(buffer)
+    }
+
+    fn skip(&mut self) -> Option<Result<Token>> {
+        self.take_while(|c| matches!(c, skip!()));
+        self.next()
     }
 
     fn single(&mut self) -> Token {
         match self.source.next().unwrap() {
             '+' => Token::BinaryOperator(BinaryOperator::Add),
             '-' => {
-                if self
-                    .source
-                    .peek()
-                    .is_some_and(|c| matches!(c, invisible!()))
-                {
+                if self.source.peek().is_some_and(|c| matches!(c, skip!())) {
                     Token::BinaryOperator(BinaryOperator::Subtract)
                 } else {
                     Token::UnaryOperator(UnaryOperator::Negate)
@@ -136,16 +101,13 @@ impl Lex<'_> {
             _ => unreachable!(),
         }
     }
-}
 
-fn take_until(source: &mut Source, until: fn(char) -> bool) -> String {
-    let mut buffer = String::new();
-    while let Some(c) = source.peek() {
-        if !until(*c) {
-            break;
+    fn take_while(&mut self, predicate: fn(&char) -> bool) -> String {
+        let mut output = String::new();
+        while let Some(c) = self.source.peek().and_then(|c| predicate(c).then_some(c)) {
+            output.push(*c);
+            self.source.next();
         }
-        buffer.push(*c);
-        source.next().unwrap();
+        output
     }
-    buffer
 }

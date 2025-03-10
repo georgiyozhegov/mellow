@@ -45,14 +45,14 @@ pub enum Expression {
     },
 }
 
-impl From<&Token> for Expression {
-    fn from(value: &Token) -> Self {
+impl From<Token> for Expression {
+    fn from(value: Token) -> Self {
         match value {
-            Token::Integer(value) => Self::Integer(*value),
-            Token::Identifier(value) => Self::Identifier(value.to_owned()),
+            Token::Integer(value) => Self::Integer(value),
+            Token::Identifier(value) => Self::Identifier(value),
             Token::True => Self::Boolean(true),
             Token::False => Self::Boolean(false),
-            Token::String(value) => Self::String(value.to_owned()),
+            Token::String(value) => Self::String(value),
             _ => panic!(),
         }
     }
