@@ -35,10 +35,7 @@ pub struct Rpn {
 
 impl Rpn {
     pub fn new(values: Vec<Expression>, items: Vec<RpnItem>) -> Self {
-        Self {
-            values,
-            items,
-        }
+        Self { values, items }
     }
 }
 
