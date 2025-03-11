@@ -6,7 +6,7 @@ use super::{
 };
 use crate::{
     lex::{Lex, Token},
-    literal, Result, Error,
+    literal, Error, Result,
 };
 
 pub type Source<'s> = Peekable<Lex<'s>>;
