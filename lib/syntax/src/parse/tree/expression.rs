@@ -1,4 +1,5 @@
-use crate::{token::Token, BinaryKind, UnaryKind};
+use super::super::{BinaryKind, UnaryKind};
+use crate::lex::Token;
 
 #[derive(Debug, Clone)]
 pub enum Expression {

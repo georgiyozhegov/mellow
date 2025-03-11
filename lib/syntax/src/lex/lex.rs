@@ -1,8 +1,5 @@
-use std::{iter::Peekable, str::Chars};
-
-use crate::{alphabetic, error::Result, numeric, quote, single, skip, token::Token, Error};
-
-pub type Source<'s> = Peekable<Chars<'s>>;
+use super::{Source, Token};
+use crate::{alphabetic, numeric, quote, single, skip, Error, Result};
 
 pub struct Lex<'l> {
     source: Source<'l>,

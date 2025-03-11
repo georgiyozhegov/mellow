@@ -1,12 +1,12 @@
 use std::iter::Peekable;
 
-use crate::{
-    error::Result,
-    literal,
+use super::{
     rpn::{ExpressionState, Rpn, RpnItem},
-    token::Token,
-    tree::{Expression, Statement},
-    BinaryKind, Error, Lex, UnaryKind,
+    BinaryKind, Expression, Statement, UnaryKind,
+};
+use crate::{
+    lex::{Lex, Token},
+    literal, Result, Error,
 };
 
 pub type Source<'s> = Peekable<Lex<'s>>;

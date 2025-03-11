@@ -1,6 +1,6 @@
 use std::fmt::{self, Display, Formatter};
 
-use crate::token::Token;
+use crate::lex::Token;
 
 pub type Result<T> = std::result::Result<T, Error>;
 

@@ -1,4 +1,5 @@
-use crate::{token::Token, tree::Expression, BinaryKind, Error, Precedence, UnaryKind};
+use super::{BinaryKind, Expression, Precedence, UnaryKind};
+use crate::{lex::Token, Error};
 
 #[macro_export]
 macro_rules! literal {
