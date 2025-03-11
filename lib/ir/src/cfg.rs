@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use syntax::{Expression, Statement};
+use syntax::parse::{Expression, Statement};
 
 use crate::block::{Block, BlockRange};
 
@@ -109,15 +109,13 @@ fn if_(
     let mut last_condition = None;
     for (condition, body) in or.into_iter() {
         let body = construct_(body.clone(), cfg);
-        let next = cfg.next_id();
-        cfg.branch(previous, condition.clone(), body.start, next);
+        cfg.branch(previous, condition.clone(), body.start, cfg.next_id());
         previous = body.end;
         last_condition = Some(condition);
     }
     let else_ = construct_(else_, cfg);
     if let Some(condition) = last_condition {
-        let next = cfg.next_id();
-        cfg.branch(previous, condition, next, else_.start);
+        cfg.branch(previous, condition, cfg.next_id(), else_.start);
     }
 }
 

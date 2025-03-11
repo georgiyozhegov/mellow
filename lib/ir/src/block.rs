@@ -1,4 +1,4 @@
-use syntax::Statement;
+use syntax::parse::Statement;
 
 #[derive(Debug)]
 pub enum Block {
