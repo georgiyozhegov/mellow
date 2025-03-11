@@ -2,9 +2,16 @@
 pub enum Token {
     Integer(i128),
     Identifier(String),
-    BinaryOperator(BinaryOperator),
+    Plus,
+    Minus,
+    Star,
+    Slash,
+    Greater,
+    Less,
+    Question,
     String(String),
-    UnaryOperator(UnaryOperator),
+    Negate,
+    Not,
     LeftParenthesis,
     RightParenthesis,
     Let,
@@ -23,21 +30,4 @@ pub enum Token {
     True,
     False,
     Debug,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum BinaryOperator {
-    Add,
-    Subtract,
-    Multiply,
-    Divide,
-    Greater,
-    Less,
-    Equal,
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum UnaryOperator {
-    Negate,
-    Not,
 }

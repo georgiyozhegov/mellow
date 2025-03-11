@@ -4,8 +4,8 @@ use std::{
 };
 
 use syntax::{
-    token::BinaryOperator,
     tree::{Expression, Statement},
+    BinaryKind,
 };
 
 #[derive(Debug, PartialEq, Eq)]
@@ -42,7 +42,7 @@ pub fn type_of(expression: Expression) -> Type {
             let right = type_of(*right);
             if matches!(
                 operator,
-                BinaryOperator::Equal | BinaryOperator::Greater | BinaryOperator::Less
+                BinaryKind::Equal | BinaryKind::Greater | BinaryKind::Less
             ) {
                 if left != right {
                     panic!("invalid type of operands ({left:?} and {right:?})");

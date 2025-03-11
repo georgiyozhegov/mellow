@@ -1,4 +1,4 @@
-use crate::token::{BinaryOperator, Token, UnaryOperator};
+use crate::{token::Token, BinaryKind, UnaryKind};
 
 #[derive(Debug, Clone)]
 pub enum Statement {
@@ -35,8 +35,8 @@ pub enum Expression {
     Identifier(String),
     Boolean(bool),
     String(String),
-    Binary(BinaryOperator, Box<Expression>, Box<Expression>),
-    Unary(UnaryOperator, Box<Expression>),
+    Binary(BinaryKind, Box<Expression>, Box<Expression>),
+    Unary(UnaryKind, Box<Expression>),
     If {
         condition: Box<Expression>,
         if_: Box<Expression>,

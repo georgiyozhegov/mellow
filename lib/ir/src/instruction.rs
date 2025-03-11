@@ -1,8 +1,8 @@
 use std::fmt::{self, Display, Formatter};
 
 use syntax::{
-    token::BinaryOperator,
     tree::{Expression, Statement},
+    BinaryKind,
 };
 
 use crate::tac::TemporaryAllocator;
@@ -61,37 +61,37 @@ impl Instruction {
                 let right = Self::expression(*right, allocator, output);
                 let id = allocator.allocate();
                 let instruction = match operator {
-                    BinaryOperator::Add => Self::Add {
+                    BinaryKind::Add => Self::Add {
                         to: id,
                         left,
                         right,
                     },
-                    BinaryOperator::Subtract => Self::Subtract {
+                    BinaryKind::Subtract => Self::Subtract {
                         to: id,
                         left,
                         right,
                     },
-                    BinaryOperator::Multiply => Self::Multiply {
+                    BinaryKind::Multiply => Self::Multiply {
                         to: id,
                         left,
                         right,
                     },
-                    BinaryOperator::Divide => Self::Divide {
+                    BinaryKind::Divide => Self::Divide {
                         to: id,
                         left,
                         right,
                     },
-                    BinaryOperator::Greater => Self::Greater {
+                    BinaryKind::Greater => Self::Greater {
                         to: id,
                         left,
                         right,
                     },
-                    BinaryOperator::Less => Self::Less {
+                    BinaryKind::Less => Self::Less {
                         to: id,
                         left,
                         right,
                     },
-                    BinaryOperator::Equal => Self::Equal {
+                    BinaryKind::Equal => Self::Equal {
                         to: id,
                         left,
                         right,

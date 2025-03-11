@@ -1,6 +1,6 @@
 use std::fmt::{self, Display, Formatter};
 
-use crate::token::{BinaryOperator, Token, UnaryOperator};
+use crate::token::Token;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -55,57 +55,33 @@ impl Display for Token {
                 Self::Integer(value) => format!("integer literal '{value}'"),
                 Self::Identifier(value) => format!("identifier '{value}'"),
                 Self::String(value) => format!("string literal \"{value}\""),
-                Self::BinaryOperator(operator) => operator.to_string(),
-                Self::UnaryOperator(operator) => operator.to_string(),
-                Self::LeftParenthesis => "(".to_string(),
-                Self::RightParenthesis => ")".to_string(),
-                Self::Let => "'let'".to_string(),
-                Self::Mutable => "'mutable'".to_string(),
-                Self::Equal => "'='".to_string(),
-                Self::If => "'if'".to_string(),
-                Self::Or => "'or'".to_string(),
-                Self::Else => "'else'".to_string(),
-                Self::Then => "'then'".to_string(),
-                Self::While => "'while'".to_string(),
-                Self::For => "'for'".to_string(),
-                Self::In => "'in'".to_string(),
-                Self::Loop => "'loop'".to_string(),
-                Self::Do => "'do'".to_string(),
-                Self::End => "'end'".to_string(),
-                Self::True => "'true'".to_string(),
-                Self::False => "'false'".to_string(),
-                Self::Debug => "'debug'".to_string(),
-            }
-        )
-    }
-}
-
-impl Display for BinaryOperator {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
-        write!(
-            formatter,
-            "{}",
-            match self {
-                Self::Add => "'+'",
-                Self::Subtract => "'-'",
-                Self::Multiply => "'*'",
-                Self::Divide => "'/'",
-                Self::Greater => "'>'",
-                Self::Less => "'<'",
-                Self::Equal => "'?'",
-            }
-        )
-    }
-}
-
-impl Display for UnaryOperator {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
-        write!(
-            formatter,
-            "{}",
-            match self {
-                Self::Negate => "'-'",
-                Self::Not => "'!'",
+                Self::Plus => "'+'".into(),
+                Self::Minus => "'-'".into(),
+                Self::Star => "'*'".into(),
+                Self::Slash => "'/'".into(),
+                Self::Greater => "'>'".into(),
+                Self::Less => "'<'".into(),
+                Self::Question => "'?'".into(),
+                Self::Negate => "'-'".into(),
+                Self::Not => "'!'".into(),
+                Self::LeftParenthesis => "(".into(),
+                Self::RightParenthesis => ")".into(),
+                Self::Let => "'let'".into(),
+                Self::Mutable => "'mutable'".into(),
+                Self::Equal => "'='".into(),
+                Self::If => "'if'".into(),
+                Self::Or => "'or'".into(),
+                Self::Else => "'else'".into(),
+                Self::Then => "'then'".into(),
+                Self::While => "'while'".into(),
+                Self::For => "'for'".into(),
+                Self::In => "'in'".into(),
+                Self::Loop => "'loop'".into(),
+                Self::Do => "'do'".into(),
+                Self::End => "'end'".into(),
+                Self::True => "'true'".into(),
+                Self::False => "'false'".into(),
+                Self::Debug => "'debug'".into(),
             }
         )
     }

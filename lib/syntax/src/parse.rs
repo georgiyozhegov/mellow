@@ -6,7 +6,7 @@ use crate::{
     rpn::{ExpressionState, Rpn, RpnItem},
     token::Token,
     tree::{Expression, Statement},
-    Error, Lex,
+    BinaryKind, Error, Lex, UnaryKind,
 };
 
 pub type Source<'s> = Peekable<Lex<'s>>;
@@ -168,7 +168,7 @@ impl Parse<'_> {
 
 impl Parse<'_> {
     pub fn expression(&mut self) -> Result<Expression> {
-        let mut rpn = Rpn::default();
+        let mut rpn = Rpn::new();
         let mut status = ExpressionState::default();
         while let Some(token) = self.peek()? {
             if status.stop(&token)? {
@@ -179,16 +179,18 @@ impl Parse<'_> {
                     rpn.value(Expression::from(token));
                     self.next()?;
                 }
-                Token::BinaryOperator(_) => {
-                    rpn.binary(RpnItem::from(token));
+                token if token.is_binary() => {
+                    let binary: Option<BinaryKind> = token.into();
+                    rpn.binary(binary.unwrap());
                     self.next()?;
                 }
-                Token::UnaryOperator(_) => {
-                    rpn.unary(RpnItem::from(token));
+                token if token.is_unary() => {
+                    let unary: Option<UnaryKind> = token.into();
+                    rpn.unary(unary.unwrap());
                     self.next()?;
                 }
                 Token::LeftParenthesis => {
-                    rpn.item(RpnItem::from(token));
+                    rpn.item(RpnItem::Parenthesis);
                     self.next()?;
                 }
                 Token::RightParenthesis => {

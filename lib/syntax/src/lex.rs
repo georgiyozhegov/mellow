@@ -1,12 +1,6 @@
 use std::{iter::Peekable, str::Chars};
 
-use crate::{
-    alphabetic,
-    error::Result,
-    numeric, quote, single, skip,
-    token::{BinaryOperator, Token, UnaryOperator},
-    Error,
-};
+use crate::{alphabetic, error::Result, numeric, quote, single, skip, token::Token, Error};
 
 pub type Source<'s> = Peekable<Chars<'s>>;
 
@@ -81,23 +75,17 @@ impl Lex<'_> {
 
     fn single(&mut self) -> Token {
         match self.source.next().unwrap() {
-            '+' => Token::BinaryOperator(BinaryOperator::Add),
-            '-' => {
-                if self.source.peek().is_some_and(|c| matches!(c, skip!())) {
-                    Token::BinaryOperator(BinaryOperator::Subtract)
-                } else {
-                    Token::UnaryOperator(UnaryOperator::Negate)
-                }
-            }
-            '*' => Token::BinaryOperator(BinaryOperator::Multiply),
-            '/' => Token::BinaryOperator(BinaryOperator::Divide),
-            '>' => Token::BinaryOperator(BinaryOperator::Greater),
-            '<' => Token::BinaryOperator(BinaryOperator::Less),
-            '?' => Token::BinaryOperator(BinaryOperator::Equal),
+            '+' => Token::Plus,
+            '-' => Token::Minus,
+            '*' => Token::Star,
+            '/' => Token::Slash,
+            '>' => Token::Greater,
+            '<' => Token::Less,
+            '?' => Token::Question,
             '(' => Token::LeftParenthesis,
             ')' => Token::RightParenthesis,
             '=' => Token::Equal,
-            '!' => Token::UnaryOperator(UnaryOperator::Not),
+            '!' => Token::Not,
             _ => unreachable!(),
         }
     }

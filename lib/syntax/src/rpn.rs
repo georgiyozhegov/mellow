@@ -1,14 +1,16 @@
-use crate::{
-    token::{BinaryOperator, Token, UnaryOperator},
-    tree::Expression,
-    Error,
-};
+use crate::{token::Token, tree::Expression, BinaryKind, Error, Precedence, UnaryKind};
 
 #[macro_export]
 macro_rules! literal {
     () => {
         Token::Integer(_) | Token::Identifier(_) | Token::True | Token::False | Token::String(_)
     };
+}
+
+impl Token {
+    pub fn is_literal(&self) -> bool {
+        matches!(self, Token::Integer(_))
+    }
 }
 
 #[macro_export]
@@ -34,14 +36,11 @@ pub struct Rpn {
 }
 
 impl Rpn {
-    pub fn new(values: Vec<Expression>, items: Vec<RpnItem>) -> Self {
-        Self { values, items }
-    }
-}
-
-impl Default for Rpn {
-    fn default() -> Self {
-        Self::new(Vec::new(), Vec::new())
+    pub fn new() -> Self {
+        Self {
+            values: Vec::new(),
+            items: Vec::new(),
+        }
     }
 }
 
@@ -54,7 +53,8 @@ impl Rpn {
         self.items.push(item);
     }
 
-    pub fn binary(&mut self, item: RpnItem) {
+    pub fn binary(&mut self, kind: BinaryKind) {
+        let item = RpnItem::Binary(kind);
         while self
             .items
             .last()
@@ -63,18 +63,19 @@ impl Rpn {
             let previous = self.items.pop().unwrap();
             self.fold(previous);
         }
-        self.items.push(item);
+        self.item(item);
     }
 
-    pub fn unary(&mut self, item: RpnItem) {
-        self.items.push(item);
+    pub fn unary(&mut self, kind: UnaryKind) {
+        self.item(RpnItem::Unary(kind));
     }
 
     pub fn parenthesis(&mut self) {
-        while let Some(item) = self.items.pop() {
-            if item == RpnItem::Parenthesis {
-                break;
-            }
+        while let Some(item) = self
+            .items
+            .pop()
+            .and_then(|item| (item != RpnItem::Parenthesis).then(|| item))
+        {
             self.fold(item);
         }
     }
@@ -85,79 +86,28 @@ impl Rpn {
         }
         self.values.pop().unwrap()
     }
-}
 
-impl Rpn {
     fn fold(&mut self, item: RpnItem) {
         match item {
-            RpnItem::Binary(operator) => {
+            RpnItem::Binary(kind) => {
                 let right = self.values.pop().unwrap();
                 let left = self.values.pop().unwrap();
-                self.values.push(Expression::Binary(
-                    operator,
-                    Box::new(left),
-                    Box::new(right),
-                ));
+                self.value(Expression::Binary(kind, Box::new(left), Box::new(right)));
             }
-            RpnItem::Unary(operator) => {
+            RpnItem::Unary(kind) => {
                 let value = self.values.pop().unwrap();
-                self.values
-                    .push(Expression::Unary(operator, Box::new(value)));
+                self.value(Expression::Unary(kind, Box::new(value)));
             }
-            _ => panic!(),
+            _ => unreachable!(),
         }
     }
 }
 
 #[derive(PartialEq, Debug)]
 pub enum RpnItem {
-    Binary(BinaryOperator),
-    Unary(UnaryOperator),
+    Binary(BinaryKind),
+    Unary(UnaryKind),
     Parenthesis,
-}
-
-impl From<Token> for RpnItem {
-    fn from(value: Token) -> Self {
-        match value {
-            Token::BinaryOperator(operator) => Self::Binary(operator),
-            Token::UnaryOperator(operator) => Self::Unary(operator),
-            Token::LeftParenthesis => Self::Parenthesis,
-            _ => panic!(),
-        }
-    }
-}
-
-impl RpnItem {
-    pub fn precedence(&self) -> u8 {
-        match self {
-            Self::Binary(operator) => operator.precedence(),
-            Self::Unary(operator) => operator.precedence(),
-            Self::Parenthesis => 0,
-        }
-    }
-}
-
-impl BinaryOperator {
-    pub fn precedence(&self) -> u8 {
-        match self {
-            Self::Add => 2,
-            Self::Subtract => 2,
-            Self::Multiply => 3,
-            Self::Divide => 3,
-            Self::Greater => 1,
-            Self::Less => 1,
-            Self::Equal => 1,
-        }
-    }
-}
-
-impl UnaryOperator {
-    pub fn precedence(&self) -> u8 {
-        match self {
-            Self::Negate => 4,
-            Self::Not => 4,
-        }
-    }
 }
 
 #[derive(PartialEq)]
@@ -173,27 +123,44 @@ impl Default for ExpressionState {
 }
 
 impl ExpressionState {
-    pub fn stop(&mut self, token: &Token) -> Result<bool, Error> {
-        match (&self, token) {
-            (Self::Value, literal!() | Token::If) => {
+    fn value(&mut self, token: &Token) -> Result<bool, Error> {
+        match token {
+            literal!() | Token::If => {
                 *self = Self::Item;
                 Ok(false)
             }
-            (Self::Value, Token::LeftParenthesis | Token::UnaryOperator(_)) => Ok(false),
-            (Self::Item, Token::BinaryOperator(_)) => {
-                *self = Self::Value;
+            token if token.is_unary() => Ok(false),
+            token if token.is_binary() => {
+                *self = Self::Item;
                 Ok(false)
             }
-            (Self::Item, Token::RightParenthesis) => Ok(false),
-            (Self::Item, end_of_expression!()) => Ok(true),
-            (Self::Value, _) => Err(Error::grammar(
+            Token::RightParenthesis => Ok(false),
+            _ => Err(Error::grammar(
                 "literal, identifier or '('",
                 Some(token.clone()),
             )),
-            (Self::Item, _) => Err(Error::grammar(
+        }
+    }
+
+    fn item(&mut self, token: &Token) -> Result<bool, Error> {
+        match token {
+            token if token.is_binary() => {
+                *self = Self::Value;
+                Ok(false)
+            }
+            Token::RightParenthesis => Ok(false),
+            end_of_expression!() => Ok(true),
+            _ => Err(Error::grammar(
                 "operator, statement or ')'",
                 Some(token.clone()),
             )),
+        }
+    }
+
+    pub fn stop(&mut self, token: &Token) -> Result<bool, Error> {
+        match self {
+            Self::Value => self.value(token),
+            Self::Item => self.item(token),
         }
     }
 }
