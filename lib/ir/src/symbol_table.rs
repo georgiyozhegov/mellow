@@ -3,10 +3,7 @@ use std::{
     i32,
 };
 
-use syntax::{
-    tree::{Expression, Statement},
-    BinaryKind,
-};
+use syntax::{BinaryKind, Expression, Statement};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Type {

@@ -1,9 +1,6 @@
 use std::fmt::{self, Display, Formatter};
 
-use syntax::{
-    tree::{Expression, Statement},
-    BinaryKind,
-};
+use syntax::{BinaryKind, Expression, Statement};
 
 use crate::tac::TemporaryAllocator;
 

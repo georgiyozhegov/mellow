@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use syntax::tree::{Expression, Statement};
+use syntax::{Expression, Statement};
 
 use crate::block::{Block, BlockRange};
 
