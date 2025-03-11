@@ -1,5 +1,4 @@
-let a = 0
+let a = 1
 while a < 10 do
-      a = a + 2
-      debug a
+      a = a + 1
 end

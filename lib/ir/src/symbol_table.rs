@@ -63,7 +63,10 @@ pub fn type_of(expression: Expression) -> Type {
             if condition != Type::Boolean {
                 panic!("invalid type of condition ({condition:?})");
             }
-            todo!()
+            // TODO: other checks
+        }
+        Expression::Boolean(value) => {
+            return Type::Boolean;
         }
         _ => {}
     }

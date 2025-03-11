@@ -1,9 +1,5 @@
 use std::fmt::{self, Display, Formatter};
 
-use syntax::parse::{BinaryKind, Expression, Statement};
-
-use crate::tac::TemporaryAllocator;
-
 #[derive(Debug)]
 pub enum Instruction {
     Label(u64),
@@ -21,113 +17,6 @@ pub enum Instruction {
     Jump(u64),
     JumpIf { condition: u64, to: u64 },
     Call { label: String, value: u64 },
-}
-
-impl Instruction {
-    pub fn expression(
-        expression: Expression,
-        allocator: &mut TemporaryAllocator,
-        output: &mut Vec<Self>,
-    ) -> u64 {
-        match expression {
-            Expression::Integer(value) => {
-                let id = allocator.allocate();
-                output.push(Self::Integer { to: id, value });
-                id
-            }
-            Expression::Identifier(identifier) => {
-                let id = allocator.allocate();
-                output.push(Self::Get { to: id, identifier });
-                id
-            }
-            Expression::Boolean(value) => {
-                let id = allocator.allocate();
-                output.push(Self::Integer {
-                    to: id,
-                    value: value as i128,
-                });
-                id
-            }
-            Expression::String(value) => {
-                let id = allocator.allocate();
-                output.push(Self::String { to: id, value });
-                id
-            }
-            Expression::Binary(operator, left, right) => {
-                let left = Self::expression(*left, allocator, output);
-                let right = Self::expression(*right, allocator, output);
-                let id = allocator.allocate();
-                let instruction = match operator {
-                    BinaryKind::Add => Self::Add {
-                        to: id,
-                        left,
-                        right,
-                    },
-                    BinaryKind::Subtract => Self::Subtract {
-                        to: id,
-                        left,
-                        right,
-                    },
-                    BinaryKind::Multiply => Self::Multiply {
-                        to: id,
-                        left,
-                        right,
-                    },
-                    BinaryKind::Divide => Self::Divide {
-                        to: id,
-                        left,
-                        right,
-                    },
-                    BinaryKind::Greater => Self::Greater {
-                        to: id,
-                        left,
-                        right,
-                    },
-                    BinaryKind::Less => Self::Less {
-                        to: id,
-                        left,
-                        right,
-                    },
-                    BinaryKind::Equal => Self::Equal {
-                        to: id,
-                        left,
-                        right,
-                    },
-                };
-                output.push(instruction);
-                id
-            }
-            expression => todo!("{expression:?}"),
-        }
-    }
-}
-
-impl Instruction {
-    pub fn statement(
-        statement: Statement,
-        allocator: &mut TemporaryAllocator,
-        output: &mut Vec<Self>,
-    ) {
-        match statement {
-            Statement::Let {
-                identifier, value, ..
-            }
-            | Statement::Assign { identifier, value } => {
-                let from = Self::expression(value, allocator, output);
-                let instruction = Self::Set { identifier, from };
-                output.push(instruction);
-            }
-            Statement::Debug(value) => {
-                let value = Self::expression(value, allocator, output);
-                let instruction = Self::Call {
-                    label: "debug_i64".into(),
-                    value,
-                }; // TODO: implement type system
-                output.push(instruction);
-            }
-            _ => unreachable!("conditional statements are not present in control flow graph"),
-        }
-    }
 }
 
 impl Display for Instruction {
