@@ -71,18 +71,19 @@ pub struct CfgIter {
 }
 
 impl Iterator for CfgIter {
-    type Item = (Block, Option<Link>);
+    type Item = (u64, Block, Option<Link>);
 
     fn next(&mut self) -> Option<Self::Item> {
         let block = self.blocks.next()?;
-        let link = self.links.remove(&self.id);
+        let id = self.id;
         self.id += 1;
-        Some((block, link))
+        let link = self.links.remove(&id);
+        Some((id, block, link))
     }
 }
 
 impl IntoIterator for Cfg<Block, Link> {
-    type Item = (Block, Option<Link>);
+    type Item = (u64, Block, Option<Link>);
     type IntoIter = CfgIter;
 
     fn into_iter(self) -> Self::IntoIter {
