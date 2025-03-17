@@ -1,4 +1,5 @@
 use std::iter::Peekable;
+use super::tree::*;
 
 use super::{
     rpn::{ExpressionState, Rpn, RpnItem},
@@ -67,11 +68,11 @@ impl Parse<'_> {
         let identifier = self.identifier()?;
         self.expect(Token::Equal)?;
         let value = self.expression()?;
-        Ok(Statement::Let {
+        Ok(Statement::Let(Let {
             identifier,
             mutable,
             value,
-        })
+        }))
     }
 
     fn mutable(&mut self) -> Result<bool> {
@@ -94,7 +95,7 @@ impl Parse<'_> {
     fn assign(&mut self, identifier: String) -> Result<Statement> {
         self.expect(Token::Equal)?;
         let value = self.expression()?;
-        Ok(Statement::Assign { identifier, value })
+        Ok(Statement::Assign(Assign { identifier, value }))
     }
 
     fn if_s(&mut self) -> Result<Statement> {
@@ -104,12 +105,12 @@ impl Parse<'_> {
         let or = self.or_s()?;
         let else_ = self.else_s()?;
         self.expect(Token::End)?;
-        Ok(Statement::If {
+        Ok(Statement::If(If {
             condition,
             if_,
             or,
             else_,
-        })
+        }))
     }
 
     fn or_s(&mut self) -> Result<Vec<(Expression, Vec<Statement>)>> {
@@ -143,7 +144,7 @@ impl Parse<'_> {
         self.expect(Token::Do)?;
         let body = self.body()?;
         self.expect(Token::End)?;
-        Ok(Statement::While { condition, body })
+        Ok(Statement::While(While { condition, body }))
     }
 
     fn for_(&mut self) -> Result<Statement> {
@@ -153,16 +154,16 @@ impl Parse<'_> {
         self.expect(Token::Do)?;
         let body = self.body()?;
         self.expect(Token::End)?;
-        Ok(Statement::For {
+        Ok(Statement::For(For {
             item,
             sequence,
             body,
-        })
+        }))
     }
 
     fn debug(&mut self) -> Result<Statement> {
         let value = self.expression()?;
-        Ok(Statement::Debug(value))
+        Ok(Statement::Debug(Debug(value)))
     }
 }
 

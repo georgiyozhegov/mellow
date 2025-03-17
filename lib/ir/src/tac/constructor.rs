@@ -1,4 +1,4 @@
-use syntax::parse::{BinaryKind, Expression, VisitExpression, VisitStatement};
+use syntax::parse::{BinaryKind, Expression, VisitExpression, VisitStatement, *};
 
 use super::Instruction;
 use crate::cfg::{Block, Cfg, Link};
@@ -74,19 +74,22 @@ impl VisitStatement for Constructor {
     type Output = ();
     type Context = ();
 
-    fn let_(&mut self, identifier: String, mutable: bool, value: Expression, _context: &mut ()) {
-        let from = value.visit(self);
-        self.push(Instruction::Set { identifier, from });
-        // TODO: mutable check
+    fn let_(
+            &mut self,
+            value: Let,
+            _context: &mut Self::Context,
+        ) -> Self::Output {
+        let from = value.value.visit(self);
+        self.push(Instruction::Set { identifier: value.identifier, from });
     }
 
-    fn assign(&mut self, identifier: String, value: Expression, _context: &mut ()) -> Self::Output {
-        let from = value.visit(self);
-        self.output.push(Instruction::Set { identifier, from });
+    fn assign(&mut self, value: Assign, _context: &mut ()) -> Self::Output {
+        let from = value.value.visit(self);
+        self.output.push(Instruction::Set { identifier: value.identifier, from });
     }
 
-    fn debug(&mut self, value: Expression, _context: &mut ()) -> Self::Output {
-        let value = value.visit(self);
+    fn debug(&mut self, value: Debug, _context: &mut ()) -> Self::Output {
+        let value = value.0.visit(self);
         let instruction = Instruction::Call {
             label: "debug_i64".into(),
             value,

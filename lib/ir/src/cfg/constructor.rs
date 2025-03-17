@@ -1,4 +1,4 @@
-use syntax::parse::{Expression, Statement, VisitStatement};
+use syntax::parse::{Expression, Statement, VisitStatement, *};
 
 use super::{block::BlockRange, Block, Cfg, Link};
 
@@ -18,45 +18,34 @@ impl VisitStatement for Constructor {
 
     fn let_(
         &mut self,
-        identifier: String,
-        mutable: bool,
-        value: Expression,
+        value: Let,
         context: &mut Self::Context,
     ) -> Self::Output {
-        context.push(Statement::Let {
-            identifier,
-            mutable,
-            value,
-        });
+        context.push(Statement::Let(value));
     }
 
     fn assign(
         &mut self,
-        identifier: String,
-        value: Expression,
+        value: Assign,
         context: &mut Self::Context,
     ) -> Self::Output {
-        context.push(Statement::Assign { identifier, value });
+        context.push(Statement::Assign(value));
     }
 
-    fn debug(&mut self, value: Expression, context: &mut Self::Context) -> Self::Output {
+    fn debug(&mut self, value: Debug, context: &mut Self::Context) -> Self::Output {
         context.push(Statement::Debug(value));
     }
 
     fn if_(
         &mut self,
-        condition: Expression,
-        if_: Vec<Statement>,
-        or: Vec<(Expression, Vec<Statement>)>,
-        else_: Vec<Statement>,
+        mut value: If,
         context: &mut Self::Context,
     ) -> Self::Output {
         let mut previous = self.output.insert(Block::Basic(context.clone()));
         context.clear();
-        let mut or = or.clone();
-        or.insert(0, (condition.clone(), if_.clone()));
+        value.or.insert(0, (value.condition, value.if_.clone()));
         let mut last_condition = None;
-        for (condition, body) in or {
+        for (condition, body) in value.or {
             let body = self.block(body.clone());
             self.output.branch(
                 previous,
@@ -67,7 +56,7 @@ impl VisitStatement for Constructor {
             previous = body.end;
             last_condition = Some(condition);
         }
-        let else_ = self.block(else_.clone());
+        let else_ = self.block(value.else_.clone());
         if let Some(condition) = last_condition {
             self.output.branch(
                 previous,
@@ -80,18 +69,17 @@ impl VisitStatement for Constructor {
 
     fn while_(
         &mut self,
-        condition: Expression,
-        body: Vec<Statement>,
+        value: While,
         context: &mut Self::Context,
     ) -> Self::Output {
         let previous = self.output.insert(Block::Basic(context.clone()));
         context.clear();
         let start = self.output.insert(Block::Empty);
         self.output.direct(previous, start);
-        let body = self.block(body.clone());
+        let body = self.block(value.body);
         let end = self.output.next_id();
         self.output
-            .branch(start, condition.clone(), body.start, end);
+            .branch(start, value.condition, body.start, end);
         self.output.direct(body.end, start);
     }
 }

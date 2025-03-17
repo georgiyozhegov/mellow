@@ -10,7 +10,7 @@ use std::iter::Peekable;
 pub use binary::BinaryKind;
 pub use parse::Parse;
 pub use precedence::Precedence;
-pub use tree::{Expression, Statement};
+pub use tree::*;
 pub use unary::UnaryKind;
 pub use visit::*;
 

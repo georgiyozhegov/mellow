@@ -1,4 +1,4 @@
-use super::{BinaryKind, Expression, Statement, UnaryKind};
+use super::{tree::*, BinaryKind, Expression, Statement, UnaryKind};
 
 #[allow(unused)]
 pub trait VisitStatement {
@@ -7,49 +7,40 @@ pub trait VisitStatement {
 
     fn let_(
         &mut self,
-        identifier: String,
-        mutable: bool,
-        value: Expression,
+        value: Let,
         context: &mut Self::Context,
     ) -> Self::Output {
         todo!()
     }
     fn assign(
         &mut self,
-        identifier: String,
-        value: Expression,
+        value: Assign,
         context: &mut Self::Context,
     ) -> Self::Output {
         todo!()
     }
     fn if_(
         &mut self,
-        condition: Expression,
-        if_: Vec<Statement>,
-        or: Vec<(Expression, Vec<Statement>)>,
-        else_: Vec<Statement>,
+        value: If,
         context: &mut Self::Context,
     ) -> Self::Output {
         todo!()
     }
     fn while_(
         &mut self,
-        condition: Expression,
-        body: Vec<Statement>,
+        value: While,
         context: &mut Self::Context,
     ) -> Self::Output {
         todo!()
     }
     fn for_(
         &mut self,
-        item: String,
-        sequence: Expression,
-        body: Vec<Statement>,
+        value: For,
         context: &mut Self::Context,
     ) -> Self::Output {
         todo!()
     }
-    fn debug(&mut self, value: Expression, context: &mut Self::Context) -> Self::Output {
+    fn debug(&mut self, value: Debug, context: &mut Self::Context) -> Self::Output {
         todo!()
     }
 }
@@ -95,24 +86,11 @@ pub trait VisitExpression {
 impl Statement {
     pub fn visit<T: VisitStatement>(self, visit: &mut T, context: &mut T::Context) -> T::Output {
         match self {
-            Self::Let {
-                identifier,
-                mutable,
-                value,
-            } => visit.let_(identifier, mutable, value, context),
-            Self::Assign { identifier, value } => visit.assign(identifier, value, context),
-            Self::If {
-                condition,
-                if_,
-                or,
-                else_,
-            } => visit.if_(condition, if_, or, else_, context),
-            Self::While { condition, body } => visit.while_(condition, body, context),
-            Self::For {
-                item,
-                sequence,
-                body,
-            } => visit.for_(item, sequence, body, context),
+            Self::Let(value) => visit.let_(value, context),
+            Self::Assign(value) => visit.assign(value, context),
+            Self::If(value) => visit.if_(value, context),
+            Self::While(value) => visit.while_(value, context),
+            Self::For(value) => visit.for_(value, context),
             Self::Debug(value) => visit.debug(value, context),
         }
     }

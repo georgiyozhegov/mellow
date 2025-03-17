@@ -142,16 +142,12 @@ pub fn construct(source: &Vec<Statement>) -> SymbolTable {
 
     for statement in source.iter() {
         match statement {
-            Statement::Let {
-                identifier,
-                mutable,
-                value,
-            } => {
-                let type_ = type_of(value.clone());
+            Statement::Let(value) => {
+                let type_ = type_of(value.value.clone());
                 table.insert_variable(
-                    identifier.into(),
+                    value.identifier.clone(),
                     VariableMeta {
-                        mutable: *mutable,
+                        mutable: value.mutable,
                         type_,
                     },
                 );
