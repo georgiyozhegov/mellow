@@ -1,5 +1,7 @@
 use super::{BinaryKind, Expression, Statement, UnaryKind};
 
+
+#[allow(unused)]
 pub trait VisitStatement {
     type Output;
 
@@ -60,6 +62,7 @@ impl Statement {
     }
 }
 
+#[allow(unused)]
 pub trait VisitExpression {
     type Output;
 
