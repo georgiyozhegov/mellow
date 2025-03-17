@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use syntax::parse::{Expression, Statement};
+use syntax::parse::Expression;
 
-use super::{Block, BlockRange};
+use super::Block;
 
 #[derive(Debug)]
 pub enum Link {
@@ -68,76 +68,4 @@ impl Cfg<Block, Link> {
     pub fn next_id(&self) -> u64 {
         self.blocks.len() as u64
     }
-}
-
-fn construct_(source: Vec<Statement>, cfg: &mut Cfg<Block, Link>) -> BlockRange {
-    let start = cfg.next_id();
-    let mut current = Vec::new();
-    for statement in source {
-        match statement {
-            Statement::Let { .. } | Statement::Assign { .. } | Statement::Debug(..) => {
-                current.push(statement.clone());
-            }
-            Statement::If {
-                condition,
-                if_,
-                or,
-                else_,
-            } => self::if_(condition, if_, or, else_, &mut current, cfg),
-            Statement::While { condition, body } => while_(condition, body, &mut current, cfg),
-            _ => todo!(),
-        }
-    }
-    if !current.is_empty() {
-        cfg.insert(Block::Basic(current));
-    }
-    let end = cfg.last_id();
-    BlockRange::new(start, end)
-}
-
-fn if_(
-    condition: Expression,
-    if_: Vec<Statement>,
-    mut or: Vec<(Expression, Vec<Statement>)>,
-    else_: Vec<Statement>,
-    current: &mut Vec<Statement>,
-    cfg: &mut Cfg<Block, Link>,
-) {
-    let mut previous = cfg.insert(Block::Basic(current.clone()));
-    current.clear();
-    or.insert(0, (condition, if_));
-    let mut last_condition = None;
-    for (condition, body) in or.into_iter() {
-        let body = construct_(body.clone(), cfg);
-        cfg.branch(previous, condition.clone(), body.start, cfg.next_id());
-        previous = body.end;
-        last_condition = Some(condition);
-    }
-    let else_ = construct_(else_, cfg);
-    if let Some(condition) = last_condition {
-        cfg.branch(previous, condition, cfg.next_id(), else_.start);
-    }
-}
-
-fn while_(
-    condition: Expression,
-    body: Vec<Statement>,
-    current: &mut Vec<Statement>,
-    cfg: &mut Cfg<Block, Link>,
-) {
-    let previous = cfg.insert(Block::Basic(current.clone()));
-    current.clear();
-    let start = cfg.insert(Block::Empty);
-    cfg.direct(previous, start);
-    let body = construct_(body.clone(), cfg);
-    let end = cfg.next_id();
-    cfg.branch(start, condition, body.start, end);
-    cfg.direct(body.end, start);
-}
-
-pub fn construct(source: Vec<Statement>) -> Cfg<Block, Link> {
-    let mut cfg = Cfg::new();
-    construct_(source, &mut cfg);
-    cfg.insert(Block::Empty);
-    cfg
 }

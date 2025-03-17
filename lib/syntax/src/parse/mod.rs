@@ -12,7 +12,7 @@ pub use parse::Parse;
 pub use precedence::Precedence;
 pub use tree::{Expression, Statement};
 pub use unary::UnaryKind;
-pub use visit::{VisitExpression, VisitStatement};
+pub use visit::*;
 
 use crate::lex::Lex;
 

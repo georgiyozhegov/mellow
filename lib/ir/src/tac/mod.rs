@@ -1,7 +1,7 @@
-mod instruction;
 mod constructor;
-pub use instruction::Instruction;
+mod instruction;
 use constructor::Constructor;
+pub use instruction::Instruction;
 
 use crate::cfg::{Block, Cfg, Link};
 

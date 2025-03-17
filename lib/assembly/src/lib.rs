@@ -1,11 +1,11 @@
 mod assembly;
 mod data;
+mod lifetime;
 mod optimize;
 mod register;
-mod lifetime;
 
-use std::collections::HashMap;
 use crate::lifetime::allocate;
+use std::collections::HashMap;
 
 use assembly::Assembly;
 use data::Data;

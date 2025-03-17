@@ -1,6 +1,5 @@
 use super::{BinaryKind, Expression, Statement, UnaryKind};
 
-
 #[allow(unused)]
 pub trait VisitStatement {
     type Output;
@@ -63,6 +62,60 @@ impl Statement {
 }
 
 #[allow(unused)]
+pub trait VisitWithStatement {
+    type Output;
+    type Context;
+
+    fn let_(
+        &mut self,
+        identifier: &String,
+        mutable: &bool,
+        value: &Expression,
+        context: &mut Self::Context,
+    ) -> Self::Output {
+        todo!()
+    }
+    fn assign(
+        &mut self,
+        identifier: &String,
+        value: &Expression,
+        context: &mut Self::Context,
+    ) -> Self::Output {
+        todo!()
+    }
+    fn if_(
+        &mut self,
+        condition: &Expression,
+        if_: &Vec<Statement>,
+        or: &Vec<(Expression, Vec<Statement>)>,
+        else_: &Vec<Statement>,
+        context: &mut Self::Context,
+    ) -> Self::Output {
+        todo!()
+    }
+    fn while_(
+        &mut self,
+        condition: &Expression,
+        body: &Vec<Statement>,
+        context: &mut Self::Context,
+    ) -> Self::Output {
+        todo!()
+    }
+    fn for_(
+        &mut self,
+        item: &String,
+        sequence: &Expression,
+        body: &Vec<Statement>,
+        context: &mut Self::Context,
+    ) -> Self::Output {
+        todo!()
+    }
+    fn debug(&mut self, value: &Expression, context: &mut Self::Context) -> Self::Output {
+        todo!()
+    }
+}
+
+#[allow(unused)]
 pub trait VisitExpression {
     type Output;
 
@@ -97,6 +150,36 @@ pub trait VisitExpression {
         else_: &Option<Box<Expression>>,
     ) -> Self::Output {
         todo!()
+    }
+}
+
+impl Statement {
+    pub fn visit_with<T: VisitWithStatement>(
+        &self,
+        visit: &mut T,
+        context: &mut T::Context,
+    ) -> T::Output {
+        match self {
+            Self::Let {
+                identifier,
+                mutable,
+                value,
+            } => visit.let_(identifier, mutable, value, context),
+            Self::Assign { identifier, value } => visit.assign(identifier, value, context),
+            Self::If {
+                condition,
+                if_,
+                or,
+                else_,
+            } => visit.if_(condition, if_, or, else_, context),
+            Self::While { condition, body } => visit.while_(condition, body, context),
+            Self::For {
+                item,
+                sequence,
+                body,
+            } => visit.for_(item, sequence, body, context),
+            Self::Debug(value) => visit.debug(value, context),
+        }
     }
 }
 

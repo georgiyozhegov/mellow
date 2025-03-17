@@ -1,7 +1,7 @@
 use syntax::parse::{BinaryKind, Expression, VisitExpression, VisitStatement};
 
-use crate::cfg::{Cfg, Link, Block};
 use super::Instruction;
+use crate::cfg::{Block, Cfg, Link};
 
 pub struct Constructor {
     output: Vec<Instruction>,
@@ -18,6 +18,10 @@ impl Constructor {
 }
 
 impl Constructor {
+    fn push(&mut self, instruction: Instruction) {
+        self.output.push(instruction);
+    }
+
     fn allocate(&mut self) -> u64 {
         let id = self.temporary;
         self.temporary += 1;
@@ -35,10 +39,10 @@ impl Constructor {
         };
     }
 
-    fn link(&mut self, link: &Link) {
-        match link {
+    fn link(&mut self, value: &Link) {
+        match value {
             Link::Direct(to) => {
-                self.output.push(Instruction::Jump(*to));
+                self.push(Instruction::Jump(*to));
             }
             Link::Branch {
                 condition,
@@ -46,13 +50,11 @@ impl Constructor {
                 false_,
             } => {
                 let condition = condition.visit(self);
-                self.output.extend(vec![
-                    Instruction::JumpIf {
-                        condition,
-                        to: *true_,
-                    },
-                    Instruction::Jump(*false_),
-                ]);
+                self.push(Instruction::JumpIf {
+                    condition,
+                    to: *true_,
+                });
+                self.push(Instruction::Jump(*false_));
             }
         }
     }
@@ -73,7 +75,7 @@ impl VisitStatement for Constructor {
 
     fn let_(&mut self, identifier: &String, mutable: &bool, value: &Expression) {
         let from = value.visit(self);
-        self.output.push(Instruction::Set {
+        self.push(Instruction::Set {
             identifier: identifier.clone(),
             from,
         });
@@ -94,7 +96,7 @@ impl VisitStatement for Constructor {
             label: "debug_i64".into(),
             value,
         };
-        self.output.push(instruction);
+        self.push(instruction);
     }
 }
 
@@ -112,7 +114,7 @@ impl VisitExpression for Constructor {
 
     fn identifier(&mut self, name: &String) -> Self::Output {
         let id = self.allocate();
-        self.output.push(Instruction::Get {
+        self.push(Instruction::Get {
             to: id,
             identifier: name.clone(),
         });
@@ -130,7 +132,7 @@ impl VisitExpression for Constructor {
 
     fn string(&mut self, value: &String) -> Self::Output {
         let id = self.allocate();
-        self.output.push(Instruction::String {
+        self.push(Instruction::String {
             to: id,
             value: value.clone(),
         });
@@ -183,7 +185,7 @@ impl VisitExpression for Constructor {
                 right,
             },
         };
-        self.output.push(instruction);
+        self.push(instruction);
         id
     }
 }
