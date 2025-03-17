@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use syntax::parse::{Expression, Statement};
 
-use crate::block::{Block, BlockRange};
+use super::{Block, BlockRange};
 
 #[derive(Debug)]
 pub enum Link {

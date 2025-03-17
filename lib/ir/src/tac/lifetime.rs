@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::Instruction;
+use crate::tac::Instruction;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Lifetime {

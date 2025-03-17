@@ -1,11 +1,4 @@
-mod block;
-pub use block::Block;
 pub mod cfg;
-mod convert;
-mod instruction;
-mod lifetime;
 pub mod tac;
-pub use instruction::Instruction;
-pub use lifetime::allocate;
 pub mod symbol_table;
 pub use symbol_table::SymbolTable;

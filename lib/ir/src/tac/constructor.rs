@@ -1,16 +1,14 @@
-use syntax::parse::{BinaryKind, Expression, Statement, VisitExpression, VisitStatement};
+use syntax::parse::{BinaryKind, Expression, VisitExpression, VisitStatement};
 
-use crate::{
-    cfg::{Cfg, Link},
-    Block, Instruction,
-};
+use crate::cfg::{Cfg, Link, Block};
+use super::Instruction;
 
-pub struct Convert {
+pub struct Constructor {
     output: Vec<Instruction>,
     temporary: u64,
 }
 
-impl Convert {
+impl Constructor {
     pub fn new() -> Self {
         Self {
             output: Vec::new(),
@@ -19,7 +17,7 @@ impl Convert {
     }
 }
 
-impl Convert {
+impl Constructor {
     fn allocate(&mut self) -> u64 {
         let id = self.temporary;
         self.temporary += 1;
@@ -70,7 +68,7 @@ impl Convert {
     }
 }
 
-impl VisitStatement for Convert {
+impl VisitStatement for Constructor {
     type Output = ();
 
     fn let_(&mut self, identifier: &String, mutable: &bool, value: &Expression) {
@@ -100,7 +98,7 @@ impl VisitStatement for Convert {
     }
 }
 
-impl VisitExpression for Convert {
+impl VisitExpression for Constructor {
     type Output = u64;
 
     fn integer(&mut self, value: &i128) -> Self::Output {

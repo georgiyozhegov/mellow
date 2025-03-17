@@ -7,7 +7,7 @@ use std::collections::HashMap;
 
 use assembly::Assembly;
 use data::Data;
-use ir::Instruction;
+use ir::tac::Instruction;
 pub use optimize::optimize;
 use register::{Register, RegisterKind, Size};
 
@@ -128,7 +128,7 @@ fn map(allocated: HashMap<u64, u64>) -> HashMap<u64, RegisterKind> {
 pub fn convert(tac: Vec<Instruction>) -> Vec<Assembly> {
     let mut output = Vec::new();
     let n = RegisterKind::allocable().len();
-    let allocated = map(ir::allocate(&tac, n as u64));
+    let allocated = map(ir::tac::allocate(&tac, n as u64));
     for instruction in tac.into_iter() {
         generate(instruction, &mut output, &allocated);
     }
