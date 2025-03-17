@@ -163,7 +163,7 @@ impl Parse<'_> {
 
     fn debug(&mut self) -> Result<Statement> {
         let value = self.expression()?;
-        Ok(Statement::Debug(Debug(value)))
+        Ok(Statement::Debug(Debug { value }))
     }
 }
 

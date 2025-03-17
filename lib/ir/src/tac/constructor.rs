@@ -89,7 +89,7 @@ impl VisitStatement for Constructor {
     }
 
     fn debug(&mut self, node: Debug, _context: &mut ()) -> Self::Output {
-        let value = node.0.visit(self);
+        let value = node.value.visit(self);
         let instruction = Instruction::Call {
             label: "debug_i64".into(),
             value,
