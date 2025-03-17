@@ -4,7 +4,6 @@ mod lifetime;
 mod optimize;
 mod register;
 
-use crate::lifetime::allocate;
 use std::collections::HashMap;
 
 use assembly::Assembly;
@@ -12,6 +11,8 @@ use data::Data;
 use ir::tac::Instruction;
 pub use optimize::optimize;
 use register::{Register, RegisterKind, Size};
+
+use crate::lifetime::allocate;
 
 macro_rules! arithmetic {
     ($operation:ident, $to:expr, $left:expr, $right:expr, $allocated:expr, $output:expr) => {

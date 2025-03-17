@@ -1,26 +1,29 @@
-use super::{tree::*, BinaryKind, Expression, Statement, UnaryKind};
+use super::tree::{
+    expression::{self, Expression},
+    statement::{self, Statement},
+};
 
 #[allow(unused)]
 pub trait VisitStatement {
     type Output;
     type Context;
 
-    fn let_(&mut self, node: Let, context: &mut Self::Context) -> Self::Output {
+    fn let_(&mut self, node: statement::Let, context: &mut Self::Context) -> Self::Output {
         todo!()
     }
-    fn assign(&mut self, node: Assign, context: &mut Self::Context) -> Self::Output {
+    fn assign(&mut self, node: statement::Assign, context: &mut Self::Context) -> Self::Output {
         todo!()
     }
-    fn if_(&mut self, node: If, context: &mut Self::Context) -> Self::Output {
+    fn if_(&mut self, node: statement::If, context: &mut Self::Context) -> Self::Output {
         todo!()
     }
-    fn while_(&mut self, node: While, context: &mut Self::Context) -> Self::Output {
+    fn while_(&mut self, node: statement::While, context: &mut Self::Context) -> Self::Output {
         todo!()
     }
-    fn for_(&mut self, node: For, context: &mut Self::Context) -> Self::Output {
+    fn for_(&mut self, node: statement::For, context: &mut Self::Context) -> Self::Output {
         todo!()
     }
-    fn debug(&mut self, node: Debug, context: &mut Self::Context) -> Self::Output {
+    fn debug(&mut self, node: statement::Debug, context: &mut Self::Context) -> Self::Output {
         todo!()
     }
 }
@@ -29,36 +32,25 @@ pub trait VisitStatement {
 pub trait VisitExpression {
     type Output;
 
-    fn integer(&mut self, value: &i128) -> Self::Output {
+    fn integer(&mut self, node: expression::Integer) -> Self::Output {
         todo!()
     }
-    fn identifier(&mut self, name: &String) -> Self::Output {
+    fn identifier(&mut self, node: expression::Identifier) -> Self::Output {
         todo!()
     }
-    fn boolean(&mut self, value: &bool) -> Self::Output {
+    fn boolean(&mut self, node: expression::Boolean) -> Self::Output {
         todo!()
     }
-    fn string(&mut self, value: &String) -> Self::Output {
+    fn string(&mut self, string: expression::Str) -> Self::Output {
         todo!()
     }
-    fn binary(
-        &mut self,
-        kind: &BinaryKind,
-        left: &Box<Expression>,
-        right: &Box<Expression>,
-    ) -> Self::Output {
+    fn binary(&mut self, node: expression::Binary) -> Self::Output {
         todo!()
     }
-    fn unary(&mut self, kind: &UnaryKind, value: &Box<Expression>) -> Self::Output {
+    fn unary(&mut self, node: expression::Unary) -> Self::Output {
         todo!()
     }
-    fn if_(
-        &mut self,
-        condition: &Expression,
-        if_: &Box<Expression>,
-        or: &Vec<(Expression, Expression)>,
-        else_: &Option<Box<Expression>>,
-    ) -> Self::Output {
+    fn if_(&mut self, node: expression::If) -> Self::Output {
         todo!()
     }
 }
@@ -77,20 +69,15 @@ impl Statement {
 }
 
 impl Expression {
-    pub fn visit<T: VisitExpression>(&self, visit: &mut T) -> T::Output {
+    pub fn visit<T: VisitExpression>(self, visit: &mut T) -> T::Output {
         match self {
-            Self::Integer(value) => visit.integer(value),
-            Self::Identifier(name) => visit.identifier(name),
-            Self::Boolean(value) => visit.boolean(value),
-            Self::String(value) => visit.string(value),
-            Self::Binary(kind, left, right) => visit.binary(kind, left, right),
-            Self::Unary(kind, value) => visit.unary(kind, value),
-            Self::If {
-                condition,
-                if_,
-                or,
-                else_,
-            } => visit.if_(condition, if_, or, else_),
+            Self::Integer(node) => visit.integer(node),
+            Self::Identifier(node) => visit.identifier(node),
+            Self::Boolean(node) => visit.boolean(node),
+            Self::String(node) => visit.string(node),
+            Self::Binary(node) => visit.binary(node),
+            Self::Unary(node) => visit.unary(node),
+            Self::If(node) => visit.if_(node),
         }
     }
 }

@@ -1,4 +1,4 @@
-use syntax::parse::*;
+use syntax::parse::{expression, statement, BinaryKind, VisitExpression, VisitStatement};
 
 use super::Instruction;
 use crate::cfg::{Block, Cfg, Link};
@@ -49,7 +49,7 @@ impl Constructor {
                 true_,
                 false_,
             } => {
-                let condition = condition.visit(self);
+                let condition = condition.clone().visit(self);
                 self.push(Instruction::JumpIf {
                     condition,
                     to: *true_,
@@ -74,7 +74,7 @@ impl VisitStatement for Constructor {
     type Output = ();
     type Context = ();
 
-    fn let_(&mut self, node: Let, _context: &mut Self::Context) -> Self::Output {
+    fn let_(&mut self, node: statement::Let, _context: &mut Self::Context) -> Self::Output {
         let from = node.value.visit(self);
         self.push(Instruction::Set {
             identifier: node.identifier,
@@ -82,7 +82,7 @@ impl VisitStatement for Constructor {
         });
     }
 
-    fn assign(&mut self, node: Assign, _context: &mut ()) -> Self::Output {
+    fn assign(&mut self, node: statement::Assign, _context: &mut ()) -> Self::Output {
         let from = node.value.visit(self);
         self.output.push(Instruction::Set {
             identifier: node.identifier,
@@ -90,7 +90,7 @@ impl VisitStatement for Constructor {
         });
     }
 
-    fn debug(&mut self, node: Debug, _context: &mut ()) -> Self::Output {
+    fn debug(&mut self, node: statement::Debug, _context: &mut ()) -> Self::Output {
         let value = node.value.visit(self);
         let instruction = Instruction::Call {
             label: "debug_i64".into(),
@@ -103,52 +103,47 @@ impl VisitStatement for Constructor {
 impl VisitExpression for Constructor {
     type Output = u64;
 
-    fn integer(&mut self, value: &i128) -> Self::Output {
+    fn integer(&mut self, node: expression::Integer) -> Self::Output {
         let id = self.allocate();
         self.output.push(Instruction::Integer {
             to: id,
-            value: *value,
+            value: node.value,
         });
         id
     }
 
-    fn identifier(&mut self, name: &String) -> Self::Output {
+    fn identifier(&mut self, node: expression::Identifier) -> Self::Output {
         let id = self.allocate();
         self.push(Instruction::Get {
             to: id,
-            identifier: name.clone(),
+            identifier: node.name,
         });
         id
     }
 
-    fn boolean(&mut self, value: &bool) -> Self::Output {
+    fn boolean(&mut self, node: expression::Boolean) -> Self::Output {
         let id = self.allocate();
         self.output.push(Instruction::Integer {
             to: id,
-            value: *value as i128,
+            value: node.value as i128,
         });
         id
     }
 
-    fn string(&mut self, value: &String) -> Self::Output {
+    fn string(&mut self, node: expression::Str) -> Self::Output {
         let id = self.allocate();
         self.push(Instruction::String {
             to: id,
-            value: value.clone(),
+            value: node.value,
         });
         id
     }
 
-    fn binary(
-        &mut self,
-        kind: &BinaryKind,
-        left: &Box<Expression>,
-        right: &Box<Expression>,
-    ) -> Self::Output {
-        let left = left.visit(self);
-        let right = right.visit(self);
+    fn binary(&mut self, node: expression::Binary) -> Self::Output {
+        let left = node.left.visit(self);
+        let right = node.right.visit(self);
         let id = self.allocate();
-        let instruction = match kind {
+        let instruction = match node.kind {
             BinaryKind::Add => Instruction::Add {
                 to: id,
                 left,

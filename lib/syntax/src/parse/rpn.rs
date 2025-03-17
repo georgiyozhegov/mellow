@@ -1,4 +1,7 @@
-use super::{BinaryKind, Expression, Precedence, UnaryKind};
+use super::{
+    expression::{self, Expression},
+    BinaryKind, Precedence, UnaryKind,
+};
 use crate::{lex::Token, Error};
 
 #[macro_export]
@@ -93,11 +96,18 @@ impl Rpn {
             RpnItem::Binary(kind) => {
                 let right = self.values.pop().unwrap();
                 let left = self.values.pop().unwrap();
-                self.value(Expression::Binary(kind, Box::new(left), Box::new(right)));
+                self.value(Expression::Binary(expression::Binary {
+                    kind,
+                    left: Box::new(left),
+                    right: Box::new(right),
+                }));
             }
             RpnItem::Unary(kind) => {
                 let value = self.values.pop().unwrap();
-                self.value(Expression::Unary(kind, Box::new(value)));
+                self.value(Expression::Unary(expression::Unary {
+                    kind,
+                    inner: Box::new(value),
+                }));
             }
             _ => unreachable!(),
         }

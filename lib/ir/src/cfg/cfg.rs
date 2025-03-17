@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use syntax::parse::Expression;
+use syntax::parse::expression::Expression;
 
 use super::Block;
 

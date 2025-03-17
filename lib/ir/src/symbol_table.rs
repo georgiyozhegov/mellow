@@ -3,7 +3,11 @@ use std::{
     i32,
 };
 
-use syntax::parse::{BinaryKind, Expression, Statement};
+use syntax::parse::{
+    expression::{self, Expression},
+    statement::Statement,
+    BinaryKind,
+};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Type {
@@ -25,20 +29,14 @@ macro_rules! in_range {
 
 pub fn type_of(expression: Expression) -> Type {
     match expression {
-        Expression::Integer(value) => {
-            if in_range!(value, i32) {
-                return Type::I32;
-            };
-            if in_range!(value, i64) {
-                return Type::I64;
-            };
-            panic!("invalid integer type ({value:?})");
+        Expression::Integer(node) => {
+            return Type::I64;
         }
-        Expression::Binary(operator, left, right) => {
-            let left = type_of(*left);
-            let right = type_of(*right);
+        Expression::Binary(node) => {
+            let left = type_of(*node.left);
+            let right = type_of(*node.right);
             if matches!(
-                operator,
+                node.kind,
                 BinaryKind::Equal | BinaryKind::Greater | BinaryKind::Less
             ) {
                 if left != right {
@@ -53,12 +51,12 @@ pub fn type_of(expression: Expression) -> Type {
         Expression::String(value) => {
             return Type::String;
         }
-        Expression::If {
+        Expression::If(expression::If {
             condition,
             if_,
             or,
             else_,
-        } => {
+        }) => {
             let condition = type_of(*condition);
             if condition != Type::Boolean {
                 panic!("invalid type of condition ({condition:?})");

@@ -1,4 +1,4 @@
-use syntax::parse::*;
+use syntax::parse::{statement::*, VisitStatement};
 
 use super::{block::BlockRange, Block, Cfg, Link};
 

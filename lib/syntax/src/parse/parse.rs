@@ -1,9 +1,10 @@
-use super::tree::*;
 use std::iter::Peekable;
 
 use super::{
+    expression::{self, Expression},
     rpn::{ExpressionState, Rpn, RpnItem},
-    BinaryKind, Expression, Statement, UnaryKind,
+    statement::{self, Statement},
+    BinaryKind, UnaryKind,
 };
 use crate::{
     lex::{Lex, Token},
@@ -68,7 +69,7 @@ impl Parse<'_> {
         let identifier = self.identifier()?;
         self.expect(Token::Equal)?;
         let value = self.expression()?;
-        Ok(Statement::Let(Let {
+        Ok(Statement::Let(statement::Let {
             identifier,
             mutable,
             value,
@@ -95,7 +96,7 @@ impl Parse<'_> {
     fn assign(&mut self, identifier: String) -> Result<Statement> {
         self.expect(Token::Equal)?;
         let value = self.expression()?;
-        Ok(Statement::Assign(Assign { identifier, value }))
+        Ok(Statement::Assign(statement::Assign { identifier, value }))
     }
 
     fn if_s(&mut self) -> Result<Statement> {
@@ -105,7 +106,7 @@ impl Parse<'_> {
         let or = self.or_s()?;
         let else_ = self.else_s()?;
         self.expect(Token::End)?;
-        Ok(Statement::If(If {
+        Ok(Statement::If(statement::If {
             condition,
             if_,
             or,
@@ -144,7 +145,7 @@ impl Parse<'_> {
         self.expect(Token::Do)?;
         let body = self.body()?;
         self.expect(Token::End)?;
-        Ok(Statement::While(While { condition, body }))
+        Ok(Statement::While(statement::While { condition, body }))
     }
 
     fn for_(&mut self) -> Result<Statement> {
@@ -154,7 +155,7 @@ impl Parse<'_> {
         self.expect(Token::Do)?;
         let body = self.body()?;
         self.expect(Token::End)?;
-        Ok(Statement::For(For {
+        Ok(Statement::For(statement::For {
             item,
             sequence,
             body,
@@ -163,7 +164,7 @@ impl Parse<'_> {
 
     fn debug(&mut self) -> Result<Statement> {
         let value = self.expression()?;
-        Ok(Statement::Debug(Debug { value }))
+        Ok(Statement::Debug(statement::Debug { value }))
     }
 }
 
@@ -217,12 +218,12 @@ impl Parse<'_> {
         let or = self.or_e()?;
         let else_ = self.else_e()?;
         self.expect(Token::End)?;
-        Ok(Expression::If {
+        Ok(Expression::If(expression::If {
             condition: Box::new(condition),
             if_: Box::new(true_),
             or,
             else_,
-        })
+        }))
     }
 
     fn or_e(&mut self) -> Result<Vec<(Expression, Expression)>> {
