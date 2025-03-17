@@ -76,20 +76,20 @@ impl VisitStatement for Constructor {
 
     fn let_(
             &mut self,
-            value: Let,
+            node: Let,
             _context: &mut Self::Context,
         ) -> Self::Output {
-        let from = value.value.visit(self);
-        self.push(Instruction::Set { identifier: value.identifier, from });
+        let from = node.value.visit(self);
+        self.push(Instruction::Set { identifier: node.identifier, from });
     }
 
-    fn assign(&mut self, value: Assign, _context: &mut ()) -> Self::Output {
-        let from = value.value.visit(self);
-        self.output.push(Instruction::Set { identifier: value.identifier, from });
+    fn assign(&mut self, node: Assign, _context: &mut ()) -> Self::Output {
+        let from = node.value.visit(self);
+        self.output.push(Instruction::Set { identifier: node.identifier, from });
     }
 
-    fn debug(&mut self, value: Debug, _context: &mut ()) -> Self::Output {
-        let value = value.0.visit(self);
+    fn debug(&mut self, node: Debug, _context: &mut ()) -> Self::Output {
+        let value = node.0.visit(self);
         let instruction = Instruction::Call {
             label: "debug_i64".into(),
             value,

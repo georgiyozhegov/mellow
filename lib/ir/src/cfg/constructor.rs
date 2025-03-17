@@ -1,4 +1,4 @@
-use syntax::parse::{Expression, Statement, VisitStatement, *};
+use syntax::parse::*;
 
 use super::{block::BlockRange, Block, Cfg, Link};
 
@@ -18,34 +18,34 @@ impl VisitStatement for Constructor {
 
     fn let_(
         &mut self,
-        value: Let,
+        node: Let,
         context: &mut Self::Context,
     ) -> Self::Output {
-        context.push(Statement::Let(value));
+        context.push(Statement::Let(node));
     }
 
     fn assign(
         &mut self,
-        value: Assign,
+        node: Assign,
         context: &mut Self::Context,
     ) -> Self::Output {
-        context.push(Statement::Assign(value));
+        context.push(Statement::Assign(node));
     }
 
-    fn debug(&mut self, value: Debug, context: &mut Self::Context) -> Self::Output {
-        context.push(Statement::Debug(value));
+    fn debug(&mut self, node: Debug, context: &mut Self::Context) -> Self::Output {
+        context.push(Statement::Debug(node));
     }
 
     fn if_(
         &mut self,
-        mut value: If,
+        mut node: If,
         context: &mut Self::Context,
     ) -> Self::Output {
         let mut previous = self.output.insert(Block::Basic(context.clone()));
         context.clear();
-        value.or.insert(0, (value.condition, value.if_.clone()));
+        node.or.insert(0, (node.condition, node.if_.clone()));
         let mut last_condition = None;
-        for (condition, body) in value.or {
+        for (condition, body) in node.or {
             let body = self.block(body.clone());
             self.output.branch(
                 previous,
@@ -56,7 +56,7 @@ impl VisitStatement for Constructor {
             previous = body.end;
             last_condition = Some(condition);
         }
-        let else_ = self.block(value.else_.clone());
+        let else_ = self.block(node.else_.clone());
         if let Some(condition) = last_condition {
             self.output.branch(
                 previous,
@@ -69,17 +69,17 @@ impl VisitStatement for Constructor {
 
     fn while_(
         &mut self,
-        value: While,
+        node: While,
         context: &mut Self::Context,
     ) -> Self::Output {
         let previous = self.output.insert(Block::Basic(context.clone()));
         context.clear();
         let start = self.output.insert(Block::Empty);
         self.output.direct(previous, start);
-        let body = self.block(value.body);
+        let body = self.block(node.body);
         let end = self.output.next_id();
         self.output
-            .branch(start, value.condition, body.start, end);
+            .branch(start, node.condition, body.start, end);
         self.output.direct(body.end, start);
     }
 }

@@ -7,40 +7,40 @@ pub trait VisitStatement {
 
     fn let_(
         &mut self,
-        value: Let,
+        node: Let,
         context: &mut Self::Context,
     ) -> Self::Output {
         todo!()
     }
     fn assign(
         &mut self,
-        value: Assign,
+        node: Assign,
         context: &mut Self::Context,
     ) -> Self::Output {
         todo!()
     }
     fn if_(
         &mut self,
-        value: If,
+        node: If,
         context: &mut Self::Context,
     ) -> Self::Output {
         todo!()
     }
     fn while_(
         &mut self,
-        value: While,
+        node: While,
         context: &mut Self::Context,
     ) -> Self::Output {
         todo!()
     }
     fn for_(
         &mut self,
-        value: For,
+        node: For,
         context: &mut Self::Context,
     ) -> Self::Output {
         todo!()
     }
-    fn debug(&mut self, value: Debug, context: &mut Self::Context) -> Self::Output {
+    fn debug(&mut self, node: Debug, context: &mut Self::Context) -> Self::Output {
         todo!()
     }
 }
@@ -86,12 +86,12 @@ pub trait VisitExpression {
 impl Statement {
     pub fn visit<T: VisitStatement>(self, visit: &mut T, context: &mut T::Context) -> T::Output {
         match self {
-            Self::Let(value) => visit.let_(value, context),
-            Self::Assign(value) => visit.assign(value, context),
-            Self::If(value) => visit.if_(value, context),
-            Self::While(value) => visit.while_(value, context),
-            Self::For(value) => visit.for_(value, context),
-            Self::Debug(value) => visit.debug(value, context),
+            Self::Let(node) => visit.let_(node, context),
+            Self::Assign(node) => visit.assign(node, context),
+            Self::If(node) => visit.if_(node, context),
+            Self::While(node) => visit.while_(node, context),
+            Self::For(node) => visit.for_(node, context),
+            Self::Debug(node) => visit.debug(node, context),
         }
     }
 }
