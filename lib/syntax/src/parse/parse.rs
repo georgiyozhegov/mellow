@@ -1,9 +1,11 @@
 use std::iter::Peekable;
 
 use super::{
-    expression::{self, Expression},
+    expression,
+    Expression,
     rpn::{ExpressionState, Rpn, RpnItem},
-    statement::{self, Statement},
+    statement,
+    Statement,
     BinaryKind, UnaryKind,
 };
 use crate::{

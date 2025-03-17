@@ -1,5 +1,5 @@
 use super::{
-    expression::{self, Expression},
+    expression, Expression,
     BinaryKind, Precedence, UnaryKind,
 };
 use crate::{lex::Token, Error};
