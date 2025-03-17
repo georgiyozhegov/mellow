@@ -1,5 +1,5 @@
-use std::iter::Peekable;
 use super::tree::*;
+use std::iter::Peekable;
 
 use super::{
     rpn::{ExpressionState, Rpn, RpnItem},

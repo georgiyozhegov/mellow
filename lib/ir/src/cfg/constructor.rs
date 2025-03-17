@@ -16,19 +16,11 @@ impl VisitStatement for Constructor {
     type Output = ();
     type Context = Vec<Statement>;
 
-    fn let_(
-        &mut self,
-        node: Let,
-        context: &mut Self::Context,
-    ) -> Self::Output {
+    fn let_(&mut self, node: Let, context: &mut Self::Context) -> Self::Output {
         context.push(Statement::Let(node));
     }
 
-    fn assign(
-        &mut self,
-        node: Assign,
-        context: &mut Self::Context,
-    ) -> Self::Output {
+    fn assign(&mut self, node: Assign, context: &mut Self::Context) -> Self::Output {
         context.push(Statement::Assign(node));
     }
 
@@ -36,11 +28,7 @@ impl VisitStatement for Constructor {
         context.push(Statement::Debug(node));
     }
 
-    fn if_(
-        &mut self,
-        mut node: If,
-        context: &mut Self::Context,
-    ) -> Self::Output {
+    fn if_(&mut self, mut node: If, context: &mut Self::Context) -> Self::Output {
         let mut previous = self.output.insert(Block::Basic(context.clone()));
         context.clear();
         node.or.insert(0, (node.condition, node.if_.clone()));
@@ -67,19 +55,14 @@ impl VisitStatement for Constructor {
         }
     }
 
-    fn while_(
-        &mut self,
-        node: While,
-        context: &mut Self::Context,
-    ) -> Self::Output {
+    fn while_(&mut self, node: While, context: &mut Self::Context) -> Self::Output {
         let previous = self.output.insert(Block::Basic(context.clone()));
         context.clear();
         let start = self.output.insert(Block::Empty);
         self.output.direct(previous, start);
         let body = self.block(node.body);
         let end = self.output.next_id();
-        self.output
-            .branch(start, node.condition, body.start, end);
+        self.output.branch(start, node.condition, body.start, end);
         self.output.direct(body.end, start);
     }
 }

@@ -5,39 +5,19 @@ pub trait VisitStatement {
     type Output;
     type Context;
 
-    fn let_(
-        &mut self,
-        node: Let,
-        context: &mut Self::Context,
-    ) -> Self::Output {
+    fn let_(&mut self, node: Let, context: &mut Self::Context) -> Self::Output {
         todo!()
     }
-    fn assign(
-        &mut self,
-        node: Assign,
-        context: &mut Self::Context,
-    ) -> Self::Output {
+    fn assign(&mut self, node: Assign, context: &mut Self::Context) -> Self::Output {
         todo!()
     }
-    fn if_(
-        &mut self,
-        node: If,
-        context: &mut Self::Context,
-    ) -> Self::Output {
+    fn if_(&mut self, node: If, context: &mut Self::Context) -> Self::Output {
         todo!()
     }
-    fn while_(
-        &mut self,
-        node: While,
-        context: &mut Self::Context,
-    ) -> Self::Output {
+    fn while_(&mut self, node: While, context: &mut Self::Context) -> Self::Output {
         todo!()
     }
-    fn for_(
-        &mut self,
-        node: For,
-        context: &mut Self::Context,
-    ) -> Self::Output {
+    fn for_(&mut self, node: For, context: &mut Self::Context) -> Self::Output {
         todo!()
     }
     fn debug(&mut self, node: Debug, context: &mut Self::Context) -> Self::Output {

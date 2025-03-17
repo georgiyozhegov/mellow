@@ -46,5 +46,5 @@ pub struct For {
 
 #[derive(Debug, Clone)]
 pub struct Debug {
-    pub value: Expression
+    pub value: Expression,
 }

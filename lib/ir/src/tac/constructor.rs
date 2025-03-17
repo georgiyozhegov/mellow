@@ -1,4 +1,4 @@
-use syntax::parse::{BinaryKind, Expression, VisitExpression, VisitStatement, *};
+use syntax::parse::*;
 
 use super::Instruction;
 use crate::cfg::{Block, Cfg, Link};
@@ -74,18 +74,20 @@ impl VisitStatement for Constructor {
     type Output = ();
     type Context = ();
 
-    fn let_(
-            &mut self,
-            node: Let,
-            _context: &mut Self::Context,
-        ) -> Self::Output {
+    fn let_(&mut self, node: Let, _context: &mut Self::Context) -> Self::Output {
         let from = node.value.visit(self);
-        self.push(Instruction::Set { identifier: node.identifier, from });
+        self.push(Instruction::Set {
+            identifier: node.identifier,
+            from,
+        });
     }
 
     fn assign(&mut self, node: Assign, _context: &mut ()) -> Self::Output {
         let from = node.value.visit(self);
-        self.output.push(Instruction::Set { identifier: node.identifier, from });
+        self.output.push(Instruction::Set {
+            identifier: node.identifier,
+            from,
+        });
     }
 
     fn debug(&mut self, node: Debug, _context: &mut ()) -> Self::Output {
