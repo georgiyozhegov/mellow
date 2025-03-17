@@ -32,7 +32,7 @@ impl Constructor {
         match value {
             Block::Basic(body) => {
                 for statement in body {
-                    statement.visit(self);
+                    statement.visit(self, &mut ());
                 }
             }
             Block::Empty => {}
@@ -72,25 +72,20 @@ impl Constructor {
 
 impl VisitStatement for Constructor {
     type Output = ();
+    type Context = ();
 
-    fn let_(&mut self, identifier: &String, mutable: &bool, value: &Expression) {
+    fn let_(&mut self, identifier: String, mutable: bool, value: Expression, _context: &mut ()) {
         let from = value.visit(self);
-        self.push(Instruction::Set {
-            identifier: identifier.clone(),
-            from,
-        });
+        self.push(Instruction::Set { identifier, from });
         // TODO: mutable check
     }
 
-    fn assign(&mut self, identifier: &String, value: &Expression) -> Self::Output {
+    fn assign(&mut self, identifier: String, value: Expression, _context: &mut ()) -> Self::Output {
         let from = value.visit(self);
-        self.output.push(Instruction::Set {
-            identifier: identifier.clone(),
-            from,
-        });
+        self.output.push(Instruction::Set { identifier, from });
     }
 
-    fn debug(&mut self, value: &Expression) -> Self::Output {
+    fn debug(&mut self, value: Expression, _context: &mut ()) -> Self::Output {
         let value = value.visit(self);
         let instruction = Instruction::Call {
             label: "debug_i64".into(),

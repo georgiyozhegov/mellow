@@ -1,4 +1,4 @@
-use syntax::parse::{Expression, Statement, VisitWithStatement};
+use syntax::parse::{Expression, Statement, VisitStatement};
 
 use super::{block::BlockRange, Block, Cfg, Link};
 
@@ -12,46 +12,43 @@ impl Constructor {
     }
 }
 
-impl VisitWithStatement for Constructor {
+impl VisitStatement for Constructor {
     type Output = ();
     type Context = Vec<Statement>;
 
     fn let_(
         &mut self,
-        identifier: &String,
-        mutable: &bool,
-        value: &Expression,
+        identifier: String,
+        mutable: bool,
+        value: Expression,
         context: &mut Self::Context,
     ) -> Self::Output {
         context.push(Statement::Let {
-            identifier: identifier.clone(),
-            mutable: *mutable,
-            value: value.clone(),
+            identifier,
+            mutable,
+            value,
         });
     }
 
     fn assign(
         &mut self,
-        identifier: &String,
-        value: &Expression,
+        identifier: String,
+        value: Expression,
         context: &mut Self::Context,
     ) -> Self::Output {
-        context.push(Statement::Assign {
-            identifier: identifier.clone(),
-            value: value.clone(),
-        });
+        context.push(Statement::Assign { identifier, value });
     }
 
-    fn debug(&mut self, value: &Expression, context: &mut Self::Context) -> Self::Output {
-        context.push(Statement::Debug(value.clone()));
+    fn debug(&mut self, value: Expression, context: &mut Self::Context) -> Self::Output {
+        context.push(Statement::Debug(value));
     }
 
     fn if_(
         &mut self,
-        condition: &Expression,
-        if_: &Vec<Statement>,
-        or: &Vec<(Expression, Vec<Statement>)>,
-        else_: &Vec<Statement>,
+        condition: Expression,
+        if_: Vec<Statement>,
+        or: Vec<(Expression, Vec<Statement>)>,
+        else_: Vec<Statement>,
         context: &mut Self::Context,
     ) -> Self::Output {
         let mut previous = self.output.insert(Block::Basic(context.clone()));
@@ -83,8 +80,8 @@ impl VisitWithStatement for Constructor {
 
     fn while_(
         &mut self,
-        condition: &Expression,
-        body: &Vec<Statement>,
+        condition: Expression,
+        body: Vec<Statement>,
         context: &mut Self::Context,
     ) -> Self::Output {
         let previous = self.output.insert(Block::Basic(context.clone()));
@@ -104,7 +101,7 @@ impl Constructor {
         let start = self.output.next_id();
         let mut current = Vec::new();
         for statement in source {
-            statement.visit_with(self, &mut current);
+            statement.visit(self, &mut current);
         }
         if !current.is_empty() {
             self.output.insert(Block::Basic(current));

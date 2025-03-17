@@ -3,114 +3,53 @@ use super::{BinaryKind, Expression, Statement, UnaryKind};
 #[allow(unused)]
 pub trait VisitStatement {
     type Output;
-
-    fn let_(&mut self, identifier: &String, mutable: &bool, value: &Expression) -> Self::Output {
-        todo!()
-    }
-    fn assign(&mut self, identifier: &String, value: &Expression) -> Self::Output {
-        todo!()
-    }
-    fn if_(
-        &mut self,
-        condition: &Expression,
-        if_: &Vec<Statement>,
-        or: &Vec<(Expression, Vec<Statement>)>,
-        else_: &Vec<Statement>,
-    ) -> Self::Output {
-        todo!()
-    }
-    fn while_(&mut self, condition: &Expression, body: &Vec<Statement>) -> Self::Output {
-        todo!()
-    }
-    fn for_(
-        &mut self,
-        item: &String,
-        sequence: &Expression,
-        body: &Vec<Statement>,
-    ) -> Self::Output {
-        todo!()
-    }
-    fn debug(&mut self, value: &Expression) -> Self::Output {
-        todo!()
-    }
-}
-
-impl Statement {
-    pub fn visit<T: VisitStatement>(&self, visit: &mut T) -> T::Output {
-        match self {
-            Self::Let {
-                identifier,
-                mutable,
-                value,
-            } => visit.let_(identifier, mutable, value),
-            Self::Assign { identifier, value } => visit.assign(identifier, value),
-            Self::If {
-                condition,
-                if_,
-                or,
-                else_,
-            } => visit.if_(condition, if_, or, else_),
-            Self::While { condition, body } => visit.while_(condition, body),
-            Self::For {
-                item,
-                sequence,
-                body,
-            } => visit.for_(item, sequence, body),
-            Self::Debug(value) => visit.debug(value),
-        }
-    }
-}
-
-#[allow(unused)]
-pub trait VisitWithStatement {
-    type Output;
     type Context;
 
     fn let_(
         &mut self,
-        identifier: &String,
-        mutable: &bool,
-        value: &Expression,
+        identifier: String,
+        mutable: bool,
+        value: Expression,
         context: &mut Self::Context,
     ) -> Self::Output {
         todo!()
     }
     fn assign(
         &mut self,
-        identifier: &String,
-        value: &Expression,
+        identifier: String,
+        value: Expression,
         context: &mut Self::Context,
     ) -> Self::Output {
         todo!()
     }
     fn if_(
         &mut self,
-        condition: &Expression,
-        if_: &Vec<Statement>,
-        or: &Vec<(Expression, Vec<Statement>)>,
-        else_: &Vec<Statement>,
+        condition: Expression,
+        if_: Vec<Statement>,
+        or: Vec<(Expression, Vec<Statement>)>,
+        else_: Vec<Statement>,
         context: &mut Self::Context,
     ) -> Self::Output {
         todo!()
     }
     fn while_(
         &mut self,
-        condition: &Expression,
-        body: &Vec<Statement>,
+        condition: Expression,
+        body: Vec<Statement>,
         context: &mut Self::Context,
     ) -> Self::Output {
         todo!()
     }
     fn for_(
         &mut self,
-        item: &String,
-        sequence: &Expression,
-        body: &Vec<Statement>,
+        item: String,
+        sequence: Expression,
+        body: Vec<Statement>,
         context: &mut Self::Context,
     ) -> Self::Output {
         todo!()
     }
-    fn debug(&mut self, value: &Expression, context: &mut Self::Context) -> Self::Output {
+    fn debug(&mut self, value: Expression, context: &mut Self::Context) -> Self::Output {
         todo!()
     }
 }
@@ -154,11 +93,7 @@ pub trait VisitExpression {
 }
 
 impl Statement {
-    pub fn visit_with<T: VisitWithStatement>(
-        &self,
-        visit: &mut T,
-        context: &mut T::Context,
-    ) -> T::Output {
+    pub fn visit<T: VisitStatement>(self, visit: &mut T, context: &mut T::Context) -> T::Output {
         match self {
             Self::Let {
                 identifier,
