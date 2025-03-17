@@ -13,30 +13,26 @@ fn main() {
 
     // println!("{ast:#?}");
 
-    // let symbol_table = ir::symbol_table::construct(&ast);
+    let symbol_table = ir::symbol_table::construct(&ast);
     let cfg = ir::cfg::construct(ast);
     let tac = ir::tac::construct(cfg);
 
-    println!("{tac:#?}");
+    // println!("{tac:#?}");
 
-    /*
     println!("section .bss");
     for (identifier, _) in symbol_table.variables() {
         println!("{identifier}: resq 1");
     }
-    */
 
     println!("section .text");
     println!("global _start:");
     println!("_start:");
 
-    /*
     for (identifier, meta) in symbol_table.functions() {
         if meta.external {
             println!("extern {identifier}");
         }
     }
-    */
 
     let assembly = assembly::convert(tac);
     let assembly = assembly::optimize(assembly);
