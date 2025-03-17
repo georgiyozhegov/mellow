@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, vec::IntoIter};
 
 use syntax::parse::expression::Expression;
 
@@ -26,12 +26,6 @@ impl<B, L> Cfg<B, L> {
             blocks: Vec::new(),
             links: HashMap::new(),
         }
-    }
-}
-
-impl<B, L> Default for Cfg<B, L> {
-    fn default() -> Self {
-        Self::new()
     }
 }
 
@@ -67,5 +61,35 @@ impl Cfg<Block, Link> {
 
     pub fn next_id(&self) -> u64 {
         self.blocks.len() as u64
+    }
+}
+
+pub struct CfgIter {
+    id: u64,
+    blocks: IntoIter<Block>,
+    links: HashMap<u64, Link>,
+}
+
+impl Iterator for CfgIter {
+    type Item = (Block, Option<Link>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let block = self.blocks.next()?;
+        let link = self.links.remove(&self.id);
+        self.id += 1;
+        Some((block, link))
+    }
+}
+
+impl IntoIterator for Cfg<Block, Link> {
+    type Item = (Block, Option<Link>);
+    type IntoIter = CfgIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        CfgIter {
+            id: 0,
+            blocks: self.blocks.into_iter(),
+            links: self.links,
+        }
     }
 }

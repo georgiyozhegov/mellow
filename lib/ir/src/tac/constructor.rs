@@ -39,10 +39,10 @@ impl Constructor {
         };
     }
 
-    fn link(&mut self, value: &Link) {
+    fn link(&mut self, value: Link) {
         match value {
             Link::Direct(to) => {
-                self.push(Instruction::Jump(*to));
+                self.push(Instruction::Jump(to));
             }
             Link::Branch {
                 condition,
@@ -52,17 +52,17 @@ impl Constructor {
                 let condition = condition.clone().visit(self);
                 self.push(Instruction::JumpIf {
                     condition,
-                    to: *true_,
+                    to: true_,
                 });
-                self.push(Instruction::Jump(*false_));
+                self.push(Instruction::Jump(false_));
             }
         }
     }
 
     pub fn construct(mut self, source: Cfg<Block, Link>) -> Vec<Instruction> {
-        for (id, block) in source.blocks.into_iter().enumerate() {
+        for (block, link) in source {
             self.block(block);
-            if let Some(link) = source.links.get(&(id as u64)) {
+            if let Some(link) = link {
                 self.link(link);
             }
         }
@@ -92,11 +92,10 @@ impl VisitStatement for Constructor {
 
     fn debug(&mut self, node: statement::Debug, _context: &mut ()) -> Self::Output {
         let value = node.value.visit(self);
-        let instruction = Instruction::Call {
+        self.push(Instruction::Call {
             label: "debug_i64".into(),
             value,
-        };
-        self.push(instruction);
+        });
     }
 }
 
