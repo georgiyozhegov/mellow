@@ -1,7 +1,5 @@
-mod lifetime;
 mod instruction;
 mod constructor;
-pub use lifetime::allocate;
 pub use instruction::Instruction;
 use constructor::Constructor;
 

@@ -1,6 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::tac::Instruction;
+use ir::tac::Instruction;
+
+use crate::register::RegisterKind;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct Lifetime {
@@ -85,11 +87,11 @@ fn interference_graph(lifetimes: HashMap<u64, Lifetime>) -> HashMap<u64, HashSet
     graph
 }
 
-pub fn allocate(tac: &Vec<Instruction>, registers: u64) -> HashMap<u64, u64> {
+pub fn allocate(tac: &Vec<Instruction>) -> HashMap<u64, RegisterKind> {
     let lifetimes = scan(tac);
     let graph = interference_graph(lifetimes);
-    let registers = (0..registers).collect::<Vec<u64>>();
-    let mut allocated: HashMap<u64, u64> = HashMap::new();
+    let registers = RegisterKind::allocable();
+    let mut allocated: HashMap<u64, RegisterKind> = HashMap::new();
 
     let mut ids = graph.keys().cloned().collect::<Vec<u64>>();
     ids.sort_by_key(|id| -(graph.get(id).unwrap().len() as isize));

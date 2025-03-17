@@ -2,8 +2,10 @@ mod assembly;
 mod data;
 mod optimize;
 mod register;
+mod lifetime;
 
 use std::collections::HashMap;
+use crate::lifetime::allocate;
 
 use assembly::Assembly;
 use data::Data;
@@ -116,19 +118,10 @@ fn generate(
     }
 }
 
-fn map(allocated: HashMap<u64, u64>) -> HashMap<u64, RegisterKind> {
-    let mut mapped = HashMap::new();
-    let registers = RegisterKind::allocable();
-    for (id, register) in allocated.iter() {
-        mapped.insert(*id, registers.get(*register as usize).unwrap().clone());
-    }
-    mapped
-}
-
 pub fn convert(tac: Vec<Instruction>) -> Vec<Assembly> {
     let mut output = Vec::new();
     let n = RegisterKind::allocable().len();
-    let allocated = map(ir::tac::allocate(&tac, n as u64));
+    let allocated = allocate(&tac);
     for instruction in tac.into_iter() {
         generate(instruction, &mut output, &allocated);
     }
