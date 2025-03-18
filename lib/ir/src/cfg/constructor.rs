@@ -1,14 +1,29 @@
 use syntax::parse::{statement::*, VisitStatement};
 
-use super::{block::BlockRange, Block, Cfg};
+use super::{block::BlockRange, Block};
 
 pub struct Constructor {
-    output: Cfg,
+    output: Vec<Block>,
 }
 
 impl Constructor {
     pub fn new() -> Self {
-        Self { output: Cfg::new() }
+        Self { output: Vec::new() }
+    }
+}
+
+impl Constructor {
+    fn push(&mut self, block: Block) -> usize {
+        self.output.push(block);
+        self.last_id()
+    }
+
+    fn last_id(&self) -> usize {
+        self.next_id() - 1
+    }
+
+    fn next_id(&self) -> usize {
+        self.output.len()
     }
 }
 
@@ -29,61 +44,53 @@ impl VisitStatement for Constructor {
     }
 
     fn if_(&mut self, mut node: If, context: &mut Self::Context) -> Self::Output {
-        let mut previous = self.output.insert(Block::Basic(context.clone()));
+        let mut previous = self.push(Block::new(context.clone()));
         context.clear();
         node.or.insert(0, (node.condition, node.if_.clone()));
         let mut last_condition = None;
         for (condition, body) in node.or {
             let body = self.block(body.clone());
-            self.output.branch(
-                previous,
-                condition.clone(),
-                body.start,
-                self.output.next_id(),
-            );
+            let next = self.next_id();
+            self.output[previous].branch(condition.clone(), body.start, next);
             previous = body.end;
             last_condition = Some(condition);
         }
-        let else_ = self.block(node.else_.clone());
+        let else_ = self.block(node.else_);
         if let Some(condition) = last_condition {
-            self.output.branch(
-                previous,
-                condition.clone(),
-                self.output.next_id(),
-                else_.start,
-            );
+            let next = self.next_id();
+            self.output[previous].branch(condition, next, else_.start);
         }
     }
 
     fn while_(&mut self, node: While, context: &mut Self::Context) -> Self::Output {
-        let previous = self.output.insert(Block::Basic(context.clone()));
+        let previous = self.push(Block::new(context.clone()));
         context.clear();
-        let start = self.output.insert(Block::Empty);
-        self.output.direct(previous, start);
+        let start = self.push(Block::empty());
+        self.output[previous].direct(start);
         let body = self.block(node.body);
-        let end = self.output.next_id();
-        self.output.branch(start, node.condition, body.start, end);
-        self.output.direct(body.end, start);
+        let end = self.next_id();
+        self.output[start].branch(node.condition, body.start, end);
+        self.output[body.end].direct(start);
     }
 }
 
 impl Constructor {
     fn block(&mut self, source: Vec<Statement>) -> BlockRange {
-        let start = self.output.next_id();
+        let start = self.next_id();
         let mut current = Vec::new();
         for statement in source {
             statement.visit(self, &mut current);
         }
         if !current.is_empty() {
-            self.output.insert(Block::Basic(current));
+            self.push(Block::new(current));
         }
-        let end = self.output.last_id();
+        let end = self.last_id();
         BlockRange::new(start, end)
     }
 
-    pub fn construct(mut self, source: Vec<Statement>) -> Cfg {
+    pub fn construct(mut self, source: Vec<Statement>) -> Vec<Block> {
         self.block(source);
-        self.output.insert(Block::Empty);
+        self.push(Block::empty());
         self.output
     }
 }

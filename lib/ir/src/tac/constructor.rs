@@ -1,7 +1,7 @@
 use syntax::parse::{expression, statement, BinaryKind, VisitExpression, VisitStatement};
 
 use super::Instruction;
-use crate::cfg::{Block, Cfg, Link};
+use crate::cfg::{Block, Link};
 
 pub struct Constructor {
     output: Vec<Instruction>,
@@ -29,43 +29,38 @@ impl Constructor {
     }
 
     fn block(&mut self, value: Block) {
-        match value {
-            Block::Basic(body) => {
-                for statement in body {
-                    statement.visit(self, &mut ());
-                }
-            }
-            Block::Empty => {}
-        };
+        for statement in value.clone().into_iter() {
+            statement.visit(self, &mut ());
+        }
+        if let Some(next) = value.next() {
+            self.link(next.clone());
+        }
     }
 
     fn link(&mut self, value: Link) {
         match value {
             Link::Direct(to) => {
-                self.push(Instruction::Jump(to));
+                self.push(Instruction::Jump(to as u64));
             }
             Link::Branch {
                 condition,
                 true_,
                 false_,
             } => {
-                let condition = condition.clone().visit(self);
+                let condition = condition.visit(self);
                 self.push(Instruction::JumpIf {
                     condition,
-                    to: true_,
+                    to: true_ as u64,
                 });
-                self.push(Instruction::Jump(false_));
+                self.push(Instruction::Jump(false_ as u64));
             }
         }
     }
 
-    pub fn construct(mut self, source: Cfg) -> Vec<Instruction> {
-        for (id, block, link) in source {
-            self.push(Instruction::Label(id));
+    pub fn construct(mut self, source: Vec<Block>) -> Vec<Instruction> {
+        for (id, block) in source.into_iter().enumerate() {
+            self.push(Instruction::Label(id as u64));
             self.block(block);
-            if let Some(link) = link {
-                self.link(link);
-            }
         }
         self.output
     }
