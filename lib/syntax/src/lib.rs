@@ -3,7 +3,7 @@ pub mod lex;
 pub mod parse;
 pub use error::{Error, Result};
 use lex::Lex;
-use parse::{Statement, Parse};
+use parse::{Parse, Statement};
 
 pub fn construct(source: lex::Source) -> Result<Vec<Statement>> {
     let lex = Lex::new(source);

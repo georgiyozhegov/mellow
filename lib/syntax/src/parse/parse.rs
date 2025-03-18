@@ -2,11 +2,8 @@ use std::iter::Peekable;
 
 use super::{
     expression,
-    Expression,
     rpn::{ExpressionState, Rpn, RpnItem},
-    statement,
-    Statement,
-    BinaryKind, UnaryKind,
+    statement, BinaryKind, Expression, Statement, UnaryKind,
 };
 use crate::{
     lex::{Lex, Token},
