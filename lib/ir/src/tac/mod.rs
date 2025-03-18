@@ -3,9 +3,9 @@ mod instruction;
 use constructor::Constructor;
 pub use instruction::Instruction;
 
-use crate::cfg::{Block, Cfg, Link};
+use crate::cfg::Cfg;
 
-pub fn construct(source: Cfg<Block, Link>) -> Vec<Instruction> {
+pub fn construct(source: Cfg) -> Vec<Instruction> {
     let constructor = Constructor::new();
     constructor.construct(source)
 }

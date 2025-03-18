@@ -1,9 +1,9 @@
 use syntax::parse::{statement::*, VisitStatement};
 
-use super::{block::BlockRange, Block, Cfg, Link};
+use super::{block::BlockRange, Block, Cfg};
 
 pub struct Constructor {
-    output: Cfg<Block, Link>,
+    output: Cfg,
 }
 
 impl Constructor {
@@ -81,7 +81,7 @@ impl Constructor {
         BlockRange::new(start, end)
     }
 
-    pub fn construct(mut self, source: Vec<Statement>) -> Cfg<Block, Link> {
+    pub fn construct(mut self, source: Vec<Statement>) -> Cfg {
         self.block(source);
         self.output.insert(Block::Empty);
         self.output

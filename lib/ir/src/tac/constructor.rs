@@ -59,7 +59,7 @@ impl Constructor {
         }
     }
 
-    pub fn construct(mut self, source: Cfg<Block, Link>) -> Vec<Instruction> {
+    pub fn construct(mut self, source: Cfg) -> Vec<Instruction> {
         for (id, block, link) in source {
             self.push(Instruction::Label(id));
             self.block(block);

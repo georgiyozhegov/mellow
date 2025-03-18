@@ -15,12 +15,12 @@ pub enum Link {
 }
 
 #[derive(Debug)]
-pub struct Cfg<B, L> {
-    pub blocks: Vec<B>,
-    pub links: HashMap<u64, L>,
+pub struct Cfg {
+    pub blocks: Vec<Block>,
+    pub links: HashMap<u64, Link>,
 }
 
-impl<B, L> Cfg<B, L> {
+impl Cfg {
     pub fn new() -> Self {
         Self {
             blocks: Vec::new(),
@@ -29,7 +29,7 @@ impl<B, L> Cfg<B, L> {
     }
 }
 
-impl Cfg<Block, Link> {
+impl Cfg {
     pub fn insert(&mut self, block: Block) -> u64 {
         let id = self.blocks.len() as u64;
         self.blocks.push(block);
@@ -82,7 +82,7 @@ impl Iterator for CfgIter {
     }
 }
 
-impl IntoIterator for Cfg<Block, Link> {
+impl IntoIterator for Cfg {
     type Item = (u64, Block, Option<Link>);
     type IntoIter = CfgIter;
 
