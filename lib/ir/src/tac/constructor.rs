@@ -83,15 +83,15 @@ impl VisitStatement for Constructor {
         });
     }
 
-    fn assign(&mut self, node: statement::Assign, _context: &mut ()) -> Self::Output {
+    fn assign(&mut self, node: statement::Assign, _context: &mut Self::Context) -> Self::Output {
         let from = node.value.visit(self);
-        self.output.push(Instruction::Set {
+        self.push(Instruction::Set {
             identifier: node.identifier,
             from,
         });
     }
 
-    fn debug(&mut self, node: statement::Debug, _context: &mut ()) -> Self::Output {
+    fn debug(&mut self, node: statement::Debug, _context: &mut Self::Context) -> Self::Output {
         let value = node.value.visit(self);
         self.push(Instruction::Call {
             label: "debug_i64".into(),
