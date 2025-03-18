@@ -12,37 +12,37 @@ use crate::{
 
 pub type Source<'s> = Peekable<Lex<'s>>;
 
-pub struct Parse<'p> {
+pub struct Parser<'p> {
     source: Source<'p>,
 }
 
-impl<'p> Parse<'p> {
+impl<'p> Parser<'p> {
     pub fn new(source: Source<'p>) -> Self {
         Self { source }
     }
 }
 
-impl Iterator for Parse<'_> {
+impl Iterator for Parser<'_> {
     type Item = Result<Statement>;
 
     fn next(&mut self) -> Option<Self::Item> {
         self.source.peek()?;
-        Some(self.statement())
+        Some(Statement::parse(self))
     }
 }
 
-impl Parse<'_> {
-    fn next(&mut self) -> Result<Token> {
+impl Parser<'_> {
+    pub fn next(&mut self) -> Result<Token> {
         self.source
             .next()
             .unwrap_or(Err(Error::grammar("statement", None)))
     }
 
-    fn peek(&mut self) -> Result<Option<Token>> {
+    pub fn peek(&mut self) -> Result<Option<Token>> {
         self.source.peek().cloned().transpose()
     }
 
-    fn expect(&mut self, token: Token) -> Result<()> {
+    pub fn expect(&mut self, token: Token) -> Result<()> {
         let next = self.next()?;
         if next == token {
             Ok(())
@@ -51,31 +51,7 @@ impl Parse<'_> {
         }
     }
 
-    pub fn statement(&mut self) -> Result<Statement> {
-        match self.next()? {
-            Token::Let => self.let_(),
-            Token::Identifier(identifier) => self.assign(identifier),
-            Token::If => self.if_s(),
-            Token::While => self.while_(),
-            Token::For => self.for_(),
-            Token::Debug => self.debug(),
-            token => Err(Error::grammar("statement", Some(token))),
-        }
-    }
-
-    fn let_(&mut self) -> Result<Statement> {
-        let mutable = self.mutable()?;
-        let identifier = self.identifier()?;
-        self.expect(Token::Equal)?;
-        let value = self.expression()?;
-        Ok(Statement::Let(statement::Let {
-            identifier,
-            mutable,
-            value,
-        }))
-    }
-
-    fn mutable(&mut self) -> Result<bool> {
+    pub fn mutable(&mut self) -> Result<bool> {
         match self.peek()? {
             Some(Token::Mutable) => {
                 self.next()?;
@@ -85,26 +61,72 @@ impl Parse<'_> {
         }
     }
 
-    fn identifier(&mut self) -> Result<String> {
+    pub fn identifier(&mut self) -> Result<String> {
         match self.next()? {
             Token::Identifier(identifier) => Ok(identifier),
             token => Err(Error::grammar("identifier", Some(token))),
         }
     }
 
-    fn assign(&mut self, identifier: String) -> Result<Statement> {
-        self.expect(Token::Equal)?;
-        let value = self.expression()?;
+    pub fn body(&mut self) -> Result<Vec<Statement>> {
+        let mut body = Vec::new();
+        while let Some(token) = self.peek()? {
+            match token {
+                Token::Or | Token::Else | Token::End => break,
+                _ => body.push(Statement::parse(self)?),
+            }
+        }
+        Ok(body)
+    }
+}
+
+impl Statement {
+    fn parse(parser: &mut Parser) -> Result<Statement> {
+        match parser.peek()? {
+            Some(Token::Let) => statement::Let::parse(parser),
+            Some(Token::Identifier(..)) => statement::Assign::parse(parser),
+            Some(Token::If) => statement::If::parse(parser),
+            Some(Token::While) => statement::While::parse(parser),
+            Some(Token::For) => statement::For::parse(parser),
+            Some(Token::Debug) => statement::Debug::parse(parser),
+            token => Err(Error::grammar("statement", token)),
+        }
+    }
+}
+
+impl statement::Let {
+    fn parse(parser: &mut Parser) -> Result<Statement> {
+        parser.expect(Token::Let)?;
+        let mutable = parser.mutable()?;
+        let identifier = parser.identifier()?;
+        parser.expect(Token::Equal)?;
+        let value = Expression::parse(parser)?;
+        Ok(Statement::Let(statement::Let {
+            identifier,
+            mutable,
+            value,
+        }))
+    }
+}
+
+impl statement::Assign {
+    fn parse(parser: &mut Parser) -> Result<Statement> {
+        let identifier = parser.identifier()?;
+        parser.expect(Token::Equal)?;
+        let value = Expression::parse(parser)?;
         Ok(Statement::Assign(statement::Assign { identifier, value }))
     }
+}
 
-    fn if_s(&mut self) -> Result<Statement> {
-        let condition = self.expression()?;
-        self.expect(Token::Then)?;
-        let if_ = self.body()?;
-        let or = self.or_s()?;
-        let else_ = self.else_s()?;
-        self.expect(Token::End)?;
+impl statement::If {
+    fn parse(parser: &mut Parser) -> Result<Statement> {
+        parser.expect(Token::If)?;
+        let condition = Expression::parse(parser)?;
+        parser.expect(Token::Then)?;
+        let if_ = parser.body()?;
+        let or = Self::or(parser)?;
+        let else_ = Self::else_(parser)?;
+        parser.expect(Token::End)?;
         Ok(Statement::If(statement::If {
             condition,
             if_,
@@ -113,94 +135,107 @@ impl Parse<'_> {
         }))
     }
 
-    fn or_s(&mut self) -> Result<Vec<(Expression, Vec<Statement>)>> {
+    fn or(parser: &mut Parser) -> Result<Vec<(Expression, Vec<Statement>)>> {
         let mut or = Vec::new();
-        while self.peek()?.is_some_and(|token| token == Token::Or) {
-            self.next()?;
-            let condition = self.expression()?;
-            self.expect(Token::Then)?;
-            let body = self.body()?;
+        while parser.peek()?.is_some_and(|token| token == Token::Or) {
+            parser.next()?;
+            let condition = Expression::parse(parser)?;
+            parser.expect(Token::Then)?;
+            let body = parser.body()?;
             or.push((condition, body));
         }
-        match self.peek()? {
+        match parser.peek()? {
             Some(Token::Else) | Some(Token::End) => Ok(or),
             token => Err(Error::grammar("'else' or 'end' after 'or' body", token)),
         }
     }
 
-    fn else_s(&mut self) -> Result<Vec<Statement>> {
-        match self.peek()? {
+    fn else_(parser: &mut Parser) -> Result<Vec<Statement>> {
+        match parser.peek()? {
             Some(Token::Else) => {
-                self.next()?;
-                self.body()
+                parser.next()?;
+                parser.body()
             }
             Some(Token::End) => Ok(vec![]),
             token => Err(Error::grammar("'else', 'or' or 'end'", token)),
         }
     }
+}
 
-    fn while_(&mut self) -> Result<Statement> {
-        let condition = self.expression()?;
-        self.expect(Token::Do)?;
-        let body = self.body()?;
-        self.expect(Token::End)?;
+impl statement::While {
+    fn parse(parser: &mut Parser) -> Result<Statement> {
+        parser.expect(Token::While)?;
+        let condition = Expression::parse(parser)?;
+        parser.expect(Token::Do)?;
+        let body = parser.body()?;
+        parser.expect(Token::End)?;
         Ok(Statement::While(statement::While { condition, body }))
     }
+}
 
-    fn for_(&mut self) -> Result<Statement> {
-        let item = self.identifier()?;
-        self.expect(Token::In)?;
-        let sequence = self.expression()?;
-        self.expect(Token::Do)?;
-        let body = self.body()?;
-        self.expect(Token::End)?;
+impl statement::For {
+    fn parse(parser: &mut Parser) -> Result<Statement> {
+        parser.expect(Token::For)?;
+        let item = parser.identifier()?;
+        parser.expect(Token::In)?;
+        let sequence = Expression::parse(parser)?;
+        parser.expect(Token::Do)?;
+        let body = parser.body()?;
+        parser.expect(Token::End)?;
         Ok(Statement::For(statement::For {
             item,
             sequence,
             body,
         }))
     }
+}
 
-    fn debug(&mut self) -> Result<Statement> {
-        let value = self.expression()?;
+impl statement::Debug {
+    fn parse(parser: &mut Parser) -> Result<Statement> {
+        parser.expect(Token::Debug)?;
+        let value = Expression::parse(parser)?;
         Ok(Statement::Debug(statement::Debug { value }))
     }
 }
 
-impl Parse<'_> {
-    pub fn expression(&mut self) -> Result<Expression> {
+pub trait ParseExpression {
+    fn parse(parser: &mut Parser) -> Result<Expression>;
+}
+
+impl ParseExpression for Expression {
+    fn parse(parser: &mut Parser) -> Result<Expression> {
         let mut rpn = Rpn::new();
         let mut status = ExpressionState::default();
-        while let Some(token) = self.peek()? {
+        while let Some(token) = parser.peek()? {
             if status.stop(&token)? {
                 break;
             }
             match token {
                 literal!() => {
                     rpn.value(Expression::from(token));
-                    self.next()?;
+                    parser.next()?;
                 }
                 token if token.is_binary() => {
                     let binary: Option<BinaryKind> = token.into();
                     rpn.binary(binary.unwrap());
-                    self.next()?;
+                    parser.next()?;
                 }
                 token if token.is_unary() => {
                     let unary: Option<UnaryKind> = token.into();
                     rpn.unary(unary.unwrap());
-                    self.next()?;
+                    parser.next()?;
                 }
                 Token::LeftParenthesis => {
                     rpn.item(RpnItem::Parenthesis);
-                    self.next()?;
+                    parser.next()?;
                 }
                 Token::RightParenthesis => {
-                    self.next()?;
+                    parser.next()?;
                     rpn.parenthesis();
                 }
                 Token::If => {
-                    self.next()?;
-                    rpn.value(self.if_e()?);
+                    parser.next()?;
+                    rpn.value(expression::If::parse(parser)?);
                 }
                 _ => {
                     return Err(Error::grammar("expression", Some(token)));
@@ -209,14 +244,16 @@ impl Parse<'_> {
         }
         Ok(rpn.collapse())
     }
+}
 
-    fn if_e(&mut self) -> Result<Expression> {
-        let condition = self.expression()?;
-        self.expect(Token::Then)?;
-        let true_ = self.expression()?;
-        let or = self.or_e()?;
-        let else_ = self.else_e()?;
-        self.expect(Token::End)?;
+impl expression::If {
+    fn parse(parser: &mut Parser) -> Result<Expression> {
+        let condition = Expression::parse(parser)?;
+        parser.expect(Token::Then)?;
+        let true_ = Expression::parse(parser)?;
+        let or = Self::or(parser)?;
+        let else_ = Self::else_(parser)?;
+        parser.expect(Token::End)?;
         Ok(Expression::If(expression::If {
             condition: Box::new(condition),
             if_: Box::new(true_),
@@ -225,26 +262,26 @@ impl Parse<'_> {
         }))
     }
 
-    fn or_e(&mut self) -> Result<Vec<(Expression, Expression)>> {
+    fn or(parser: &mut Parser) -> Result<Vec<(Expression, Expression)>> {
         let mut or = Vec::new();
-        while self.peek()?.is_some_and(|token| token == Token::Or) {
-            self.next()?;
-            let condition = self.expression()?;
-            self.expect(Token::Then)?;
-            let body = self.expression()?;
+        while parser.peek()?.is_some_and(|token| token == Token::Or) {
+            parser.next()?;
+            let condition = Expression::parse(parser)?;
+            parser.expect(Token::Then)?;
+            let body = Expression::parse(parser)?;
             or.push((condition, body));
         }
-        match self.peek()? {
+        match parser.peek()? {
             Some(Token::Else) | Some(Token::End) => Ok(or),
             token => Err(Error::grammar("'else' or 'end' after 'or' body", token)),
         }
     }
 
-    fn else_e(&mut self) -> Result<Option<Box<Expression>>> {
-        match self.peek()? {
+    fn else_(parser: &mut Parser) -> Result<Option<Box<Expression>>> {
+        match parser.peek()? {
             Some(Token::Else) => {
-                self.next()?;
-                Ok(Some(Box::new(self.expression()?)))
+                parser.next()?;
+                Ok(Some(Box::new(Expression::parse(parser)?)))
             }
             Some(Token::End) => Ok(None),
             token => Err(Error::grammar(
@@ -252,18 +289,5 @@ impl Parse<'_> {
                 token,
             )),
         }
-    }
-}
-
-impl Parse<'_> {
-    fn body(&mut self) -> Result<Vec<Statement>> {
-        let mut body = Vec::new();
-        while let Some(token) = self.peek()? {
-            match token {
-                Token::Or | Token::Else | Token::End => break,
-                _ => body.push(self.statement()?),
-            }
-        }
-        Ok(body)
     }
 }

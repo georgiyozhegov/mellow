@@ -8,7 +8,7 @@ mod visit;
 use std::iter::Peekable;
 
 pub use binary::BinaryKind;
-pub use parse::Parse;
+pub use parse::Parser;
 pub use precedence::Precedence;
 pub use tree::*;
 pub use unary::UnaryKind;
