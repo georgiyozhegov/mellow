@@ -2,11 +2,11 @@ use std::iter::Peekable;
 
 use super::Statement;
 use crate::{
-    lex::{Lex, Token},
+    lex::{Lexer, Token},
     Error, Result,
 };
 
-pub type Source<'s> = Peekable<Lex<'s>>;
+pub type Source<'s> = Peekable<Lexer<'s>>;
 
 pub struct Parser<'p> {
     source: Source<'p>,

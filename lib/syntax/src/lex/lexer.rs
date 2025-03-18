@@ -1,17 +1,17 @@
 use super::{Source, Token};
 use crate::{alphabetic, numeric, quote, single, skip, Error, Result};
 
-pub struct Lex<'l> {
+pub struct Lexer<'l> {
     source: Source<'l>,
 }
 
-impl<'l> Lex<'l> {
+impl<'l> Lexer<'l> {
     pub fn new(source: Source<'l>) -> Self {
         Self { source }
     }
 }
 
-impl Iterator for Lex<'_> {
+impl Iterator for Lexer<'_> {
     type Item = Result<Token>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -26,7 +26,7 @@ impl Iterator for Lex<'_> {
     }
 }
 
-impl Lex<'_> {
+impl Lexer<'_> {
     fn numeric(&mut self) -> Token {
         let buffer = self.take_while(|c| matches!(c, numeric!()));
         Token::Integer(buffer.parse().unwrap())
