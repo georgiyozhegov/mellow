@@ -1,9 +1,9 @@
 use std::iter::Peekable;
 
 use super::{
-    expression,
+    expression::{self, UnaryKind, BinaryKind},
     rpn::{ExpressionState, Rpn, RpnItem},
-    statement, BinaryKind, Expression, Statement, UnaryKind,
+    statement, Expression, Statement,
 };
 use crate::{
     lex::{Lex, Token},

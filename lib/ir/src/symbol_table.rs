@@ -1,12 +1,8 @@
-use std::{
-    collections::{hash_map::Iter, HashMap},
-    i32,
-};
+use std::collections::{hash_map::Iter, HashMap};
 
 use syntax::parse::{
-    expression::{self, Expression},
+    expression::{self, Expression, BinaryKind},
     statement::Statement,
-    BinaryKind,
 };
 
 #[derive(Debug, PartialEq, Eq)]

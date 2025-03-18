@@ -6,13 +6,13 @@ mod binary;
 mod unary;
 mod if_;
 
-pub use boolean::Boolean;
-pub use identifier::Identifier;
-pub use if_::If;
-pub use integer::Integer;
-pub use string::Str;
-pub use binary::Binary;
-pub use unary::Unary;
+pub use boolean::*;
+pub use identifier::*;
+pub use if_::*;
+pub use integer::*;
+pub use string::*;
+pub use binary::*;
+pub use unary::*;
 
 use crate::lex::Token;
 

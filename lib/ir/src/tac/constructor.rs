@@ -1,4 +1,4 @@
-use syntax::parse::{expression, statement, BinaryKind, VisitExpression, VisitStatement};
+use syntax::parse::{expression::{self, BinaryKind}, statement, VisitExpression, VisitStatement};
 
 use super::Instruction;
 use crate::cfg::{Block, Link};

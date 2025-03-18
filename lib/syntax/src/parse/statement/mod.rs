@@ -4,12 +4,12 @@ mod if_;
 mod while_;
 mod for_;
 mod debug;
-pub use assign::Assign;
-pub use let_::Let;
-pub use if_::If;
-pub use while_::While;
-pub use for_::For;
-pub use debug::Debug;
+pub use assign::*;
+pub use let_::*;
+pub use if_::*;
+pub use while_::*;
+pub use for_::*;
+pub use debug::*;
 
 #[derive(Debug, Clone)]
 pub enum Statement {
