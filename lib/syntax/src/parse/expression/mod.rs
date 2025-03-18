@@ -14,7 +14,9 @@ pub use string::*;
 pub use binary::*;
 pub use unary::*;
 
-use crate::lex::Token;
+use crate::{lex::Token, literal, Error, Result};
+
+use super::{rpn::{ExpressionState, Rpn, RpnItem}, Parser};
 
 #[derive(Debug, Clone)]
 pub enum Expression {
@@ -37,5 +39,49 @@ impl From<Token> for Expression {
             Token::String(value) => Self::String(Str { value }),
             _ => panic!(),
         }
+    }
+}
+
+impl Expression {
+    pub fn parse(parser: &mut Parser) -> Result<Expression> {
+        let mut rpn = Rpn::new();
+        let mut status = ExpressionState::default();
+        while let Some(token) = parser.peek()? {
+            if status.stop(&token)? {
+                break;
+            }
+            match token {
+                literal!() => {
+                    rpn.value(Expression::from(token));
+                    parser.next()?;
+                }
+                token if token.is_binary() => {
+                    let binary: Option<BinaryKind> = token.into();
+                    rpn.binary(binary.unwrap());
+                    parser.next()?;
+                }
+                token if token.is_unary() => {
+                    let unary: Option<UnaryKind> = token.into();
+                    rpn.unary(unary.unwrap());
+                    parser.next()?;
+                }
+                Token::LeftParenthesis => {
+                    rpn.item(RpnItem::Parenthesis);
+                    parser.next()?;
+                }
+                Token::RightParenthesis => {
+                    parser.next()?;
+                    rpn.parenthesis();
+                }
+                Token::If => {
+                    parser.next()?;
+                    rpn.value(If::parse(parser)?);
+                }
+                _ => {
+                    return Err(Error::grammar("expression", Some(token)));
+                }
+            }
+        }
+        Ok(rpn.collapse())
     }
 }
