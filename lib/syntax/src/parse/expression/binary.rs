@@ -29,7 +29,7 @@ impl From<Token> for Option<BinaryKind> {
             Token::Slash => Some(BinaryKind::Divide),
             Token::Greater => Some(BinaryKind::Greater),
             Token::Less => Some(BinaryKind::Less),
-            Token::Equal => Some(BinaryKind::Equal),
+            Token::Question => Some(BinaryKind::Equal),
             _ => None,
         }
     }

@@ -46,20 +46,29 @@ impl VisitStatement for Constructor {
     fn if_(&mut self, mut node: If, context: &mut Self::Context) -> Self::Output {
         let mut previous = self.push(Block::new(context.clone()));
         context.clear();
-        node.or.insert(0, (node.condition, node.if_.clone()));
-        let mut last_condition = None;
-        for (condition, body) in node.or {
-            let body = self.block(body.clone());
+        node.or.insert(0, node.if_);
+
+        let mut branches = Vec::new();
+        for branch in node.or {
+            let condition = self.push(Block::empty());
+            self.output[previous].direct(condition);
+
+            let body = self.block(branch.body);
             let next = self.next_id();
-            self.output[previous].branch(condition.clone(), body.start, next);
+            self.output[condition].branch(branch.condition, body.start, next);
+            branches.push(body.end);
+
             previous = body.end;
-            last_condition = Some(condition);
         }
+
         let else_ = self.block(node.else_);
-        if let Some(condition) = last_condition {
-            let next = self.next_id();
-            self.output[previous].branch(condition, next, else_.start);
+        self.output[previous].direct(else_.start);
+
+        let end = self.push(Block::empty());
+        for branch in branches {
+            self.output[branch].direct(end);
         }
+        self.output[else_.end].direct(end);
     }
 
     fn while_(&mut self, node: While, context: &mut Self::Context) -> Self::Output {
@@ -90,7 +99,6 @@ impl Constructor {
 
     pub fn construct(mut self, source: Vec<Statement>) -> Vec<Block> {
         self.block(source);
-        self.push(Block::empty());
         self.output
     }
 }

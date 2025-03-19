@@ -1,5 +1,11 @@
-let a = 1
-while a < 10 do
-      a = a + 1
-      debug a
+let a = 20
+
+if a < 10 then
+      debug 0
+or a ? 10 then
+      debug 1
+or a ? 5 then
+      debug 2
+else
+      debug 3
 end
