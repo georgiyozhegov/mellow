@@ -1,4 +1,7 @@
-use super::{expression::{self, BinaryKind, UnaryKind}, Expression, Precedence};
+use super::{
+    expression::{self, BinaryKind, UnaryKind},
+    Expression, Precedence,
+};
 use crate::{lex::Token, Error};
 
 #[macro_export]

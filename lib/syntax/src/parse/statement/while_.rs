@@ -1,4 +1,8 @@
-use crate::{lex::Token, parse::{Expression, Parser}, Result};
+use crate::{
+    lex::Token,
+    parse::{Expression, Parser},
+    Result,
+};
 
 use super::Statement;
 

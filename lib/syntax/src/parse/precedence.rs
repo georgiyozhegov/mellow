@@ -1,4 +1,7 @@
-use super::{rpn::RpnItem, expression::{BinaryKind, UnaryKind}};
+use super::{
+    expression::{BinaryKind, UnaryKind},
+    rpn::RpnItem,
+};
 
 pub trait Precedence {
     fn precedence(&self) -> u8;

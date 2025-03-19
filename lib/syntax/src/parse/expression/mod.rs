@@ -1,22 +1,25 @@
-mod integer;
-mod identifier;
-mod boolean;
-mod string;
 mod binary;
-mod unary;
+mod boolean;
+mod identifier;
 mod if_;
+mod integer;
+mod string;
+mod unary;
 
+pub use binary::*;
 pub use boolean::*;
 pub use identifier::*;
 pub use if_::*;
 pub use integer::*;
 pub use string::*;
-pub use binary::*;
 pub use unary::*;
 
 use crate::{lex::Token, literal, Error, Result};
 
-use super::{rpn::{ExpressionState, Rpn, RpnItem}, Parser};
+use super::{
+    rpn::{ExpressionState, Rpn, RpnItem},
+    Parser,
+};
 
 #[derive(Debug, Clone)]
 pub enum Expression {

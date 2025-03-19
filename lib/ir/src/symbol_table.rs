@@ -1,7 +1,7 @@
 use std::collections::{hash_map::Iter, HashMap};
 
 use syntax::parse::{
-    expression::{self, Expression, BinaryKind},
+    expression::{self, BinaryKind, Expression},
     statement::Statement,
 };
 

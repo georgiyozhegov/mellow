@@ -1,15 +1,15 @@
-mod let_;
 mod assign;
-mod if_;
-mod while_;
-mod for_;
 mod debug;
+mod for_;
+mod if_;
+mod let_;
+mod while_;
 pub use assign::*;
-pub use let_::*;
-pub use if_::*;
-pub use while_::*;
-pub use for_::*;
 pub use debug::*;
+pub use for_::*;
+pub use if_::*;
+pub use let_::*;
+pub use while_::*;
 
 use crate::{lex::Token, Error, Result};
 

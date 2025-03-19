@@ -1,4 +1,8 @@
-use crate::{lex::Token, parse::{Expression, Parser}, Error, Result};
+use crate::{
+    lex::Token,
+    parse::{Expression, Parser},
+    Error, Result,
+};
 
 use super::Statement;
 
@@ -37,11 +41,7 @@ impl If {
         let or = Self::or(parser)?;
         let else_ = Self::else_(parser)?;
         parser.expect(Token::End)?;
-        Ok(Statement::If(If {
-            if_,
-            or,
-            else_,
-        }))
+        Ok(Statement::If(If { if_, or, else_ }))
     }
 
     fn or(parser: &mut Parser) -> Result<Vec<IfBranch>> {
