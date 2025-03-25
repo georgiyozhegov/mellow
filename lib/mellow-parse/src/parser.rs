@@ -61,15 +61,4 @@ impl Parser<'_> {
             token => Err(Error::grammar("identifier", Some(token))),
         }
     }
-
-    pub fn body(&mut self) -> Result<Vec<Statement>> {
-        let mut body = Vec::new();
-        while let Some(token) = self.peek()? {
-            match token {
-                Token::Or | Token::Else | Token::End => break,
-                _ => body.push(Statement::parse(self)?),
-            }
-        }
-        Ok(body)
-    }
 }

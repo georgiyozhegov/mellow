@@ -1,26 +1,20 @@
 use mellow_lex::{Error, Result, Token};
 
 use super::Statement;
-use crate::{Expression, Parser};
+use crate::{tree::Body, Expression, Parser};
 
 #[derive(Debug, Clone)]
 pub struct IfBranch {
     pub condition: Expression,
-    pub body: Vec<Statement>,
-}
-
-impl IfBranch {
-    pub fn new(condition: Expression, body: Vec<Statement>) -> Self {
-        Self { condition, body }
-    }
+    pub body: Body,
 }
 
 impl IfBranch {
     pub fn parse(parser: &mut Parser) -> Result<Self> {
         let condition = Expression::parse(parser)?;
         parser.expect(Token::Then)?;
-        let body = parser.body()?;
-        Ok(Self::new(condition, body))
+        let body = Body::parse(parser)?;
+        Ok(Self { condition, body })
     }
 }
 
@@ -28,7 +22,7 @@ impl IfBranch {
 pub struct If {
     pub if_: IfBranch,
     pub or: Vec<IfBranch>,
-    pub else_: Vec<Statement>,
+    pub else_: Body,
 }
 
 impl If {
@@ -54,13 +48,13 @@ impl If {
         }
     }
 
-    fn else_(parser: &mut Parser) -> Result<Vec<Statement>> {
+    fn else_(parser: &mut Parser) -> Result<Body> {
         match parser.peek()? {
             Some(Token::Else) => {
                 parser.next()?;
-                parser.body()
+                Body::parse(parser)
             }
-            Some(Token::End) => Ok(vec![]),
+            Some(Token::End) => Ok(Body::empty()),
             token => Err(Error::grammar("'else', 'or' or 'end'", token)),
         }
     }

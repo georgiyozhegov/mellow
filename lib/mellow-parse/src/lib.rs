@@ -1,9 +1,10 @@
-mod parser;
-mod rpn;
-mod precedence;
-pub mod statement;
 pub mod expression;
-pub use statement::Statement;
+mod parser;
+mod precedence;
+mod rpn;
+pub mod statement;
+mod tree;
 pub use expression::Expression;
-pub use precedence::Precedence;
 pub use parser::Parser;
+pub use precedence::Precedence;
+pub use statement::Statement;
