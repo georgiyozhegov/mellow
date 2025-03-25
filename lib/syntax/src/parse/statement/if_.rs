@@ -1,10 +1,7 @@
-use crate::{
-    lex::Token,
-    parse::{Expression, Parser},
-    Error, Result,
-};
+use mellow_lex::{Error, Result, Token};
 
 use super::Statement;
+use crate::parse::{Expression, Parser};
 
 #[derive(Debug, Clone)]
 pub struct IfBranch {

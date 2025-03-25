@@ -1,10 +1,8 @@
 use std::iter::Peekable;
 
+use mellow_lex::{Error, Lexer, Result, Token};
+
 use super::Statement;
-use crate::{
-    lex::{Lexer, Token},
-    Error, Result,
-};
 
 pub type Source<'s> = Peekable<Lexer<'s>>;
 

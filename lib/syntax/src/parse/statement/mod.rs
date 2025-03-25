@@ -9,9 +9,8 @@ pub use debug::*;
 pub use for_::*;
 pub use if_::*;
 pub use let_::*;
+use mellow_lex::{Error, Result, Token};
 pub use while_::*;
-
-use crate::{lex::Token, Error, Result};
 
 use super::Parser;
 

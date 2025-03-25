@@ -1,4 +1,4 @@
-use super::{expression, statement, Expression, Statement};
+use super::{Expression, Statement, expression, statement};
 
 #[allow(unused)]
 pub trait VisitStatement {

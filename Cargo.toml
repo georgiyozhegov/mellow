@@ -1,13 +1,13 @@
 [package]
 name = "mellow"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [workspace]
 members = [ 
     "lib/syntax",
     "lib/ir",
-    "lib/assembly",
+    "lib/assembly", "lib/mellow-lex",
 ]
 
 [dependencies]

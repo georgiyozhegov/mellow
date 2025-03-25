@@ -1,6 +1,7 @@
 use syntax::parse::{
+    VisitExpression, VisitStatement,
     expression::{self, BinaryKind},
-    statement, VisitExpression, VisitStatement,
+    statement,
 };
 
 use super::Instruction;

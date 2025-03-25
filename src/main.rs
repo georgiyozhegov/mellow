@@ -6,18 +6,25 @@ fn main() {
     let ast = match syntax::construct(source.chars().peekable()) {
         Ok(ast) => ast,
         Err(error) => {
-            eprintln!("{error}");
+            eprintln!("{error:?}");
             exit(1);
         }
     };
 
     // println!("{ast:#?}");
 
-    let symbol_table = ir::symbol_table::construct(&ast);
+    let symbol_table = match ir::symbol_table::construct(&ast) {
+        Ok(table) => table,
+        Err(error) => {
+            eprintln!("{error:?}");
+            exit(1);
+        }
+    };
+
+    println!("{symbol_table:#?}");
+
     let cfg = ir::cfg::construct(ast);
     let tac = ir::tac::construct(cfg);
-
-    // println!("{tac:#?}");
 
     println!("section .bss");
     for (identifier, _) in symbol_table.variables() {

@@ -1,4 +1,4 @@
-use crate::lex::Token;
+use mellow_lex::Token;
 
 use super::Expression;
 
@@ -20,24 +20,19 @@ pub enum BinaryKind {
     Equal,
 }
 
-impl From<Token> for Option<BinaryKind> {
-    fn from(token: Token) -> Self {
-        match token {
-            Token::Plus => Some(BinaryKind::Add),
-            Token::Minus => Some(BinaryKind::Subtract),
-            Token::Star => Some(BinaryKind::Multiply),
-            Token::Slash => Some(BinaryKind::Divide),
-            Token::Greater => Some(BinaryKind::Greater),
-            Token::Less => Some(BinaryKind::Less),
-            Token::Question => Some(BinaryKind::Equal),
-            _ => None,
-        }
-    }
-}
+impl TryFrom<&Token> for BinaryKind {
+    type Error = ();
 
-impl Token {
-    pub fn is_binary(&self) -> bool {
-        let binary: Option<BinaryKind> = self.clone().into();
-        binary.is_some()
+    fn try_from(value: &Token) -> Result<Self, Self::Error> {
+        match value {
+            Token::Plus => Ok(BinaryKind::Add),
+            Token::Minus => Ok(BinaryKind::Subtract),
+            Token::Star => Ok(BinaryKind::Multiply),
+            Token::Slash => Ok(BinaryKind::Divide),
+            Token::Greater => Ok(BinaryKind::Greater),
+            Token::Less => Ok(BinaryKind::Less),
+            Token::Question => Ok(BinaryKind::Equal),
+            _ => Err(()),
+        }
     }
 }

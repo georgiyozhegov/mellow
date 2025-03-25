@@ -11,15 +11,15 @@ pub use boolean::*;
 pub use identifier::*;
 pub use if_::*;
 pub use integer::*;
+use mellow_lex::{Error, Result, Token};
 pub use string::*;
 pub use unary::*;
 
-use crate::{lex::Token, literal, Error, Result};
-
 use super::{
-    rpn::{ExpressionState, Rpn, RpnItem},
     Parser,
+    rpn::{ExpressionState, Rpn, RpnItem},
 };
+use crate::literal;
 
 #[derive(Debug, Clone)]
 pub enum Expression {
@@ -58,14 +58,16 @@ impl Expression {
                     rpn.value(Expression::from(token));
                     parser.next()?;
                 }
-                token if token.is_binary() => {
-                    let binary: Option<BinaryKind> = token.into();
-                    rpn.binary(binary.unwrap());
+                ref token if BinaryKind::try_from(token).is_ok() => {
+                    // TODO: if let guard
+                    let binary = BinaryKind::try_from(token).unwrap();
+                    rpn.binary(binary);
                     parser.next()?;
                 }
-                token if token.is_unary() => {
-                    let unary: Option<UnaryKind> = token.into();
-                    rpn.unary(unary.unwrap());
+                ref token if UnaryKind::try_from(token).is_ok() => {
+                    // TODO: if let guard
+                    let unary = UnaryKind::try_from(token).unwrap();
+                    rpn.unary(unary);
                     parser.next()?;
                 }
                 Token::LeftParenthesis => {

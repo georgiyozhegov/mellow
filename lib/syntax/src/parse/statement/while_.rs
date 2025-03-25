@@ -1,10 +1,7 @@
-use crate::{
-    lex::Token,
-    parse::{Expression, Parser},
-    Result,
-};
+use mellow_lex::{Result, Token};
 
 use super::Statement;
+use crate::parse::{Expression, Parser};
 
 #[derive(Debug, Clone)]
 pub struct While {

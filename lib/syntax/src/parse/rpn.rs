@@ -1,20 +1,15 @@
+use mellow_lex::{Error, Token};
+
 use super::{
-    expression::{self, BinaryKind, UnaryKind},
     Expression, Precedence,
+    expression::{self, BinaryKind, UnaryKind},
 };
-use crate::{lex::Token, Error};
 
 #[macro_export]
 macro_rules! literal {
     () => {
         Token::Integer(_) | Token::Identifier(_) | Token::True | Token::False | Token::String(_)
     };
-}
-
-impl Token {
-    pub fn is_literal(&self) -> bool {
-        matches!(self, Token::Integer(_))
-    }
 }
 
 #[macro_export]
@@ -140,8 +135,8 @@ impl ExpressionState {
                 *self = Self::Item;
                 Ok(false)
             }
-            token if token.is_unary() => Ok(false),
-            token if token.is_binary() => {
+            token if UnaryKind::try_from(token).is_ok() => Ok(false),
+            token if BinaryKind::try_from(token).is_ok() => {
                 *self = Self::Item;
                 Ok(false)
             }
@@ -155,7 +150,7 @@ impl ExpressionState {
 
     fn item(&mut self, token: &Token) -> Result<bool, Error> {
         match token {
-            token if token.is_binary() => {
+            token if BinaryKind::try_from(token).is_ok() => {
                 *self = Self::Value;
                 Ok(false)
             }

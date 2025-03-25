@@ -1,4 +1,4 @@
-use crate::lex::Token;
+use mellow_lex::Token;
 
 use super::Expression;
 
@@ -14,19 +14,14 @@ pub enum UnaryKind {
     Negate,
 }
 
-impl From<Token> for Option<UnaryKind> {
-    fn from(token: Token) -> Self {
-        match token {
-            Token::Not => Some(UnaryKind::Not),
-            Token::Negate => Some(UnaryKind::Negate),
-            _ => None,
-        }
-    }
-}
+impl TryFrom<&Token> for UnaryKind {
+    type Error = ();
 
-impl Token {
-    pub fn is_unary(&self) -> bool {
-        let unary: Option<UnaryKind> = self.clone().into();
-        unary.is_some()
+    fn try_from(value: &Token) -> Result<Self, Self::Error> {
+        match value {
+            Token::Not => Ok(UnaryKind::Not),
+            Token::Negate => Ok(UnaryKind::Negate),
+            _ => Err(()),
+        }
     }
 }

@@ -1,11 +1,11 @@
-use std::collections::{hash_map::Iter, HashMap};
+use std::collections::{HashMap, hash_map::Iter};
 
 use syntax::parse::{
-    expression::{self, BinaryKind, Expression},
-    statement::Statement,
+    VisitExpression, VisitStatement, expression,
+    statement::{self, Statement},
 };
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Type {
     I64,
     I32,
@@ -13,58 +13,67 @@ pub enum Type {
     Boolean,
 }
 
-macro_rules! in_range {
-    ($value:expr, $type:ident) => {
-        if $type::MIN as i128 <= $value && $value <= $type::MAX as i128 {
-            true
-        } else {
-            false
-        }
-    };
+pub struct TypeChecker {
+    table: SymbolTable,
 }
 
-pub fn type_of(expression: Expression) -> Type {
-    match expression {
-        Expression::Integer(node) => {
-            return Type::I64;
+impl TypeChecker {
+    pub fn new() -> Self {
+        Self {
+            table: SymbolTable::new(),
         }
-        Expression::Binary(node) => {
-            let left = type_of(*node.left);
-            let right = type_of(*node.right);
-            if matches!(
-                node.kind,
-                BinaryKind::Equal | BinaryKind::Greater | BinaryKind::Less
-            ) {
-                if left != right {
-                    panic!("invalid type of operands ({left:?} and {right:?})");
-                }
-                return Type::Boolean;
-            }
-            if left == right {
-                return left;
-            }
-        }
-        Expression::String(value) => {
-            return Type::String;
-        }
-        Expression::If(expression::If {
-            condition,
-            if_,
-            or,
-            else_,
-        }) => {
-            let condition = type_of(*condition);
-            if condition != Type::Boolean {
-                panic!("invalid type of condition ({condition:?})");
-            }
-            // TODO: other checks
-        }
-        Expression::Boolean(value) => {
-            return Type::Boolean;
-        }
-        _ => {}
     }
-    panic!("invalid type");
+}
+
+#[derive(Debug)]
+pub struct TypeError(pub &'static str);
+
+impl TypeChecker {
+    pub fn construct(mut self, source: &Vec<Statement>) -> Result<SymbolTable, TypeError> {
+        for statement in source {
+            statement.clone().visit(&mut self, &mut ())?;
+        }
+        Ok(self.table)
+    }
+}
+
+impl VisitStatement for TypeChecker {
+    type Output = Result<(), TypeError>;
+    type Context = ();
+
+    fn let_(&mut self, node: statement::Let, _context: &mut Self::Context) -> Self::Output {
+        let meta = VariableMeta {
+            mutable: node.mutable,
+            type_: node.value.visit(self)?,
+        };
+        self.table.insert_variable(node.identifier, meta);
+        Ok(())
+    }
+
+    fn assign(&mut self, node: statement::Assign, _context: &mut Self::Context) -> Self::Output {
+        if let Some(meta) = self.table.get_variable(&node.identifier) {
+            if !meta.mutable {
+                return Err(TypeError("cannot assign twice to an immutable variable"));
+            }
+            return Ok(());
+        }
+        Err(TypeError("variable is not found"))
+    }
+}
+
+impl VisitExpression for TypeChecker {
+    type Output = Result<Type, TypeError>;
+
+    fn integer(&mut self, node: expression::Integer) -> Self::Output {
+        Ok(Type::I64) // TODO
+    }
+
+    fn identifier(&mut self, node: expression::Identifier) -> Self::Output {
+        if let Some(meta) = self.table.get_variable(&node.name) {
+            return Ok(meta.type_.clone());
+        }
+        Err(TypeError("variable is not found"))
+    }
 }
 
 #[derive(Debug)]
@@ -129,25 +138,9 @@ impl SymbolTable {
     }
 }
 
-pub fn construct(source: &Vec<Statement>) -> SymbolTable {
-    let mut table = SymbolTable::new();
-
+pub fn construct(source: &Vec<Statement>) -> Result<SymbolTable, TypeError> {
+    let type_checker = TypeChecker::new();
+    let mut table = type_checker.construct(source)?;
     table.insert_function("debug_i64".into(), FunctionMeta { external: true });
-
-    for statement in source.iter() {
-        match statement {
-            Statement::Let(value) => {
-                let type_ = type_of(value.value.clone());
-                table.insert_variable(
-                    value.identifier.clone(),
-                    VariableMeta {
-                        mutable: value.mutable,
-                        type_,
-                    },
-                );
-            }
-            _ => {}
-        }
-    }
-    table
+    Ok(table)
 }

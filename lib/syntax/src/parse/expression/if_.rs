@@ -1,6 +1,7 @@
-use crate::{lex::Token, parse::Parser, Error, Result};
+use mellow_lex::{Error, Result, Token};
 
 use super::Expression;
+use crate::parse::Parser;
 
 #[derive(Debug, Clone)]
 pub struct If {

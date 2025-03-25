@@ -7,11 +7,10 @@ mod visit;
 use std::iter::Peekable;
 
 pub use expression::Expression;
+use mellow_lex::Lexer;
 pub use parser::Parser;
 pub use precedence::Precedence;
 pub use statement::Statement;
 pub use visit::*;
-
-use crate::lex::Lexer;
 
 pub type Source<'s> = Peekable<Lexer<'s>>;

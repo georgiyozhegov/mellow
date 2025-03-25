@@ -1,7 +1,6 @@
 [package]
-name = "syntax"
+name = "mellow-lex"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-mellow-lex = { path = "../mellow-lex" }

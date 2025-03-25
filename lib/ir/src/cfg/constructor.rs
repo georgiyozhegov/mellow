@@ -1,6 +1,6 @@
-use syntax::parse::{statement::*, VisitStatement};
+use syntax::parse::{VisitStatement, statement::*};
 
-use super::{block::BlockRange, Block};
+use super::{Block, block::BlockRange};
 
 pub struct Constructor {
     output: Vec<Block>,
