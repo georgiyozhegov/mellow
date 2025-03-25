@@ -1,8 +1,4 @@
-// mod error;
-// pub mod lex;
 pub mod parse;
-// pub use error::{Error, Result};
-// use lex::Lexer;
 use mellow_lex::{Lexer, Result, Source};
 use parse::{Parser, Statement};
 
