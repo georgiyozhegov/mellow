@@ -1,5 +1,7 @@
 use std::{env, fs, process::exit};
 
+// VERY IMPORTANT TODO: mellow-error crate with all kinds of errors
+
 fn main() {
     let path = env::args().nth(1).unwrap_or("source.mellow".into());
     let source = fs::read_to_string(path).unwrap();
