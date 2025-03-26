@@ -1,7 +1,6 @@
 use mellow_lex::{Result, Token};
 
-use super::Statement;
-use crate::{Expression, Parser};
+use crate::{Parse, Expression, Parser};
 
 #[derive(Debug, Clone)]
 pub struct Let {
@@ -10,17 +9,17 @@ pub struct Let {
     pub value: Expression,
 }
 
-impl Let {
-    pub fn parse(parser: &mut Parser) -> Result<Statement> {
+impl Parse for Let {
+    fn parse(parser: &mut Parser) -> Result<Self> {
         parser.expect(Token::Let)?;
         let mutable = parser.mutable()?;
         let identifier = parser.identifier()?;
         parser.expect(Token::Equal)?;
         let value = Expression::parse(parser)?;
-        Ok(Statement::Let(Let {
+        Ok(Self {
             identifier,
             mutable,
             value,
-        }))
+        })
     }
 }

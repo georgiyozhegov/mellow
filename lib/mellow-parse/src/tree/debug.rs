@@ -1,17 +1,16 @@
 use mellow_lex::{Result, Token};
 
-use super::Statement;
-use crate::{Expression, Parser};
+use crate::{Parse, Expression, Parser};
 
 #[derive(Debug, Clone)]
 pub struct Debug {
     pub value: Expression,
 }
 
-impl Debug {
-    pub fn parse(parser: &mut Parser) -> Result<Statement> {
+impl Parse for Debug {
+    fn parse(parser: &mut Parser) -> Result<Self> {
         parser.expect(Token::Debug)?;
         let value = Expression::parse(parser)?;
-        Ok(Statement::Debug(Debug { value }))
+        Ok(Debug { value })
     }
 }

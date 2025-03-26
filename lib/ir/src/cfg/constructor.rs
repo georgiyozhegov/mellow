@@ -1,4 +1,4 @@
-use syntax::parse::{VisitStatement, statement::*};
+use mellow_parse::{VisitStatement, tree::*};
 
 use super::{Block, block::BlockRange};
 
@@ -43,7 +43,7 @@ impl VisitStatement for Constructor {
         context.push(Statement::Debug(node));
     }
 
-    fn if_(&mut self, mut node: If, context: &mut Self::Context) -> Self::Output {
+    fn if_(&mut self, mut node: If<Body>, context: &mut Self::Context) -> Self::Output {
         let mut previous = self.push(Block::new(context.clone()));
         context.clear();
         node.or.insert(0, node.if_);
@@ -53,15 +53,15 @@ impl VisitStatement for Constructor {
             let condition = self.push(Block::empty());
             self.output[previous].direct(condition);
 
-            let body = self.block(branch.body);
+            let body = self.block(*branch.body);
             let next = self.next_id();
-            self.output[condition].branch(branch.condition, body.start, next);
+            self.output[condition].branch(*branch.condition, body.start, next);
             branches.push(body.end);
 
             previous = body.end;
         }
 
-        let else_ = self.block(node.else_);
+        let else_ = self.block(*node.else_.unwrap_or_default());
         self.output[previous].direct(else_.start);
 
         let end = self.push(Block::empty());
@@ -84,7 +84,7 @@ impl VisitStatement for Constructor {
 }
 
 impl Constructor {
-    fn block(&mut self, source: Vec<Statement>) -> BlockRange {
+    fn block(&mut self, source: Body) -> BlockRange {
         let start = self.next_id();
         let mut current = Vec::new();
         for statement in source {
@@ -98,6 +98,7 @@ impl Constructor {
     }
 
     pub fn construct(mut self, source: Vec<Statement>) -> Vec<Block> {
+        let source = Body::new(source);
         self.block(source);
         self.output
     }

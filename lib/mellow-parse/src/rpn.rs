@@ -1,8 +1,7 @@
 use mellow_lex::{Error, Token};
 
 use crate::{
-    Expression, Precedence,
-    expression::{self, BinaryKind, UnaryKind},
+    tree::{Binary, BinaryKind, Unary, UnaryKind}, Expression, Precedence
 };
 
 #[macro_export]
@@ -91,7 +90,7 @@ impl Rpn {
             RpnItem::Binary(kind) => {
                 let right = self.values.pop().unwrap();
                 let left = self.values.pop().unwrap();
-                self.value(Expression::Binary(expression::Binary {
+                self.value(Expression::Binary(Binary {
                     kind,
                     left: Box::new(left),
                     right: Box::new(right),
@@ -99,7 +98,7 @@ impl Rpn {
             }
             RpnItem::Unary(kind) => {
                 let value = self.values.pop().unwrap();
-                self.value(Expression::Unary(expression::Unary {
+                self.value(Expression::Unary(Unary {
                     kind,
                     inner: Box::new(value),
                 }));

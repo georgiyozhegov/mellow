@@ -1,5 +1,5 @@
-use super::{
-    expression::{BinaryKind, UnaryKind},
+use crate::{
+    tree::{BinaryKind, UnaryKind},
     rpn::RpnItem,
 };
 

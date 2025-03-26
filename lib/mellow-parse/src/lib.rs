@@ -1,10 +1,11 @@
-pub mod expression;
 mod parser;
 mod precedence;
 mod rpn;
-pub mod statement;
-mod tree;
-pub use expression::Expression;
+mod visit;
+pub mod tree;
 pub use parser::Parser;
-pub use precedence::Precedence;
-pub use statement::Statement;
+use precedence::Precedence;
+use parser::Parse;
+pub use tree::Expression;
+pub use tree::Statement;
+pub use visit::{VisitStatement, VisitExpression};

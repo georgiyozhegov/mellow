@@ -1,7 +1,6 @@
-use syntax::parse::{
+use mellow_parse::{
     VisitExpression, VisitStatement,
-    expression::{self, BinaryKind},
-    statement,
+    tree::*,
 };
 
 use super::Instruction;
@@ -74,7 +73,7 @@ impl VisitStatement for Constructor {
     type Output = ();
     type Context = ();
 
-    fn let_(&mut self, node: statement::Let, _context: &mut Self::Context) -> Self::Output {
+    fn let_(&mut self, node: Let, _context: &mut Self::Context) -> Self::Output {
         let from = node.value.visit(self);
         self.push(Instruction::Set {
             identifier: node.identifier,
@@ -82,7 +81,7 @@ impl VisitStatement for Constructor {
         });
     }
 
-    fn assign(&mut self, node: statement::Assign, _context: &mut Self::Context) -> Self::Output {
+    fn assign(&mut self, node: Assign, _context: &mut Self::Context) -> Self::Output {
         let from = node.value.visit(self);
         self.push(Instruction::Set {
             identifier: node.identifier,
@@ -90,7 +89,7 @@ impl VisitStatement for Constructor {
         });
     }
 
-    fn debug(&mut self, node: statement::Debug, _context: &mut Self::Context) -> Self::Output {
+    fn debug(&mut self, node: Debug, _context: &mut Self::Context) -> Self::Output {
         let value = node.value.visit(self);
         self.push(Instruction::Call {
             label: "debug_i64".into(),
@@ -102,7 +101,7 @@ impl VisitStatement for Constructor {
 impl VisitExpression for Constructor {
     type Output = u64;
 
-    fn integer(&mut self, node: expression::Integer) -> Self::Output {
+    fn integer(&mut self, node: Integer) -> Self::Output {
         let id = self.allocate();
         self.output.push(Instruction::Integer {
             to: id,
@@ -111,7 +110,7 @@ impl VisitExpression for Constructor {
         id
     }
 
-    fn identifier(&mut self, node: expression::Identifier) -> Self::Output {
+    fn identifier(&mut self, node: Identifier) -> Self::Output {
         let id = self.allocate();
         self.push(Instruction::Get {
             to: id,
@@ -120,7 +119,7 @@ impl VisitExpression for Constructor {
         id
     }
 
-    fn boolean(&mut self, node: expression::Boolean) -> Self::Output {
+    fn boolean(&mut self, node: Boolean) -> Self::Output {
         let id = self.allocate();
         self.output.push(Instruction::Integer {
             to: id,
@@ -129,7 +128,7 @@ impl VisitExpression for Constructor {
         id
     }
 
-    fn string(&mut self, node: expression::Str) -> Self::Output {
+    fn string(&mut self, node: Str) -> Self::Output {
         let id = self.allocate();
         self.push(Instruction::String {
             to: id,
@@ -138,7 +137,7 @@ impl VisitExpression for Constructor {
         id
     }
 
-    fn binary(&mut self, node: expression::Binary) -> Self::Output {
+    fn binary(&mut self, node: Binary) -> Self::Output {
         let left = node.left.visit(self);
         let right = node.right.visit(self);
         let id = self.allocate();

@@ -14,6 +14,7 @@ dependencies = [
 name = "ir"
 version = "0.1.0"
 dependencies = [
+ "mellow-parse",
  "syntax",
 ]
 
@@ -31,8 +32,16 @@ name = "mellow-lex"
 version = "0.1.0"
 
 [[package]]
+name = "mellow-parse"
+version = "0.1.0"
+dependencies = [
+ "mellow-lex",
+]
+
+[[package]]
 name = "syntax"
 version = "0.1.0"
 dependencies = [
  "mellow-lex",
+ "mellow-parse",
 ]

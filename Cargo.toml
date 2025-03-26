@@ -7,7 +7,7 @@ edition = "2024"
 members = [ 
     "lib/syntax",
     "lib/ir",
-    "lib/assembly", "lib/mellow-lex",
+    "lib/assembly", "lib/mellow-lex", "lib/mellow-parse",
 ]
 
 [dependencies]

@@ -1,7 +1,7 @@
 use mellow_lex::{Result, Token};
 
-use super::Statement;
-use crate::{Expression, Parser};
+use super::Expression;
+use crate::{Parse, Parser};
 
 #[derive(Debug, Clone)]
 pub struct Assign {
@@ -9,11 +9,11 @@ pub struct Assign {
     pub value: Expression,
 }
 
-impl Assign {
-    pub fn parse(parser: &mut Parser) -> Result<Statement> {
+impl Parse for Assign {
+    fn parse(parser: &mut Parser) -> Result<Self> {
         let identifier = parser.identifier()?;
         parser.expect(Token::Equal)?;
         let value = Expression::parse(parser)?;
-        Ok(Statement::Assign(Assign { identifier, value }))
+        Ok(Assign { identifier, value })
     }
 }

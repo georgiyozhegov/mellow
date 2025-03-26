@@ -1,6 +1,6 @@
 use std::vec::IntoIter;
 
-use syntax::parse::{Expression, Statement};
+use mellow_parse::{Expression, Statement};
 
 #[derive(Debug, Clone)]
 pub enum Link {

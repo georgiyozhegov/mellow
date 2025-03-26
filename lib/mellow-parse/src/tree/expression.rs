@@ -1,25 +1,10 @@
-mod binary;
-mod boolean;
-mod identifier;
-mod if_;
-mod integer;
-mod string;
-mod unary;
-
-pub use binary::*;
-pub use boolean::*;
-pub use identifier::*;
-pub use if_::*;
-pub use integer::*;
 use mellow_lex::{Error, Result, Token};
-pub use string::*;
-pub use unary::*;
 
-use super::{
-    Parser,
-    rpn::{ExpressionState, Rpn, RpnItem},
+use super::*;
+
+use crate::{
+    literal, Parse, rpn::{ExpressionState, Rpn, RpnItem}, Parser
 };
-use crate::literal;
 
 #[derive(Debug, Clone)]
 pub enum Expression {
@@ -29,7 +14,7 @@ pub enum Expression {
     String(Str),
     Binary(Binary),
     Unary(Unary),
-    If(If),
+    If(If<Expression>),
 }
 
 impl From<Token> for Expression {
@@ -45,8 +30,8 @@ impl From<Token> for Expression {
     }
 }
 
-impl Expression {
-    pub fn parse(parser: &mut Parser) -> Result<Expression> {
+impl Parse for Expression {
+    fn parse(parser: &mut Parser) -> Result<Self> {
         let mut rpn = Rpn::new();
         let mut status = ExpressionState::default();
         while let Some(token) = parser.peek()? {
@@ -58,14 +43,14 @@ impl Expression {
                     rpn.value(Expression::from(token));
                     parser.next()?;
                 }
-                // TODO: if let guard
                 ref token if BinaryKind::try_from(token).is_ok() => {
+                    // TODO: if let guard
                     let binary = BinaryKind::try_from(token).unwrap();
                     rpn.binary(binary);
                     parser.next()?;
                 }
-                // TODO: if let guard
                 ref token if UnaryKind::try_from(token).is_ok() => {
+                    // TODO: if let guard
                     let unary = UnaryKind::try_from(token).unwrap();
                     rpn.unary(unary);
                     parser.next()?;
@@ -80,7 +65,8 @@ impl Expression {
                 }
                 Token::If => {
                     parser.next()?;
-                    rpn.value(If::parse(parser)?);
+                    let expression = If::<Expression>::parse(parser)?;
+                    rpn.value(Expression::If(expression));
                 }
                 _ => {
                     return Err(Error::grammar("expression", Some(token)));

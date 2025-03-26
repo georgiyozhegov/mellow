@@ -1,8 +1,8 @@
 use std::collections::{HashMap, hash_map::Iter};
 
-use syntax::parse::{
-    VisitExpression, VisitStatement, expression,
-    statement::{self, Statement},
+use mellow_parse::{
+    VisitExpression, VisitStatement,
+    tree::*,
 };
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -41,7 +41,7 @@ impl VisitStatement for TypeChecker {
     type Output = Result<(), TypeError>;
     type Context = ();
 
-    fn let_(&mut self, node: statement::Let, _context: &mut Self::Context) -> Self::Output {
+    fn let_(&mut self, node: Let, _context: &mut Self::Context) -> Self::Output {
         let meta = VariableMeta {
             mutable: node.mutable,
             type_: node.value.visit(self)?,
@@ -50,7 +50,7 @@ impl VisitStatement for TypeChecker {
         Ok(())
     }
 
-    fn assign(&mut self, node: statement::Assign, _context: &mut Self::Context) -> Self::Output {
+    fn assign(&mut self, node: Assign, _context: &mut Self::Context) -> Self::Output {
         if let Some(meta) = self.table.get_variable(&node.identifier) {
             if !meta.mutable {
                 return Err(TypeError("cannot assign twice to an immutable variable"));
@@ -64,11 +64,11 @@ impl VisitStatement for TypeChecker {
 impl VisitExpression for TypeChecker {
     type Output = Result<Type, TypeError>;
 
-    fn integer(&mut self, node: expression::Integer) -> Self::Output {
+    fn integer(&mut self, node: Integer) -> Self::Output {
         Ok(Type::I64) // TODO
     }
 
-    fn identifier(&mut self, node: expression::Identifier) -> Self::Output {
+    fn identifier(&mut self, node: Identifier) -> Self::Output {
         if let Some(meta) = self.table.get_variable(&node.name) {
             return Ok(meta.type_.clone());
         }

@@ -1,7 +1,6 @@
 use mellow_lex::{Result, Token};
 
-use super::Statement;
-use crate::{tree::Body, Expression, Parser};
+use crate::{Parse, tree::Body, Expression, Parser};
 
 #[derive(Debug, Clone)]
 pub struct For {
@@ -10,8 +9,8 @@ pub struct For {
     pub body: Body,
 }
 
-impl For {
-    pub fn parse(parser: &mut Parser) -> Result<Statement> {
+impl Parse for For {
+    fn parse(parser: &mut Parser) -> Result<Self> {
         parser.expect(Token::For)?;
         let item = parser.identifier()?;
         parser.expect(Token::In)?;
@@ -19,10 +18,10 @@ impl For {
         parser.expect(Token::Do)?;
         let body = Body::parse(parser)?;
         parser.expect(Token::End)?;
-        Ok(Statement::For(For {
+        Ok(For {
             item,
             sequence,
             body,
-        }))
+        })
     }
 }

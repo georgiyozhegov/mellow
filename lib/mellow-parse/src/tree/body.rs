@@ -2,11 +2,17 @@ use std::vec::IntoIter;
 
 use mellow_lex::{Result, Token};
 
-use crate::{Parser, Statement};
+use crate::{parser::Parse, Parser, Statement};
 
 #[derive(Debug, Clone)]
 pub struct Body {
     inner: Vec<Statement>,
+}
+
+impl Body {
+    pub fn new(inner: Vec<Statement>) -> Self {
+        Self { inner }
+    }
 }
 
 impl Body {
@@ -15,8 +21,14 @@ impl Body {
     }
 }
 
-impl Body {
-    pub fn parse(parser: &mut Parser) -> Result<Self> {
+impl Default for Body {
+    fn default() -> Self {
+        Self::empty()
+    }
+}
+
+impl Parse for Body {
+    fn parse(parser: &mut Parser) -> Result<Self> {
         let mut inner = Vec::new();
         while let Some(token) = parser.peek()? {
             match token {

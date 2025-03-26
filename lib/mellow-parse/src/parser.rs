@@ -62,3 +62,9 @@ impl Parser<'_> {
         }
     }
 }
+
+pub trait Parse {
+    fn parse(parser: &mut Parser) -> Result<Self>
+    where
+        Self: Sized;
+}

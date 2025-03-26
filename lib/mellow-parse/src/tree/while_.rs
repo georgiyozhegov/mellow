@@ -1,7 +1,6 @@
 use mellow_lex::{Result, Token};
 
-use super::Statement;
-use crate::{tree::Body, Expression, Parser};
+use crate::{Parse, tree::Body, Expression, Parser};
 
 #[derive(Debug, Clone)]
 pub struct While {
@@ -9,13 +8,13 @@ pub struct While {
     pub body: Body,
 }
 
-impl While {
-    pub fn parse(parser: &mut Parser) -> Result<Statement> {
+impl Parse for While {
+    fn parse(parser: &mut Parser) -> Result<Self> {
         parser.expect(Token::While)?;
         let condition = Expression::parse(parser)?;
         parser.expect(Token::Do)?;
         let body = Body::parse(parser)?;
         parser.expect(Token::End)?;
-        Ok(Statement::While(While { condition, body }))
+        Ok(Self { condition, body })
     }
 }
