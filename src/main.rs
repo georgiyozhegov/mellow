@@ -3,7 +3,7 @@ use std::{env, fs, process::exit};
 fn main() {
     let path = env::args().nth(1).unwrap_or("source.mellow".into());
     let source = fs::read_to_string(path).unwrap();
-    let ast = match syntax::construct(source.chars().peekable()) {
+    let ast = match mellow_syntax::construct(source.chars().peekable()) {
         Ok(ast) => ast,
         Err(error) => {
             eprintln!("{error:?}");

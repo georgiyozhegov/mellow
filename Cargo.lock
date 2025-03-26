@@ -7,7 +7,7 @@ name = "assembly"
 version = "0.1.0"
 dependencies = [
  "ir",
- "syntax",
+ "mellow-parse",
 ]
 
 [[package]]
@@ -15,7 +15,6 @@ name = "ir"
 version = "0.1.0"
 dependencies = [
  "mellow-parse",
- "syntax",
 ]
 
 [[package]]
@@ -24,7 +23,7 @@ version = "0.1.0"
 dependencies = [
  "assembly",
  "ir",
- "syntax",
+ "mellow-syntax",
 ]
 
 [[package]]
@@ -39,7 +38,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "syntax"
+name = "mellow-syntax"
 version = "0.1.0"
 dependencies = [
  "mellow-lex",
