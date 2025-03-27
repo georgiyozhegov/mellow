@@ -1,6 +1,6 @@
 use crate::{
-    tree::{BinaryKind, UnaryKind},
     rpn::RpnItem,
+    tree::{BinaryKind, UnaryKind},
 };
 
 pub trait Precedence {

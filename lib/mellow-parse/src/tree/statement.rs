@@ -1,5 +1,5 @@
 use super::*;
-use crate::{Parser, Parse};
+use crate::{Parse, Parser};
 use mellow_lex::{Error, Result, Token};
 
 #[derive(Debug, Clone)]

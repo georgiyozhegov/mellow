@@ -30,7 +30,7 @@ fn main() {
 
     println!("section .bss");
     for (identifier, _) in symbol_table.variables() {
-        println!("{identifier}: resq 1");
+        println!("{}: resq 1", identifier.name);
     }
 
     println!("section .text");
@@ -39,7 +39,7 @@ fn main() {
 
     for (identifier, meta) in symbol_table.functions() {
         if meta.external {
-            println!("extern {identifier}");
+            println!("extern {}", identifier.name);
         }
     }
 

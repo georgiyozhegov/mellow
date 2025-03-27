@@ -1,9 +1,6 @@
 use std::collections::{HashMap, hash_map::Iter};
 
-use mellow_parse::{
-    VisitExpression, VisitStatement,
-    tree::*,
-};
+use mellow_parse::{VisitExpression, VisitStatement, tree::*};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Type {
@@ -69,7 +66,7 @@ impl VisitExpression for TypeChecker {
     }
 
     fn identifier(&mut self, node: Identifier) -> Self::Output {
-        if let Some(meta) = self.table.get_variable(&node.name) {
+        if let Some(meta) = self.table.get_variable(&node) {
             return Ok(meta.type_.clone());
         }
         Err(TypeError("variable is not found"))
@@ -89,8 +86,8 @@ pub struct FunctionMeta {
 
 #[derive(Debug)]
 pub struct SymbolTable {
-    variables: HashMap<String, VariableMeta>,
-    functions: HashMap<String, FunctionMeta>,
+    variables: HashMap<Identifier, VariableMeta>,
+    functions: HashMap<Identifier, FunctionMeta>,
 }
 
 impl SymbolTable {
@@ -103,37 +100,37 @@ impl SymbolTable {
 }
 
 impl SymbolTable {
-    pub fn insert_variable(&mut self, identifier: String, meta: VariableMeta) {
+    pub fn insert_variable(&mut self, identifier: Identifier, meta: VariableMeta) {
         self.variables.insert(identifier, meta);
     }
 
-    pub fn get_variable(&mut self, identifier: &String) -> Option<&VariableMeta> {
+    pub fn get_variable(&mut self, identifier: &Identifier) -> Option<&VariableMeta> {
         self.variables.get(identifier)
     }
 
-    pub fn get_mut_variable(&mut self, identifier: &String) -> Option<&mut VariableMeta> {
+    pub fn get_mut_variable(&mut self, identifier: &Identifier) -> Option<&mut VariableMeta> {
         self.variables.get_mut(identifier)
     }
 
-    pub fn variables(&self) -> Iter<String, VariableMeta> {
+    pub fn variables(&self) -> Iter<Identifier, VariableMeta> {
         self.variables.iter()
     }
 }
 
 impl SymbolTable {
-    pub fn insert_function(&mut self, identifier: String, meta: FunctionMeta) {
+    pub fn insert_function(&mut self, identifier: Identifier, meta: FunctionMeta) {
         self.functions.insert(identifier, meta);
     }
 
-    pub fn get_function(&mut self, identifier: &String) -> Option<&FunctionMeta> {
+    pub fn get_function(&mut self, identifier: &Identifier) -> Option<&FunctionMeta> {
         self.functions.get(identifier)
     }
 
-    pub fn get_mut_function(&mut self, identifier: &String) -> Option<&mut FunctionMeta> {
+    pub fn get_mut_function(&mut self, identifier: &Identifier) -> Option<&mut FunctionMeta> {
         self.functions.get_mut(identifier)
     }
 
-    pub fn functions(&self) -> Iter<String, FunctionMeta> {
+    pub fn functions(&self) -> Iter<Identifier, FunctionMeta> {
         self.functions.iter()
     }
 }
@@ -141,6 +138,11 @@ impl SymbolTable {
 pub fn construct(source: &Vec<Statement>) -> Result<SymbolTable, TypeError> {
     let type_checker = TypeChecker::new();
     let mut table = type_checker.construct(source)?;
-    table.insert_function("debug_i64".into(), FunctionMeta { external: true });
+    table.insert_function(
+        Identifier {
+            name: "debug_i64".into(),
+        },
+        FunctionMeta { external: true },
+    );
     Ok(table)
 }

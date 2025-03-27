@@ -1,6 +1,6 @@
 use mellow_lex::{Error, Result, Token};
 
-use crate::{Parse, Expression, Parser};
+use crate::{Expression, Parse, Parser};
 
 #[derive(Debug, Clone)]
 pub struct Branch<B>
@@ -11,7 +11,10 @@ where
     pub body: Box<B>,
 }
 
-impl<B> Branch<B> where B: Parse {
+impl<B> Branch<B>
+where
+    B: Parse,
+{
     pub fn parse(parser: &mut Parser) -> Result<Self> {
         let condition = Expression::parse(parser)?;
         parser.expect(Token::Then)?;
@@ -33,7 +36,10 @@ where
     pub else_: Option<Box<B>>,
 }
 
-impl<B> If<B> where B: Parse {
+impl<B> If<B>
+where
+    B: Parse,
+{
     pub fn parse(parser: &mut Parser) -> Result<Self> {
         parser.expect(Token::If)?;
         let if_ = Branch::parse(parser)?;

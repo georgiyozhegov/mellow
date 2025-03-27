@@ -1,7 +1,4 @@
-use mellow_parse::{
-    VisitExpression, VisitStatement,
-    tree::*,
-};
+use mellow_parse::{VisitExpression, VisitStatement, tree::*};
 
 use super::Instruction;
 use crate::cfg::{Block, Link};
@@ -76,7 +73,7 @@ impl VisitStatement for Constructor {
     fn let_(&mut self, node: Let, _context: &mut Self::Context) -> Self::Output {
         let from = node.value.visit(self);
         self.push(Instruction::Set {
-            identifier: node.identifier,
+            identifier: node.identifier.name,
             from,
         });
     }
@@ -84,7 +81,7 @@ impl VisitStatement for Constructor {
     fn assign(&mut self, node: Assign, _context: &mut Self::Context) -> Self::Output {
         let from = node.value.visit(self);
         self.push(Instruction::Set {
-            identifier: node.identifier,
+            identifier: node.identifier.name,
             from,
         });
     }

@@ -1,7 +1,8 @@
 use mellow_lex::{Error, Token};
 
 use crate::{
-    tree::{Binary, BinaryKind, Unary, UnaryKind}, Expression, Precedence
+    Expression, Precedence,
+    tree::{Binary, BinaryKind, Unary, UnaryKind},
 };
 
 #[macro_export]

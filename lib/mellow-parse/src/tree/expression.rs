@@ -3,7 +3,8 @@ use mellow_lex::{Error, Result, Token};
 use super::*;
 
 use crate::{
-    literal, Parse, rpn::{ExpressionState, Rpn, RpnItem}, Parser
+    Parse, Parser, literal,
+    rpn::{ExpressionState, Rpn, RpnItem},
 };
 
 #[derive(Debug, Clone)]

@@ -2,7 +2,7 @@ use std::vec::IntoIter;
 
 use mellow_lex::{Result, Token};
 
-use crate::{parser::Parse, Parser, Statement};
+use crate::{Parse, Parser, Statement};
 
 #[derive(Debug, Clone)]
 pub struct Body {

@@ -54,13 +54,6 @@ impl Parser<'_> {
             _ => Ok(false),
         }
     }
-
-    pub fn identifier(&mut self) -> Result<String> {
-        match self.next()? {
-            Token::Identifier(identifier) => Ok(identifier),
-            token => Err(Error::grammar("identifier", Some(token))),
-        }
-    }
 }
 
 pub trait Parse {

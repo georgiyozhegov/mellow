@@ -1,6 +1,6 @@
 use mellow_lex::{Result, Token};
 
-use crate::{Parse, tree::Body, Expression, Parser};
+use crate::{Expression, Parse, Parser, tree::Body};
 
 #[derive(Debug, Clone)]
 pub struct While {
