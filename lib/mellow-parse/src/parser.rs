@@ -1,6 +1,7 @@
 use std::iter::Peekable;
 
-use mellow_lex::{Error, Lexer, Result, Token};
+use mellow_lex::{Lexer, Token};
+use mellow_error::{Result, Error};
 
 use super::Statement;
 
@@ -29,7 +30,7 @@ impl Parser<'_> {
     pub fn next(&mut self) -> Result<Token> {
         self.source
             .next()
-            .unwrap_or(Err(Error::grammar("statement", None)))
+            .unwrap_or(Err(Error::expected_but_got("statement", "EOF")))
     }
 
     pub fn peek(&mut self) -> Result<Option<Token>> {
@@ -41,7 +42,7 @@ impl Parser<'_> {
         if next == token {
             Ok(())
         } else {
-            Err(Error::grammar(token.to_string(), Some(next)))
+            Err(Error::expected_but_got(token, next))
         }
     }
 

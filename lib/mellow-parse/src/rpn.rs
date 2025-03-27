@@ -1,4 +1,5 @@
-use mellow_lex::{Error, Token};
+use mellow_lex::Token;
+use mellow_error::Error;
 
 use crate::{
     Expression, Precedence,
@@ -141,9 +142,9 @@ impl ExpressionState {
                 Ok(false)
             }
             Token::RightParenthesis => Ok(false),
-            _ => Err(Error::grammar(
+            _ => Err(Error::expected_but_got(
                 "literal, identifier or '('",
-                Some(token.clone()),
+                token,
             )),
         }
     }
@@ -156,9 +157,9 @@ impl ExpressionState {
             }
             Token::RightParenthesis => Ok(false),
             end_of_expression!() => Ok(true),
-            _ => Err(Error::grammar(
+            _ => Err(Error::expected_but_got(
                 "operator, statement or ')'",
-                Some(token.clone()),
+                token,
             )),
         }
     }

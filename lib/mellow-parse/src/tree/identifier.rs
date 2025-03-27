@@ -1,4 +1,5 @@
-use mellow_lex::{Error, Result, Token};
+use mellow_lex::Token;
+use mellow_error::{Result, Error};
 
 use crate::parser::Parse;
 
@@ -14,7 +15,7 @@ impl Parse for Identifier {
     {
         match parser.next()? {
             Token::Identifier(name) => Ok(Identifier { name }),
-            token => Err(Error::grammar("identifier", Some(token))),
+            token => Err(Error::expected_but_got("identifier", token)),
         }
     }
 }

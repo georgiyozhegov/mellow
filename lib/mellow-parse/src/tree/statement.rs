@@ -1,6 +1,7 @@
 use super::*;
 use crate::{Parse, Parser};
-use mellow_lex::{Error, Result, Token};
+use mellow_lex::Token;
+use mellow_error::{Result, Error};
 
 #[derive(Debug, Clone)]
 pub enum Statement {
@@ -21,7 +22,8 @@ impl Statement {
             Some(Token::While) => Ok(Self::While(While::parse(parser)?)),
             Some(Token::For) => Ok(Self::For(For::parse(parser)?)),
             Some(Token::Debug) => Ok(Self::Debug(Debug::parse(parser)?)),
-            token => Err(Error::grammar("statement", token)),
+            Some(token) => Err(Error::expected_but_got("statement", token)),
+            _ => Err(Error::expected_but_got("statement", "EOF")),
         }
     }
 }

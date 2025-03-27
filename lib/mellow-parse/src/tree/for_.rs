@@ -1,4 +1,5 @@
-use mellow_lex::{Result, Token};
+use mellow_lex::Token;
+use mellow_error::Result;
 
 use crate::{Expression, Parse, Parser, tree::Body};
 

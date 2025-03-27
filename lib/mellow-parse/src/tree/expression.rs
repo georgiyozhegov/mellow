@@ -1,4 +1,5 @@
-use mellow_lex::{Error, Result, Token};
+use mellow_lex::{Token};
+use mellow_error::{Result, Error};
 
 use super::*;
 
@@ -70,7 +71,7 @@ impl Parse for Expression {
                     rpn.value(Expression::If(expression));
                 }
                 _ => {
-                    return Err(Error::grammar("expression", Some(token)));
+                    return Err(Error::expected_but_got("expression", token));
                 }
             }
         }

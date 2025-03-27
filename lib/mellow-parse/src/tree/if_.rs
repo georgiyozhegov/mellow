@@ -1,4 +1,5 @@
-use mellow_lex::{Error, Result, Token};
+use mellow_lex::Token;
+use mellow_error::{Result, Error};
 
 use crate::{Expression, Parse, Parser};
 
@@ -58,7 +59,8 @@ where
         }
         match parser.peek()? {
             Some(Token::Else) | Some(Token::End) => Ok(or),
-            token => Err(Error::grammar("'else' or 'end' after 'or' body", token)),
+            Some(token) => Err(Error::expected_but_got("'else' or 'end' after 'or' body", token)),
+            _ => Err(Error::expected_but_got("'else' or 'end' after 'or' body", "EOF")),
         }
     }
 
@@ -69,7 +71,8 @@ where
                 Ok(Some(Box::new(B::parse(parser)?)))
             }
             Some(Token::End) => Ok(None),
-            token => Err(Error::grammar("'else', 'or' or 'end'", token)),
+            Some(token) => Err(Error::expected_but_got("'else', 'or' or 'end'", token)),
+            _ => Err(Error::expected_but_got("'else', 'or' or 'end'", "EOF")),
         }
     }
 }

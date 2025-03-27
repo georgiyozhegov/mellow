@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 mellow-lex = { path = "../mellow-lex" }
+mellow-error = { path = "../mellow-error" }

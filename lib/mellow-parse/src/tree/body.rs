@@ -1,6 +1,7 @@
 use std::vec::IntoIter;
 
-use mellow_lex::{Result, Token};
+use mellow_lex::Token;
+use mellow_error::Result;
 
 use crate::{Parse, Parser, Statement};
 

@@ -1,6 +1,7 @@
 use std::{iter::Peekable, str::Chars};
 
-use crate::{Error, Result, Token};
+use crate::Token;
+use mellow_error::{Error, Result};
 
 macro_rules! numeric {
     () => {
