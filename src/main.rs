@@ -3,15 +3,18 @@ use std::{env, fs, process::exit};
 fn main() {
     let path = env::args().nth(1).unwrap_or("source.mellow".into());
     let source = fs::read_to_string(path).unwrap();
+    let args: Vec<_> = env::args().skip(1).collect();
+
     let ast = match mellow_syntax::construct(source.chars().peekable()) {
         Ok(ast) => ast,
         Err(error) => {
-            eprintln!("{error:?}");
+            eprintln!("error: {error}");
             exit(1);
         }
     };
-
-    // println!("{ast:#?}");
+    if args.iter().any(|flag| flag == "--ast") {
+        println!("{ast:#?}");
+    }
 
     let symbol_table = match ir::symbol_table::construct(&ast) {
         Ok(table) => table,
@@ -20,11 +23,19 @@ fn main() {
             exit(1);
         }
     };
-
-    println!("{symbol_table:#?}");
+    if args.iter().any(|flag| flag == "--st") {
+        println!("{symbol_table:#?}");
+    }
 
     let cfg = ir::cfg::construct(ast);
+    if args.iter().any(|flag| flag == "--cfg") {
+        println!("{cfg:#?}");
+    }
+
     let tac = ir::tac::construct(cfg);
+    if args.iter().any(|flag| flag == "--tac") {
+        println!("{tac:#?}");
+    }
 
     println!("section .bss");
     for (identifier, _) in symbol_table.variables() {
