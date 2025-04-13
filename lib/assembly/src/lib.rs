@@ -121,7 +121,6 @@ fn generate(
 
 pub fn convert(tac: Vec<Instruction>) -> Vec<Assembly> {
     let mut output = Vec::new();
-    let n = RegisterKind::allocable().len();
     let allocated = allocate(&tac);
     for instruction in tac.into_iter() {
         generate(instruction, &mut output, &allocated);
