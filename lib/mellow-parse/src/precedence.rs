@@ -1,7 +1,4 @@
-use crate::{
-    rpn::RpnItem,
-    tree::{BinaryKind, UnaryKind},
-};
+use crate::{BinaryKind, RpnItem, UnaryKind};
 
 pub trait Precedence {
     fn precedence(&self) -> u8;

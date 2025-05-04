@@ -1,32 +1,32 @@
-use mellow_lex::Token;
 use mellow_error::Error;
+use mellow_lex::TokenKind;
 
-use crate::{
-    Expression, Precedence,
-    tree::{Binary, BinaryKind, Unary, UnaryKind},
-};
+use crate::{Binary, BinaryKind, Expression, Precedence, Unary, UnaryKind};
 
 #[macro_export]
 macro_rules! literal {
     () => {
-        Token::Integer(_) | Token::Identifier(_) | Token::True | Token::False | Token::String(_)
+        TokenKind::Integer(_)
+            | TokenKind::Identifier(_)
+            | TokenKind::True
+            | TokenKind::False
+            | TokenKind::String(_)
     };
 }
 
 #[macro_export]
 macro_rules! end_of_expression {
     () => {
-        Token::Let
-            | Token::Identifier(..)
-            | Token::If
-            | Token::Or
-            | Token::Then
-            | Token::Else
-            | Token::While
-            | Token::In
-            | Token::Do
-            | Token::End
-            | Token::Debug
+        TokenKind::Let
+            | TokenKind::Identifier(..)
+            | TokenKind::If
+            | TokenKind::Or
+            | TokenKind::Then
+            | TokenKind::Else
+            | TokenKind::While
+            | TokenKind::Do
+            | TokenKind::End
+            | TokenKind::Debug
     };
 }
 
@@ -92,18 +92,13 @@ impl Rpn {
             RpnItem::Binary(kind) => {
                 let right = self.values.pop().unwrap();
                 let left = self.values.pop().unwrap();
-                self.value(Expression::Binary(Binary {
-                    kind,
-                    left: Box::new(left),
-                    right: Box::new(right),
-                }));
+                let expression = Expression::Binary(Binary::new(kind, left, right));
+                self.values.push(expression);
             }
             RpnItem::Unary(kind) => {
-                let value = self.values.pop().unwrap();
-                self.value(Expression::Unary(Unary {
-                    kind,
-                    inner: Box::new(value),
-                }));
+                let inner = self.values.pop().unwrap();
+                let expression = Expression::Unary(Unary::new(kind, inner));
+                self.values.push(expression);
             }
             _ => unreachable!(),
         }
@@ -130,44 +125,38 @@ impl Default for ExpressionState {
 }
 
 impl ExpressionState {
-    fn value(&mut self, token: &Token) -> Result<bool, Error> {
-        match token {
-            literal!() | Token::If => {
+    fn value(&mut self, kind: &TokenKind) -> Result<bool, Error> {
+        match kind {
+            literal!() | TokenKind::If => {
                 *self = Self::Item;
                 Ok(false)
             }
-            token if UnaryKind::try_from(token).is_ok() => Ok(false),
-            token if BinaryKind::try_from(token).is_ok() => {
+            kind if UnaryKind::try_from(kind).is_ok() => Ok(false),
+            kind if BinaryKind::try_from(kind).is_ok() => {
                 *self = Self::Item;
                 Ok(false)
             }
-            Token::RightParenthesis => Ok(false),
-            _ => Err(Error::expected_but_got(
-                "literal, identifier or '('",
-                token,
-            )),
+            TokenKind::RightParenthesis => Ok(false),
+            _ => Err(Error::expected_but_got("literal, identifier or '('", "todo")),
         }
     }
 
-    fn item(&mut self, token: &Token) -> Result<bool, Error> {
-        match token {
-            token if BinaryKind::try_from(token).is_ok() => {
+    fn item(&mut self, kind: &TokenKind) -> Result<bool, Error> {
+        match kind {
+            kind if BinaryKind::try_from(kind).is_ok() => {
                 *self = Self::Value;
                 Ok(false)
             }
-            Token::RightParenthesis => Ok(false),
+            TokenKind::RightParenthesis => Ok(false),
             end_of_expression!() => Ok(true),
-            _ => Err(Error::expected_but_got(
-                "operator, statement or ')'",
-                token,
-            )),
+            _ => Err(Error::expected_but_got("operator, statement or ')'", "todo")),
         }
     }
 
-    pub fn stop(&mut self, token: &Token) -> Result<bool, Error> {
+    pub fn stop(&mut self, kind: &TokenKind) -> Result<bool, Error> {
         match self {
-            Self::Value => self.value(token),
-            Self::Item => self.item(token),
+            Self::Value => self.value(kind),
+            Self::Item => self.item(kind),
         }
     }
 }

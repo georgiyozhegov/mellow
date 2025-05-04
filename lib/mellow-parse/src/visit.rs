@@ -1,4 +1,7 @@
-use crate::tree::*;
+use crate::{
+    Assign, Binary, Body, Boolean, Debug, Expression, Identifier, If, Integer, Let, Statement, Str,
+    Unary, While,
+};
 
 #[allow(unused)]
 pub trait VisitStatement {
@@ -15,9 +18,6 @@ pub trait VisitStatement {
         todo!()
     }
     fn while_(&mut self, node: While, context: &mut Self::Context) -> Self::Output {
-        todo!()
-    }
-    fn for_(&mut self, node: For, context: &mut Self::Context) -> Self::Output {
         todo!()
     }
     fn debug(&mut self, node: Debug, context: &mut Self::Context) -> Self::Output {
@@ -59,7 +59,6 @@ impl Statement {
             Self::Assign(node) => visit.assign(node, context),
             Self::If(node) => visit.if_(node, context),
             Self::While(node) => visit.while_(node, context),
-            Self::For(node) => visit.for_(node, context),
             Self::Debug(node) => visit.debug(node, context),
         }
     }
