@@ -3,24 +3,6 @@ use std::{iter::Peekable, str::Chars};
 use crate::{Token, TokenKind};
 use mellow_error::{Error, Result};
 
-macro_rules! numeric {
-    () => {
-        '0'..='9'
-    };
-}
-
-macro_rules! alphabetic {
-    () => {
-        'a'..='z' | 'A'..='Z'
-    };
-}
-
-macro_rules! skip {
-    () => {
-        ' ' | '\t' | '\n'
-    };
-}
-
 pub type Source<'s> = Peekable<Chars<'s>>;
 
 pub struct Lex<'l> {
@@ -37,10 +19,10 @@ impl Iterator for Lex<'_> {
     type Item = Result<Token>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.take_while(|c| matches!(c, skip!()));
+        self.take_while(is_skip);
         let kind = match self.source.peek()? {
-            numeric!() => self.numeric(),
-            alphabetic!() => self.alphabetic(),
+            c if is_numeric(c) => self.numeric(),
+            c if is_alphabetic(c) => self.alphabetic(),
             '"' => self.string(),
             '=' => self.one(TokenKind::Equal),
             '+' => self.one(TokenKind::Plus),
@@ -72,29 +54,13 @@ impl Lex<'_> {
     }
 
     fn numeric(&mut self) -> TokenKind {
-        let buffer = self.take_while(|c| matches!(c, numeric!() | '_'));
-        let buffer = buffer.replace('_', "");
-        let value = buffer.parse().unwrap();
-        TokenKind::Integer(value)
+        let buffer = self.take_while(is_numeric);
+        TokenKind::from_numeric(buffer)
     }
 
     fn alphabetic(&mut self) -> TokenKind {
-        let buffer = self.take_while(|c| matches!(c, alphabetic!() | numeric!() | '_'));
-        match buffer.as_str() {
-            "true" => TokenKind::True,
-            "false" => TokenKind::False,
-            "let" => TokenKind::Let,
-            "mutable" => TokenKind::Mutable,
-            "if" => TokenKind::If,
-            "or" => TokenKind::Or,
-            "else" => TokenKind::Else,
-            "then" => TokenKind::Then,
-            "while" => TokenKind::While,
-            "do" => TokenKind::Do,
-            "end" => TokenKind::End,
-            "debug" => TokenKind::Debug,
-            _ => TokenKind::Identifier(buffer),
-        }
+        let buffer = self.take_while(is_alphanumeric);
+        TokenKind::from_alphabetic(buffer)
     }
 
     fn string(&mut self) -> TokenKind {
@@ -108,4 +74,20 @@ impl Lex<'_> {
         self.source.next();
         kind
     }
+}
+
+fn is_alphanumeric(c: &char) -> bool {
+    is_alphabetic(c) | is_numeric(c)
+}
+
+fn is_numeric(c: &char) -> bool {
+    matches!(c, '0'..='9')
+}
+
+fn is_alphabetic(c: &char) -> bool {
+    matches!(c, 'a'..='z' | 'A'..='Z' | '_')
+}
+
+fn is_skip(c: &char) -> bool {
+    matches!(c, ' ' | '\t' | '\n')
 }

@@ -50,3 +50,29 @@ pub enum TokenKind {
     LeftParenthesis,
     RightParenthesis,
 }
+
+impl TokenKind {
+    pub fn from_numeric(buffer: String) -> Self {
+        let buffer = buffer.replace('_', "");
+        let value = buffer.parse().unwrap();
+        Self::Integer(value)
+    }
+
+    pub fn from_alphabetic(buffer: String) -> Self {
+        match buffer.as_str() {
+            "true" => Self::True,
+            "false" => Self::False,
+            "let" => Self::Let,
+            "mutable" => Self::Mutable,
+            "if" => Self::If,
+            "or" => Self::Or,
+            "else" => Self::Else,
+            "then" => Self::Then,
+            "while" => Self::While,
+            "do" => Self::Do,
+            "end" => Self::End,
+            "debug" => Self::Debug,
+            _ => Self::Identifier(buffer),
+        }
+    }
+}
