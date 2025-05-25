@@ -6,7 +6,7 @@ edition = "2024"
 [workspace]
 members = [
     "lib/ir",
-    "lib/assembly",
+    "lib/mellow-assembly",
     "lib/mellow-lex",
     "lib/mellow-parse",
     "lib/mellow-error",
@@ -14,7 +14,7 @@ members = [
 
 [dependencies]
 ir = { path = "lib/ir" }
-assembly = { path = "lib/assembly" }
+mellow-assembly = { path = "lib/mellow-assembly" }
 mellow-error = { path = "lib/mellow-error" }
 mellow-lex = { path = "lib/mellow-lex" }
 mellow-parse = { path = "lib/mellow-parse" }

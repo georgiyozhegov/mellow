@@ -1,5 +1,5 @@
 [package]
-name = "assembly"
+name = "mellow-assembly"
 version = "0.1.0"
 edition = "2024"
 

@@ -19,6 +19,7 @@ fn main() {
             exit(1);
         }
     };
+
     if args.iter().any(|flag| flag == "--ast") {
         println!("{ast:#?}");
     }
@@ -30,6 +31,7 @@ fn main() {
             exit(1);
         }
     };
+
     if args.iter().any(|flag| flag == "--st") {
         println!("{symbol_table:#?}");
     }
