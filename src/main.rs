@@ -1,6 +1,6 @@
 use std::{env, fs, process::exit};
 
-use mellow_lex::Lex;
+use mellow_lex::{Lex, SourceBuffer};
 use mellow_parse::Parse;
 
 fn main() {
@@ -8,7 +8,8 @@ fn main() {
     let source = fs::read_to_string(path).unwrap();
     let args: Vec<_> = env::args().skip(1).collect();
 
-    let lex = Lex::new(source.chars().peekable());
+    let source_buffer = SourceBuffer::from(source);
+    let lex = Lex::new(source_buffer);
     let parse = Parse::new(lex.peekable());
 
     let ast = match parse.collect() {

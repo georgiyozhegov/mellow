@@ -5,19 +5,19 @@ use mellow_lex::{Lex, Token, TokenKind};
 
 use super::Statement;
 
-pub type Source<'s> = Peekable<Lex<'s>>;
+pub type Source = Peekable<Lex>;
 
-pub struct Parse<'p> {
-    source: Source<'p>,
+pub struct Parse {
+    source: Source,
 }
 
-impl<'p> Parse<'p> {
-    pub fn new(source: Source<'p>) -> Self {
+impl Parse {
+    pub fn new(source: Source) -> Self {
         Self { source }
     }
 }
 
-impl Iterator for Parse<'_> {
+impl Iterator for Parse {
     type Item = Result<Statement>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -26,7 +26,7 @@ impl Iterator for Parse<'_> {
     }
 }
 
-impl Parse<'_> {
+impl Parse {
     pub fn next(&mut self) -> Result<Token> {
         self.source
             .next()
