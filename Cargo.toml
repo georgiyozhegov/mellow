@@ -4,17 +4,17 @@ version = "0.1.0"
 edition = "2024"
 
 [workspace]
-members = [ 
+members = [
     "lib/ir",
-    "lib/assembly", 
-    "lib/mellow-lex", 
-    "lib/mellow-parse", 
-    "lib/mellow-syntax",
+    "lib/assembly",
+    "lib/mellow-lex",
+    "lib/mellow-parse",
     "lib/mellow-error",
 ]
 
 [dependencies]
 ir = { path = "lib/ir" }
 assembly = { path = "lib/assembly" }
-mellow-syntax = { path = "lib/mellow-syntax" }
 mellow-error = { path = "lib/mellow-error" }
+mellow-lex = { path = "lib/mellow-lex" }
+mellow-parse = { path = "lib/mellow-parse" }

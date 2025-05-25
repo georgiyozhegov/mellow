@@ -1,11 +1,17 @@
 use std::{env, fs, process::exit};
 
+use mellow_lex::Lex;
+use mellow_parse::Parse;
+
 fn main() {
     let path = env::args().nth(1).unwrap_or("source.mellow".into());
     let source = fs::read_to_string(path).unwrap();
     let args: Vec<_> = env::args().skip(1).collect();
 
-    let ast = match mellow_syntax::construct(source.chars().peekable()) {
+    let lex = Lex::new(source.chars().peekable());
+    let parse = Parse::new(lex.peekable());
+
+    let ast = match parse.collect() {
         Ok(ast) => ast,
         Err(error) => {
             eprintln!("error: {error}");

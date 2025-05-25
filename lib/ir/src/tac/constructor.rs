@@ -1,4 +1,4 @@
-use mellow_parse::{VisitExpression, VisitStatement, tree::*};
+use mellow_parse::*;
 
 use super::Instruction;
 use crate::cfg::{Block, Link};

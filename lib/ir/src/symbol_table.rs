@@ -1,6 +1,6 @@
 use std::collections::{HashMap, hash_map::Iter};
 
-use mellow_parse::{VisitExpression, VisitStatement, tree::*};
+use mellow_parse::*;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Type {
